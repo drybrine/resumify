@@ -217,6 +217,82 @@ export async function getActivePendingPayment() {
 /** Admin: konfirmasi bayar → upgrade Pro */
 export async function confirmPayment(paymentId: string) {
   const { user } = await requireAdmin();
+  return finalizePayment(paymentId, user.id);
+}
+
+/**
+ * Auto-confirm by unique amount (mutasi match).
+ * Called from webhook / cron — no user session.
+ */
+export async function autoConfirmByAmount(
+  amountIdr: number,
+  source = "webhook"
+): Promise<{
+  success?: boolean;
+  paymentId?: string;
+  error?: string;
+  matched?: boolean;
+}> {
+  if (!Number.isInteger(amountIdr) || amountIdr < 10_000) {
+    return { error: "Invalid amount" };
+  }
+
+  await expireStalePayments();
+
+  const admin = await createServiceClient();
+  const expires = new Date();
+  expires.setDate(expires.getDate() + PLANS.pro.periodDays);
+
+  const { data: paymentId, error: rpcErr } = await admin.rpc(
+    "auto_confirm_payment_by_amount",
+    {
+      p_amount_idr: amountIdr,
+      p_expires_at: expires.toISOString(),
+      p_source: source.slice(0, 40),
+    }
+  );
+
+  if (rpcErr) {
+    // Fallback: match + update manually
+    const { data: payment } = await admin
+      .from("payments")
+      .select("id, user_id, status, expires_at")
+      .eq("amount_idr", amountIdr)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!payment) return { matched: false, error: "No pending match" };
+
+    if (new Date(payment.expires_at) < new Date()) {
+      await admin
+        .from("payments")
+        .update({ status: "expired" })
+        .eq("id", payment.id);
+      return { matched: false, error: "Payment expired" };
+    }
+
+    const result = await finalizePayment(payment.id, null, source);
+    if (result.error) return { matched: true, error: result.error };
+    return { success: true, matched: true, paymentId: payment.id };
+  }
+
+  if (!paymentId) {
+    return { matched: false, error: "No pending match" };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  revalidatePath("/pricing");
+  return { success: true, matched: true, paymentId: String(paymentId) };
+}
+
+async function finalizePayment(
+  paymentId: string,
+  adminId: string | null,
+  source?: string
+) {
   const admin = await createServiceClient();
 
   const { data: payment, error } = await admin
@@ -235,18 +311,22 @@ export async function confirmPayment(paymentId: string) {
 
   const { error: rpcErr } = await admin.rpc("confirm_payment_and_upgrade", {
     p_payment_id: paymentId,
-    p_admin_id: user.id,
+    p_admin_id: adminId,
     p_expires_at: expires.toISOString(),
   });
 
   if (rpcErr) {
-    // Fallback if RPC function not created in DB yet
+    const note =
+      adminId == null
+        ? `auto:${(source || "system").slice(0, 40)}`
+        : payment.notes;
     const { error: payErr } = await admin
       .from("payments")
       .update({
         status: "paid",
         paid_at: new Date().toISOString(),
-        confirmed_by: user.id,
+        confirmed_by: adminId,
+        notes: note,
       })
       .eq("id", paymentId)
       .eq("status", "pending");

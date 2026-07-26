@@ -213,6 +213,7 @@ create trigger payments_updated_at
   for each row execute function public.set_updated_at();
 
 -- Stored procedure for atomic payment confirmation
+-- p_admin_id nullable: null = auto-confirm via mutasi webhook
 create or replace function public.confirm_payment_and_upgrade(
   p_payment_id uuid,
   p_admin_id uuid,
@@ -242,13 +243,70 @@ begin
   update public.payments
   set status = 'paid',
       paid_at = now(),
-      confirmed_by = p_admin_id
+      confirmed_by = p_admin_id,
+      notes = case
+        when p_admin_id is null then coalesce(notes || ' | ', '') || 'auto-confirmed'
+        else notes
+      end
   where id = p_payment_id;
 
   update public.profiles
   set plan = 'pro',
       plan_expires_at = p_expires_at
   where id = v_user_id;
+end;
+$$;
+
+-- Auto-confirm by unique amount (mutasi match)
+-- Returns payment id if matched & confirmed, null if no pending match
+create or replace function public.auto_confirm_payment_by_amount(
+  p_amount_idr integer,
+  p_expires_at timestamptz,
+  p_source text default 'webhook'
+)
+returns uuid
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_payment_id uuid;
+  v_user_id uuid;
+  v_status text;
+  v_expires timestamptz;
+begin
+  select id, user_id, status, expires_at
+  into v_payment_id, v_user_id, v_status, v_expires
+  from public.payments
+  where amount_idr = p_amount_idr
+    and status = 'pending'
+  order by created_at desc
+  limit 1
+  for update skip locked;
+
+  if v_payment_id is null then
+    return null;
+  end if;
+
+  if v_expires is not null and v_expires < now() then
+    update public.payments
+    set status = 'expired'
+    where id = v_payment_id;
+    return null;
+  end if;
+
+  update public.payments
+  set status = 'paid',
+      paid_at = now(),
+      confirmed_by = null,
+      notes = coalesce(notes || ' | ', '') || ('auto:' || p_source)
+  where id = v_payment_id;
+
+  update public.profiles
+  set plan = 'pro',
+      plan_expires_at = p_expires_at
+  where id = v_user_id;
+
+  return v_payment_id;
 end;
 $$;
 alter table public.payments enable row level security;

@@ -159,8 +159,8 @@ export function CheckoutButton() {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
-              . Setelah transfer, admin konfirmasi (atau tunggu auto jika
-              terhubung mutasi).
+              . Setelah transfer, status dicek otomatis (~5 dtk). Auto-confirm
+               aktif jika mutasi terhubung; admin bisa konfirmasi manual.
             </p>
             {payment.merchant_name && (
               <p className="text-center text-[11px] text-slate-500">
