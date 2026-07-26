@@ -16,16 +16,19 @@ export function getStaticQris(): string {
 }
 
 /**
- * Buat nominal unik: harga Pro + suffix 3 digit (001–999)
+ * Buat nominal unik: harga Pro + suffix 3 digit (100–999)
  * supaya cocok match transfer di mutasi rekening.
  * Contoh: 49000 + 137 = 49137
+ * Harga < 10rb (promo/test): pakai nominal exact, tanpa suffix.
  */
 export function makeUniqueAmount(baseIdr: number): number {
+  const base = Math.max(1, Math.floor(baseIdr));
+  if (base < 10_000) return base;
+
   const suffix = Math.floor(Math.random() * 900) + 100; // 100–999
-  const amount = baseIdr + suffix;
-  // @shamah/dynamic-qris range: 10_000 – 10_000_000
-  if (amount < 10_000 || amount > 10_000_000) {
-    throw new Error("Nominal di luar range QRIS (10rb–10jt)");
+  const amount = base + suffix;
+  if (amount > 10_000_000) {
+    throw new Error("Nominal di luar range (max 10jt)");
   }
   return amount;
 }
@@ -35,6 +38,17 @@ export function buildDynamicQris(opts: {
   referenceLabel: string;
 }): { payload: string; amount: number; merchantName?: string } {
   const staticPayload = getStaticQris();
+
+  // @shamah/dynamic-qris only accepts 10_000 – 10_000_000.
+  // Promo/test prices (<10rb): static QR, user types amount manually.
+  if (opts.amount < 10_000) {
+    return {
+      payload: staticPayload,
+      amount: opts.amount,
+      merchantName: undefined,
+    };
+  }
+
   const result = generateDynamicQris(staticPayload, {
     amount: opts.amount,
     mode: "replace",

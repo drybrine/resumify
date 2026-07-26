@@ -34,14 +34,14 @@ export function PlanSettingsForm({
             name="pro_price_idr"
             type="number"
             inputMode="numeric"
-            min={10000}
+            min={1}
             max={10000000}
-            step={1000}
+            step={1}
             defaultValue={priceIdr}
             required
           />
           <p className="mt-1 text-[11px] text-slate-500">
-            Saat ini: {formatIdr(priceIdr)}. Range 10rb–10jt.
+            Saat ini: {formatIdr(priceIdr)}. Min Rp 1 · max 10jt.
           </p>
         </div>
         <div>

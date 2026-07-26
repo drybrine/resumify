@@ -84,7 +84,7 @@ function extractAmounts(body: unknown): number[] {
     if (Number.isFinite(n) && n > 0) {
       // accept integer IDR; if float-like (e.g. 49137.00) floor
       const idr = Math.round(n);
-      if (idr >= 10_000 && idr <= 10_000_000) found.add(idr);
+      if (idr >= 1 && idr <= 10_000_000) found.add(idr);
     }
   };
 

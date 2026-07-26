@@ -74,8 +74,8 @@ export async function updatePlanSettings(
   const priceIdr = Number(priceRaw);
   const periodDays = Number(daysRaw);
 
-  if (!Number.isInteger(priceIdr) || priceIdr < 10_000 || priceIdr > 10_000_000) {
-    return { error: "Harga Pro harus 10.000 – 10.000.000 IDR." };
+  if (!Number.isInteger(priceIdr) || priceIdr < 1 || priceIdr > 10_000_000) {
+    return { error: "Harga Pro harus Rp 1 – 10.000.000." };
   }
   if (!Number.isInteger(periodDays) || periodDays < 1 || periodDays > 365) {
     return { error: "Periode harus 1 – 365 hari." };

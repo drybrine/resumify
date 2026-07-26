@@ -313,7 +313,7 @@ $$;
 create table if not exists public.plan_settings (
   id text primary key default 'default' check (id = 'default'),
   pro_price_idr integer not null default 49000
-    check (pro_price_idr >= 10000 and pro_price_idr <= 10000000),
+    check (pro_price_idr >= 1 and pro_price_idr <= 10000000),
   pro_period_days integer not null default 30
     check (pro_period_days >= 1 and pro_period_days <= 365),
   updated_at timestamptz not null default now(),

@@ -234,7 +234,7 @@ export async function autoConfirmByAmount(
   error?: string;
   matched?: boolean;
 }> {
-  if (!Number.isInteger(amountIdr) || amountIdr < 10_000) {
+  if (!Number.isInteger(amountIdr) || amountIdr < 1) {
     return { error: "Invalid amount" };
   }
 
