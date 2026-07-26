@@ -136,11 +136,11 @@ export function CheckoutButton() {
               </p>
               {payment.amount_idr < 10_000 && (
                 <p className="mt-1 text-[11px] text-amber-300/90">
-                  QRIS statis — ketik nominal{" "}
+                  Mode test — pastikan e-wallet menampilkan nominal{" "}
                   <span className="font-mono font-semibold">
-                    {payment.amount_idr}
-                  </span>{" "}
-                  manual di e-wallet.
+                    {formatIdr(payment.amount_idr)}
+                  </span>
+                  . Beberapa app menolak nominal &lt; Rp10.000.
                 </p>
               )}
             </div>
