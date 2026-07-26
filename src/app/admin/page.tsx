@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
-import { formatIdr } from "@/lib/plans";
+import { formatIdr, getProPricing } from "@/lib/plans";
 import { setUserPlan, confirmPaymentAction } from "@/lib/actions/admin";
 import { listPendingPayments } from "@/lib/actions/payments";
 import { Button } from "@/components/ui/button";
+import { PlanSettingsForm } from "./plan-settings-form";
 
 export const metadata = { title: "Admin" };
 
@@ -35,7 +36,10 @@ export default async function AdminPage() {
     .from("cvs")
     .select("*", { count: "exact", head: true });
 
-  const payments = await listPendingPayments();
+  const [payments, proPricing] = await Promise.all([
+    listPendingPayments(),
+    getProPricing(),
+  ]);
   const users = profiles || [];
   const proCount = users.filter((u) => u.plan === "pro").length;
   const pendingPays = payments.filter((p) => p.status === "pending");
@@ -49,12 +53,22 @@ export default async function AdminPage() {
           User, plan, konfirmasi QRIS.
         </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Users" value={String(users.length)} />
           <Stat label="Pro" value={String(proCount)} />
           <Stat label="Total CVs" value={String(cvCount || 0)} />
           <Stat label="QRIS pending" value={String(pendingPays.length)} />
         </div>
+
+        <h2 className="mt-10 text-lg font-semibold text-white">Harga Plan</h2>
+        <p className="mt-1 text-sm text-slate-400">
+          Atur harga &amp; durasi paket Pro. Tampil di /pricing &amp; invoice
+          QRIS.
+        </p>
+        <PlanSettingsForm
+          priceIdr={proPricing.priceIdr}
+          periodDays={proPricing.periodDays}
+        />
 
         <h2 className="mt-10 text-lg font-semibold text-white">
           Pembayaran QRIS

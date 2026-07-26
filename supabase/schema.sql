@@ -309,6 +309,39 @@ begin
   return v_payment_id;
 end;
 $$;
+-- Plan pricing (single-row settings, editable by admin)
+create table if not exists public.plan_settings (
+  id text primary key default 'default' check (id = 'default'),
+  pro_price_idr integer not null default 49000
+    check (pro_price_idr >= 10000 and pro_price_idr <= 10000000),
+  pro_period_days integer not null default 30
+    check (pro_period_days >= 1 and pro_period_days <= 365),
+  updated_at timestamptz not null default now(),
+  updated_by uuid references public.profiles(id)
+);
+
+insert into public.plan_settings (id, pro_price_idr, pro_period_days)
+values ('default', 49000, 30)
+on conflict (id) do nothing;
+
+alter table public.plan_settings enable row level security;
+
+drop policy if exists "Anyone can read plan settings" on public.plan_settings;
+create policy "Anyone can read plan settings"
+  on public.plan_settings for select
+  using (true);
+
+drop policy if exists "Admins update plan settings" on public.plan_settings;
+create policy "Admins update plan settings"
+  on public.plan_settings for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "Admins insert plan settings" on public.plan_settings;
+create policy "Admins insert plan settings"
+  on public.plan_settings for insert
+  with check (public.is_admin());
+
 alter table public.payments enable row level security;
 
 create policy "Users read own payments"

@@ -1,6 +1,5 @@
 import { generateDynamicQris } from "@shamah/dynamic-qris";
 import QRCode from "qrcode";
-import { PLANS } from "@/lib/plans";
 
 /**
  * Static QRIS merchant string (dari merchant app / bank).
@@ -21,7 +20,7 @@ export function getStaticQris(): string {
  * supaya cocok match transfer di mutasi rekening.
  * Contoh: 49000 + 137 = 49137
  */
-export function makeUniqueAmount(baseIdr = PLANS.pro.priceIdr): number {
+export function makeUniqueAmount(baseIdr: number): number {
   const suffix = Math.floor(Math.random() * 900) + 100; // 100–999
   const amount = baseIdr + suffix;
   // @shamah/dynamic-qris range: 10_000 – 10_000_000

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { PLANS } from "@/lib/plans";
+import { getProPricing, getProPricingService } from "@/lib/plans";
 import {
   buildDynamicQris,
   makeUniqueAmount,
@@ -74,8 +74,9 @@ export async function createProPayment() {
     .eq("user_id", user.id)
     .eq("status", "pending");
 
+  const { priceIdr: basePrice } = await getProPricing();
   const reference = `CVB-${nanoid(8).toUpperCase()}`;
-  let amount = makeUniqueAmount(PLANS.pro.priceIdr);
+  let amount = makeUniqueAmount(basePrice);
   let attempts = 0;
   let payment = null;
   let lastError = "";
@@ -98,7 +99,7 @@ export async function createProPayment() {
           user_id: user.id,
           plan: "pro",
           amount_idr: amount,
-          base_amount_idr: PLANS.pro.priceIdr,
+          base_amount_idr: basePrice,
           reference,
           qris_payload: payload,
           status: "pending",
@@ -111,7 +112,7 @@ export async function createProPayment() {
       if (error) {
         // unique amount collision
         if (error.code === "23505" || error.message.includes("unique")) {
-          amount = makeUniqueAmount(PLANS.pro.priceIdr);
+          amount = makeUniqueAmount(basePrice);
           attempts++;
           lastError = error.message;
           continue;
@@ -240,8 +241,9 @@ export async function autoConfirmByAmount(
   await expireStalePayments();
 
   const admin = await createServiceClient();
+  const { periodDays } = await getProPricingService();
   const expires = new Date();
-  expires.setDate(expires.getDate() + PLANS.pro.periodDays);
+  expires.setDate(expires.getDate() + periodDays);
 
   const { data: paymentId, error: rpcErr } = await admin.rpc(
     "auto_confirm_payment_by_amount",
@@ -306,8 +308,9 @@ async function finalizePayment(
     return { error: `Status sudah ${payment.status}` };
   }
 
+  const { periodDays } = await getProPricingService();
   const expires = new Date();
-  expires.setDate(expires.getDate() + PLANS.pro.periodDays);
+  expires.setDate(expires.getDate() + periodDays);
 
   const { error: rpcErr } = await admin.rpc("confirm_payment_and_upgrade", {
     p_payment_id: paymentId,

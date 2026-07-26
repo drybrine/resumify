@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { PLANS, formatIdr } from "@/lib/plans";
+import { PLANS, formatIdr, getProPricing } from "@/lib/plans";
 import { Check } from "lucide-react";
 import { CheckoutButton } from "./checkout-button";
 import { createClient } from "@/lib/supabase/server";
@@ -13,6 +13,8 @@ export default async function PricingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const proPricing = await getProPricing();
 
   let plan = "free";
   let planExpires: string | null = null;
@@ -74,8 +76,8 @@ export default async function PricingPage() {
             />
             <PlanCard
               name={PLANS.pro.name}
-              price={formatIdr(PLANS.pro.priceIdr)}
-              period="/30 hari"
+              price={formatIdr(proPricing.priceIdr)}
+              period={`/${proPricing.periodDays} hari`}
               features={[...PLANS.pro.features]}
               highlight
               cta={
