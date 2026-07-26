@@ -123,9 +123,26 @@ export function CheckoutButton() {
                 {formatIdr(payment.amount_idr)}
               </p>
               <p className="mt-0.5 text-[11px] text-slate-500">
-                Base {formatIdr(payment.base_amount_idr)} + kode unik{" "}
-                {uniqueFee}
+                Harga {formatIdr(payment.base_amount_idr)}
+                {uniqueFee > 0 ? (
+                  <>
+                    {" "}
+                    + kode unik{" "}
+                    <span className="font-mono text-indigo-300">
+                      {uniqueFee}
+                    </span>
+                  </>
+                ) : null}
               </p>
+              {payment.amount_idr < 10_000 && (
+                <p className="mt-1 text-[11px] text-amber-300/90">
+                  QRIS statis — ketik nominal{" "}
+                  <span className="font-mono font-semibold">
+                    {payment.amount_idr}
+                  </span>{" "}
+                  manual di e-wallet.
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <Button

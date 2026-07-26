@@ -18,13 +18,11 @@ export function getStaticQris(): string {
 /**
  * Buat nominal unik: harga Pro + suffix 3 digit (100–999)
  * supaya cocok match transfer di mutasi rekening.
- * Contoh: 49000 + 137 = 49137
- * Harga < 10rb (promo/test): pakai nominal exact, tanpa suffix.
+ * Contoh: 49000 + 137 = 49137 · Rp1 + 237 = 238 (test)
+ * Selalu pakai suffix — termasuk harga promo/test.
  */
 export function makeUniqueAmount(baseIdr: number): number {
   const base = Math.max(1, Math.floor(baseIdr));
-  if (base < 10_000) return base;
-
   const suffix = Math.floor(Math.random() * 900) + 100; // 100–999
   const amount = base + suffix;
   if (amount > 10_000_000) {
