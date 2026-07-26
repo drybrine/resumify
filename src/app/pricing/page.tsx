@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { PLANS, formatIdr, getProPricing } from "@/lib/plans";
+import { PLANS, formatIdr } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 import { Check } from "lucide-react";
 import { CheckoutButton } from "./checkout-button";
 import { createClient } from "@/lib/supabase/server";

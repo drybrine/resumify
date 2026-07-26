@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getProPricing, getProPricingService } from "@/lib/plans";
+import { getProPricing, getProPricingService } from "@/lib/plan-pricing";
 import {
   buildDynamicQris,
   makeUniqueAmount,

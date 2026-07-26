@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getProPricing } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 import type { Plan } from "@/lib/types";
 import { confirmPayment } from "@/lib/actions/payments";
 
