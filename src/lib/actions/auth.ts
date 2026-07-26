@@ -1,7 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+
+async function getOrigin() {
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const proto = headersList.get("x-forwarded-proto") || "https";
+  if (host && !host.includes("localhost")) {
+    return `${proto}://${host}`;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+}
 
 export type AuthState = {
   error?: string;
@@ -20,7 +31,7 @@ export async function signUp(
   if (password.length < 8) return { error: "Password must be at least 8 characters." };
 
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const origin = await getOrigin();
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -55,7 +66,7 @@ export async function signIn(
 
 export async function signInWithGoogle(next = "/dashboard") {
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const origin = await getOrigin();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
