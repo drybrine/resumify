@@ -20,11 +20,15 @@ export const metadata: Metadata = {
   description:
     "Buat CV ATS-friendly: live preview, 12+ template profesional, cloud save, export PDF, share link. Bayar Pro via QRIS.",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: "/apple-icon",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/icon", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL || "https://resumify-weld.vercel.app"
   ),
 };
 

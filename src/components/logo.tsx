@@ -1,6 +1,9 @@
+"use client";
+
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-/** Inline mark — sharp on any bg, no extra request */
+/** Inline mark — unique gradient ids so multiple logos on one page work */
 export function LogoMark({
   className,
   size = 36,
@@ -8,7 +11,9 @@ export function LogoMark({
   className?: string;
   size?: number;
 }) {
-  const id = "resumify-logo";
+  const raw = useId().replace(/:/g, "");
+  const id = `rf-${raw}`;
+
   return (
     <svg
       width={size}
@@ -16,11 +21,10 @@ export function LogoMark({
       viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("shrink-0 transition-transform duration-300 hover:scale-105", className)}
+      className={cn("shrink-0", className)}
       aria-hidden
     >
       <defs>
-        {/* Main Background Mesh Gradient */}
         <linearGradient
           id={`${id}-bg`}
           x1="0"
@@ -33,8 +37,6 @@ export function LogoMark({
           <stop offset="0.5" stopColor="#7C3AED" />
           <stop offset="1" stopColor="#EC4899" />
         </linearGradient>
-
-        {/* Glossy Overlay */}
         <linearGradient
           id={`${id}-shine`}
           x1="0"
@@ -46,10 +48,8 @@ export function LogoMark({
           <stop stopColor="#ffffff" stopOpacity="0.35" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
-
-        {/* Letter 'R' Gradient */}
         <linearGradient
-          id={`${id}-r-grad`}
+          id={`${id}-r`}
           x1="18"
           y1="14"
           x2="46"
@@ -61,11 +61,8 @@ export function LogoMark({
         </linearGradient>
       </defs>
 
-      {/* Outer Glow Container */}
       <rect width="64" height="64" rx="18" fill={`url(#${id}-bg)`} />
       <rect width="64" height="64" rx="18" fill={`url(#${id}-shine)`} />
-      
-      {/* Inner Subtle Border Ring */}
       <rect
         x="1.5"
         y="1.5"
@@ -76,15 +73,11 @@ export function LogoMark({
         strokeOpacity="0.25"
         strokeWidth="1.5"
       />
-
-      {/* Stylized Modern 'R' + Resume Paper Shape */}
       <path
         d="M20 14H35C41.6274 14 47 19.3726 47 26C47 31.8906 42.7483 36.7869 37.1121 37.7618L46.5 50H37L29 38H28V50H20V14Z"
-        fill={`url(#${id}-r-grad)`}
+        fill={`url(#${id}-r)`}
       />
       <rect x="28" y="21" width="9" height="9" rx="2" fill="#6366F1" />
-
-      {/* Glowing AI Sparkle Star Badge */}
       <circle cx="50" cy="14" r="7" fill="#10B981" />
       <path
         d="M50 9.5L51.2 12.8L54.5 14L51.2 15.2L50 18.5L48.8 15.2L45.5 14L48.8 12.8L50 9.5Z"
@@ -110,7 +103,7 @@ export function Logo({
       <LogoMark size={markSize} />
       {showWordmark && (
         <span className="flex flex-col leading-none">
-          <span className="text-[16px] font-extrabold tracking-tight text-white bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+          <span className="text-[16px] font-extrabold tracking-tight text-white">
             Resumify
           </span>
           {subtitle !== undefined ? (
