@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Builder — Resume ATS</title>
+  <meta name="description" content="Buat CV/resume ATS-friendly dengan preview live dan export PDF." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CV</span>
+        <div>
+          <strong>CV Builder</strong>
+          <span class="brand-sub">ATS Resume · Jake style</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-ghost" id="btnLoadSample" title="Isi data contoh">Sample</button>
+        <button type="button" class="btn btn-ghost" id="btnClear" title="Hapus semua data">Reset</button>
+        <button type="button" class="btn btn-ghost" id="btnImport">Import JSON</button>
+        <button type="button" class="btn btn-ghost" id="btnExportJson">Export JSON</button>
+        <button type="button" class="btn btn-primary" id="btnPdf">Export PDF</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="editor" id="editor">
+        <nav class="section-nav" id="sectionNav">
+          <button type="button" class="nav-item active" data-section="personal">Personal</button>
+          <button type="button" class="nav-item" data-section="summary">Summary</button>
+          <button type="button" class="nav-item" data-section="education">Education</button>
+          <button type="button" class="nav-item" data-section="experience">Experience</button>
+          <button type="button" class="nav-item" data-section="projects">Projects</button>
+          <button type="button" class="nav-item" data-section="publications">Publications</button>
+          <button type="button" class="nav-item" data-section="skills">Skills</button>
+          <button type="button" class="nav-item" data-section="languages">Languages</button>
+        </nav>
+
+        <div class="panels">
+          <!-- PERSONAL -->
+          <section class="panel active" data-panel="personal">
+            <h2>Personal Info</h2>
+            <p class="hint">Header CV — nama, kontak, link.</p>
+            <div class="grid-2">
+              <label>Full Name<input type="text" data-path="personal.fullName" placeholder="Surya Alamsyah Putera Pratama" /></label>
+              <label>Location<input type="text" data-path="personal.location" placeholder="Bandung, Indonesia" /></label>
+              <label>Email<input type="email" data-path="personal.email" placeholder="you@email.com" /></label>
+              <label>Phone<input type="text" data-path="personal.phone" placeholder="+62..." /></label>
+              <label>GitHub / Portfolio<input type="text" data-path="personal.github" placeholder="github.com/username" /></label>
+              <label>Website<input type="text" data-path="personal.website" placeholder="yoursite.app" /></label>
+              <label>LinkedIn<input type="text" data-path="personal.linkedin" placeholder="linkedin.com/in/..." /></label>
+            </div>
+          </section>
+
+          <!-- SUMMARY -->
+          <section class="panel" data-panel="summary">
+            <h2>Professional Summary</h2>
+            <p class="hint">Opsional. Kosongkan jika tidak ingin ditampilkan.</p>
+            <label>Summary
+              <textarea data-path="summary" rows="6" placeholder="Brief professional summary..."></textarea>
+            </label>
+          </section>
+
+          <!-- EDUCATION -->
+          <section class="panel" data-panel="education">
+            <div class="panel-head">
+              <div>
+                <h2>Education</h2>
+                <p class="hint">Sekolah / kampus, jurusan, periode, bullet opsional.</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="education">+ Add</button>
+            </div>
+            <div class="list" id="list-education"></div>
+          </section>
+
+          <!-- EXPERIENCE -->
+          <section class="panel" data-panel="experience">
+            <div class="panel-head">
+              <div>
+                <h2>Experience</h2>
+                <p class="hint">Kerja, magang, PKL, freelance.</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="experience">+ Add</button>
+            </div>
+            <div class="list" id="list-experience"></div>
+          </section>
+
+          <!-- PROJECTS -->
+          <section class="panel" data-panel="projects">
+            <div class="panel-head">
+              <div>
+                <h2>Projects</h2>
+                <p class="hint">Project portfolio dengan bullet impact.</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="projects">+ Add</button>
+            </div>
+            <div class="list" id="list-projects"></div>
+          </section>
+
+          <!-- PUBLICATIONS -->
+          <section class="panel" data-panel="publications">
+            <div class="panel-head">
+              <div>
+                <h2>Publications</h2>
+                <p class="hint">Satu baris sitasi per item. Hanya yang sudah publish.</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="publications">+ Add</button>
+            </div>
+            <div class="list" id="list-publications"></div>
+          </section>
+
+          <!-- SKILLS -->
+          <section class="panel" data-panel="skills">
+            <div class="panel-head">
+              <div>
+                <h2>Technical Skills</h2>
+                <p class="hint">Kategori + daftar skill (pisah koma).</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="skills">+ Add</button>
+            </div>
+            <div class="list" id="list-skills"></div>
+          </section>
+
+          <!-- LANGUAGES -->
+          <section class="panel" data-panel="languages">
+            <div class="panel-head">
+              <div>
+                <h2>Languages</h2>
+                <p class="hint">Bahasa + level.</p>
+              </div>
+              <button type="button" class="btn btn-sm" data-add="languages">+ Add</button>
+            </div>
+            <div class="list" id="list-languages"></div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="preview-pane">
+        <div class="preview-toolbar">
+          <span>Live preview</span>
+          <div class="zoom">
+            <button type="button" class="btn btn-ghost btn-sm" id="zoomOut">−</button>
+            <span id="zoomLabel">100%</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="zoomIn">+</button>
+          </div>
+        </div>
+        <div class="preview-scroll">
+          <div class="preview-scale" id="previewScale">
+            <article class="resume" id="resumePreview" aria-label="Resume preview"></article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="status" id="status">Auto-saved locally</footer>
+  </div>
+
+  <script src="js/default-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
