@@ -1,97 +1,42 @@
-"use client";
-
-import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-/** Inline mark — unique gradient ids so multiple logos on one page work */
+/**
+ * Wordmark mark: a printed sheet — solid ink block, three paper rules, one
+ * accent bar. Reads at 16px in a favicon and needs no gradients.
+ */
 export function LogoMark({
   className,
-  size = 36,
+  size = 30,
 }: {
   className?: string;
   size?: number;
 }) {
-  const raw = useId().replace(/:/g, "");
-  const id = `rf-${raw}`;
-
   return (
     <svg
       width={size}
-      height={size}
-      viewBox="0 0 64 64"
+      height={size * (32 / 26)}
+      viewBox="0 0 26 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
       aria-hidden
     >
-      <defs>
-        <linearGradient
-          id={`${id}-bg`}
-          x1="0"
-          y1="0"
-          x2="64"
-          y2="64"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#4F46E5" />
-          <stop offset="0.5" stopColor="#7C3AED" />
-          <stop offset="1" stopColor="#EC4899" />
-        </linearGradient>
-        <linearGradient
-          id={`${id}-shine`}
-          x1="0"
-          y1="0"
-          x2="64"
-          y2="32"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#ffffff" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient
-          id={`${id}-r`}
-          x1="18"
-          y1="14"
-          x2="46"
-          y2="50"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#FFFFFF" />
-          <stop offset="1" stopColor="#E0E7FF" />
-        </linearGradient>
-      </defs>
-
-      <rect width="64" height="64" rx="18" fill={`url(#${id}-bg)`} />
-      <rect width="64" height="64" rx="18" fill={`url(#${id}-shine)`} />
-      <rect
-        x="1.5"
-        y="1.5"
-        width="61"
-        height="61"
-        rx="16.5"
-        stroke="#ffffff"
-        strokeOpacity="0.25"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M20 14H35C41.6274 14 47 19.3726 47 26C47 31.8906 42.7483 36.7869 37.1121 37.7618L46.5 50H37L29 38H28V50H20V14Z"
-        fill={`url(#${id}-r)`}
-      />
-      <rect x="28" y="21" width="9" height="9" rx="2" fill="#6366F1" />
-      <circle cx="50" cy="14" r="7" fill="#10B981" />
-      <path
-        d="M50 9.5L51.2 12.8L54.5 14L51.2 15.2L50 18.5L48.8 15.2L45.5 14L48.8 12.8L50 9.5Z"
-        fill="#FFFFFF"
-      />
+      <rect x="0.5" y="0.5" width="25" height="31" rx="2.5" fill="#191712" />
+      <rect x="0.5" y="0.5" width="25" height="31" rx="2.5" stroke="#191712" />
+      <rect x="5" y="6" width="16" height="2.6" fill="#B4311C" />
+      <rect x="5" y="12.5" width="16" height="1.5" fill="#F4F1E9" />
+      <rect x="5" y="17" width="16" height="1.5" fill="#F4F1E9" opacity="0.72" />
+      <rect x="5" y="21.5" width="10.5" height="1.5" fill="#F4F1E9" opacity="0.72" />
+      <rect x="5" y="26" width="16" height="1.5" fill="#F4F1E9" opacity="0.45" />
     </svg>
   );
 }
 
 export function Logo({
   className,
-  markSize = 32,
+  markSize = 26,
   showWordmark = true,
-  subtitle,
+  subtitle = "CV Studio",
 }: {
   className?: string;
   markSize?: number;
@@ -103,20 +48,14 @@ export function Logo({
       <LogoMark size={markSize} />
       {showWordmark && (
         <span className="flex flex-col leading-none">
-          <span className="text-[16px] font-extrabold tracking-tight text-white">
+          <span className="font-display text-[19px] font-semibold tracking-[-0.01em] text-ink">
             Resumify
           </span>
-          {subtitle !== undefined ? (
-            subtitle ? (
-              <span className="mt-0.5 text-[10px] font-medium tracking-wider text-slate-500 uppercase">
-                {subtitle}
-              </span>
-            ) : null
-          ) : (
-            <span className="mt-0.5 text-[10px] font-medium tracking-wider text-slate-500 uppercase">
-              ATS Resume
+          {subtitle ? (
+            <span className="micro mt-1 text-[10px] normal-case tracking-[0.08em]">
+              {subtitle}
             </span>
-          )}
+          ) : null}
         </span>
       )}
     </span>

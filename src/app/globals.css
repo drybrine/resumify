@@ -1,100 +1,162 @@
 @import "tailwindcss";
 
-:root {
-  --background: #030712;
-  --foreground: #f3f4f6;
+/* ============================================================
+   Resumify — "print studio" design tokens
+   Paper + ink, one accent, hairline rules, near-zero radius.
+   Contrast checked against the paper surface (WCAG AA+):
+   ink 15.9:1 · ink-2 7.0:1 · ink-3 5.2:1 · accent 5.5:1
+   ============================================================ */
+
+@theme {
+  /* surfaces */
+  --color-paper: #f4f1e9; /* page canvas */
+  --color-sheet: #fffdf8; /* raised sheet of paper */
+  --color-desk: #e7e1d5; /* recessed work surface (preview desk) */
+  --color-ink-veil: #ece7db; /* subtle fill for rows/hovers */
+
+  /* type */
+  --color-ink: #191712;
+  --color-ink-2: #575143;
+  --color-ink-3: #6b6455;
+
+  /* lines */
+  --color-rule: #dfd9cb;
+  --color-rule-strong: #c6beae;
+
+  /* one accent + functional states */
+  --color-accent: #b4311c;
+  --color-accent-soft: #f1e2dc;
+  --color-ok: #3f6212;
+  --color-warn: #8a5300;
+  --color-danger: #a32117;
+
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+
+  --radius-print: 3px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ---------- base ---------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* ===== Modern Glassmorphism & Animations ===== */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  text-wrap: balance;
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* the resume paper keeps its own document typography (must match the PDF) */
+.resume-preview h1,
+.resume-preview h2,
+.resume-preview h3,
+.resume-preview h4,
+.resume-preview p,
+.resume-preview li,
+.resume-preview span,
+.resume-preview a,
+.resume-preview div {
+  font-family: inherit;
+  letter-spacing: normal;
+  text-wrap: auto;
 }
 
-.glass-card:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.25);
-  transform: translateY(-2px);
+p,
+li {
+  text-wrap: pretty;
 }
 
-.mesh-gradient-bg {
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(59, 130, 246, 0.12) 0px, transparent 50%);
+::selection {
+  background: var(--color-accent);
+  color: var(--color-sheet);
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
-.text-gradient-purple {
-  background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+a {
+  color: inherit;
 }
 
-/* Keyframe Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ---------- primitives ---------- */
+
+/* micro label — the workhorse of this system: 11px, caps, wide tracking */
+@utility micro {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
 }
 
-@keyframes scaleUp {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+@utility rule {
+  border-top: 1px solid var(--color-rule);
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@utility link-rule {
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    text-decoration-color: var(--color-accent);
+    color: var(--color-accent);
+  }
 }
 
-.animate-scale-up {
-  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@utility num {
+  font-variant-numeric: tabular-nums;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+/* ---------- motion: none of it is decorative, so honour the OS setting ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* ===== Shared resume paper ===== */
+/* ===== Shared resume paper (mirrors src/lib/templates/styles.ts — keep in sync) ===== */
 .resume-preview {
   width: 8.5in;
   min-height: 11in;
   background: #fff;
   color: #000;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 1px 2px rgba(25, 23, 18, 0.16), 0 18px 40px -18px rgba(25, 23, 18, 0.4);
 }
 
 .resume-preview a { color: inherit; text-decoration: none; }

@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
-import { Plus, ArrowUp, ArrowDown, Trash2, GripVertical } from "lucide-react";
 
 type FieldDef = {
   key: string;
@@ -14,6 +13,7 @@ type FieldDef = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ListSection<T extends Record<string, any>>({
   title,
+  hint,
   items,
   fields,
   hasBullets,
@@ -21,6 +21,7 @@ export function ListSection<T extends Record<string, any>>({
   onChange,
 }: {
   title: string;
+  hint?: string;
   items: T[];
   fields: FieldDef[];
   hasBullets?: boolean;
@@ -28,10 +29,7 @@ export function ListSection<T extends Record<string, any>>({
   onChange: (items: T[]) => void;
 }) {
   function update(i: number, key: string, value: unknown) {
-    const next = items.map((item, idx) =>
-      idx === i ? { ...item, [key]: value } : item
-    );
-    onChange(next);
+    onChange(items.map((item, idx) => (idx === i ? { ...item, [key]: value } : item)));
   }
 
   function move(i: number, dir: number) {
@@ -47,8 +45,7 @@ export function ListSection<T extends Record<string, any>>({
   }
 
   function addBullet(i: number) {
-    const bullets = [...(items[i].bullets || []), ""];
-    update(i, "bullets", bullets);
+    update(i, "bullets", [...(items[i].bullets || []), ""]);
   }
 
   function setBullet(i: number, bi: number, value: string) {
@@ -65,128 +62,130 @@ export function ListSection<T extends Record<string, any>>({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-white tracking-wide">{title}</h2>
+    <div>
+      <div className="flex items-end justify-between gap-4 border-b border-rule-strong pb-2">
+        <div>
+          <h2 className="font-display text-[19px] leading-tight text-ink">{title}</h2>
+          {hint && <p className="mt-1 text-[12px] text-ink-3">{hint}</p>}
+        </div>
         <Button
           type="button"
           size="sm"
           variant="secondary"
           onClick={() => onChange([...items, emptyItem()])}
-          className="text-xs"
+          className="shrink-0"
         >
-          <Plus className="h-3.5 w-3.5" />
-          <span>Add Entry</span>
+          + Tambah
         </Button>
       </div>
 
       {items.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/30 p-6 text-center text-xs text-slate-400">
-          No entries yet. Click <strong className="text-indigo-400">+ Add Entry</strong> to create one.
-        </div>
+        <p className="mt-4 border border-dashed border-rule-strong px-4 py-5 text-[13px] leading-relaxed text-ink-3">
+          Belum ada isian. Tambahkan satu, lalu isi dari yang paling atas ke
+          bawah — urutannya sama dengan urutan di CV.
+        </p>
       )}
 
-      {items.map((item, i) => (
-        <div
-          key={i}
-          className="glass-card rounded-2xl p-4 space-y-3 relative group border border-white/10"
-        >
-          <div className="flex items-center justify-between pb-2 border-b border-white/5">
-            <div className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 text-slate-500" />
-              <span className="text-xs font-bold text-indigo-300">
-                Item #{i + 1}
+      <ul className="mt-4 space-y-4">
+        {items.map((item, i) => (
+          <li key={i} className="rounded-print border border-rule bg-sheet p-4">
+            <div className="flex items-center justify-between gap-3 border-b border-rule pb-2.5">
+              <span className="micro num">
+                {title} {String(i + 1).padStart(2, "0")}
               </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                disabled={i === 0}
-                onClick={() => move(i, -1)}
-                className="h-7 w-7 p-0"
-              >
-                <ArrowUp className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                disabled={i === items.length - 1}
-                onClick={() => move(i, 1)}
-                className="h-7 w-7 p-0"
-              >
-                <ArrowDown className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="danger"
-                onClick={() => remove(i)}
-                className="h-7 px-2"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {fields.map((f) => (
-              <div key={f.key} className={f.full ? "col-span-2" : ""}>
-                <Label>{f.label}</Label>
-                {f.textarea ? (
-                  <Textarea
-                    rows={3}
-                    value={String(item[f.key] ?? "")}
-                    onChange={(e) => update(i, f.key, e.target.value)}
-                  />
-                ) : (
-                  <Input
-                    value={String(item[f.key] ?? "")}
-                    onChange={(e) => update(i, f.key, e.target.value)}
-                  />
-                )}
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={i === 0}
+                  onClick={() => move(i, -1)}
+                  className="h-7 px-2"
+                  aria-label="Naikkan urutan"
+                >
+                  ↑
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={i === items.length - 1}
+                  onClick={() => move(i, 1)}
+                  className="h-7 px-2"
+                  aria-label="Turunkan urutan"
+                >
+                  ↓
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="danger"
+                  onClick={() => remove(i)}
+                  className="h-7 px-2"
+                >
+                  Hapus
+                </Button>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {hasBullets && (
-            <div className="space-y-2 pt-1">
-              <Label>Bullet Points & Achievements</Label>
-              {(item.bullets || [""]).map((b: string, bi: number) => (
-                <div key={bi} className="flex gap-2 items-center">
-                  <Textarea
-                    rows={2}
-                    className="min-h-[48px] text-xs"
-                    value={b}
-                    onChange={(e) => setBullet(i, bi, e.target.value)}
-                    placeholder="Key responsibility or achievement…"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => delBullet(i, bi)}
-                    className="h-8 w-8 p-0 shrink-0 text-slate-500 hover:text-red-400"
-                  >
-                    ×
-                  </Button>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {fields.map((f) => (
+                <div key={f.key} className={f.full ? "col-span-2" : ""}>
+                  <Label>{f.label}</Label>
+                  {f.textarea ? (
+                    <Textarea
+                      rows={3}
+                      value={String(item[f.key] ?? "")}
+                      onChange={(e) => update(i, f.key, e.target.value)}
+                    />
+                  ) : (
+                    <Input
+                      value={String(item[f.key] ?? "")}
+                      onChange={(e) => update(i, f.key, e.target.value)}
+                    />
+                  )}
                 </div>
               ))}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => addBullet(i)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 p-0 h-auto"
-              >
-                + Add Bullet
-              </Button>
             </div>
-          )}
-        </div>
-      ))}
+
+            {hasBullets && (
+              <div className="mt-4 border-t border-rule pt-3">
+                <Label>Poin pencapaian</Label>
+                <div className="space-y-2">
+                  {(item.bullets || [""]).map((b: string, bi: number) => (
+                    <div key={bi} className="flex items-start gap-2">
+                      <Textarea
+                        rows={2}
+                        className="min-h-[46px] text-[13px]"
+                        value={b}
+                        onChange={(e) => setBullet(i, bi, e.target.value)}
+                        placeholder="Tulis hasil atau tanggung jawab, sebaiknya dengan angka…"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => delBullet(i, bi)}
+                        className="h-8 px-2 shrink-0 text-ink-3 hover:text-danger"
+                        aria-label="Hapus poin ini"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addBullet(i)}
+                  className="link-rule mt-2 text-[13px] text-ink-2"
+                >
+                  + Tambah poin
+                </button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

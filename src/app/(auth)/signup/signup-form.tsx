@@ -6,35 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 
 export function SignupForm() {
-  const [state, action, pending] = useActionState<AuthState, FormData>(
-    signUp,
-    null
-  );
+  const [state, action, pending] = useActionState<AuthState, FormData>(signUp, null);
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className="space-y-5">
       <form action={async () => signInWithGoogle("/dashboard")}>
-        <Button type="submit" variant="outline" className="w-full">
-          Continue with Google
+        <Button type="submit" variant="secondary" className="w-full">
+          Daftar dengan Google
         </Button>
       </form>
 
-      <div className="relative py-2 text-center text-xs text-slate-500">
-        <span className="relative z-10 bg-slate-900 px-2">or email</span>
-        <div className="absolute inset-x-0 top-1/2 h-px bg-slate-800" />
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-rule" />
+        <span className="micro text-[10px]">atau pakai email</span>
+        <span className="h-px flex-1 bg-rule" />
       </div>
 
-      <form action={action} className="space-y-3">
+      <form action={action} className="space-y-4">
         <div>
-          <Label htmlFor="fullName">Full name</Label>
-          <Input id="fullName" name="fullName" autoComplete="name" />
+          <Label htmlFor="fullName">Nama lengkap</Label>
+          <Input id="fullName" name="fullName" autoComplete="name" placeholder="Nama sesuai CV" />
         </div>
+
         <div>
           <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" required autoComplete="email" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="nama@email.com"
+          />
         </div>
+
         <div>
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Kata sandi</Label>
           <Input
             id="password"
             name="password"
@@ -42,14 +49,21 @@ export function SignupForm() {
             required
             minLength={8}
             autoComplete="new-password"
+            placeholder="Minimal 8 karakter"
           />
         </div>
-        {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
-        {state?.success && (
-          <p className="text-sm text-emerald-400">{state.success}</p>
+
+        {state?.error && (
+          <p role="alert" className="text-[13px] text-danger">
+            {state.error}
+          </p>
         )}
+        {state?.success && (
+          <p className="text-[13px] text-ok">{state.success}</p>
+        )}
+
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Creating…" : "Create account"}
+          {pending ? "Membuat akun…" : "Buat akun gratis"}
         </Button>
       </form>
     </div>

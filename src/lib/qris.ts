@@ -100,7 +100,7 @@ export function injectQrisAmount(
   // Optional additional data (tag 62)
   if (opts?.referenceLabel || opts?.terminalLabel) {
     const i62 = tags.findIndex((t) => t.id === "62");
-    let sub: Tlv[] = i62 >= 0 ? parseTlv(tags[i62].value) : [];
+    const sub: Tlv[] = i62 >= 0 ? parseTlv(tags[i62].value) : [];
     if (opts.referenceLabel) {
       const ref = opts.referenceLabel.slice(0, 25);
       const ir = sub.findIndex((t) => t.id === "05");

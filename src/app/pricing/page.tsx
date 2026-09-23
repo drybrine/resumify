@@ -1,13 +1,28 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { PLANS, formatIdr } from "@/lib/plans";
 import { getProPricing } from "@/lib/plan-pricing";
-import { Check } from "lucide-react";
 import { CheckoutButton } from "./checkout-button";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Pricing" };
+export const metadata = { title: "Harga" };
+
+const ROWS: { label: string; free: string; pro: string }[] = [
+  { label: "Jumlah CV", free: "1", pro: "50" },
+  { label: "Template", free: "Jake, Minimal", pro: "12 template" },
+  { label: "Ekspor PDF", free: "Termasuk", pro: "Termasuk" },
+  { label: "Simpan otomatis ke cloud", free: "Termasuk", pro: "Termasuk" },
+  { label: "Link share publik", free: "Tidak ada", pro: "Termasuk" },
+  { label: "Dukungan", free: "Email biasa", pro: "Diprioritaskan" },
+];
+
+const QRIS_STEPS = [
+  "Klik Bayar dengan QRIS — sistem membuat nominal unik (harga + kode 3 digit) supaya transfermu mudah dicocokkan.",
+  "Scan QR dari GoPay, OVO, DANA, ShopeePay, atau m-banking, lalu transfer nominal persis seperti yang tertulis.",
+  "Status dicek otomatis. Setelah dana masuk, Pro aktif 30 hari — kalau mutasi belum terhubung, admin mengonfirmasi manual.",
+];
 
 export default async function PricingPage() {
   const supabase = await createClient();
@@ -29,148 +44,203 @@ export default async function PricingPage() {
     planExpires = data?.plan_expires_at || null;
   }
 
+  const isPro = plan === "pro" || plan === "admin";
+
+  const freeCta = user ? (
+    plan === "free" ? (
+      <p className="micro">Paket kamu sekarang</p>
+    ) : (
+      <Link href="/dashboard">
+        <Button variant="secondary" size="sm">
+          Buka dasbor
+        </Button>
+      </Link>
+    )
+  ) : (
+    <Link href="/signup">
+      <Button variant="secondary" size="sm">
+        Mulai gratis
+      </Button>
+    </Link>
+  );
+
+  const proCta = !user ? (
+    <Link href="/signup">
+      <Button size="sm">Daftar &amp; bayar QRIS</Button>
+    </Link>
+  ) : isPro ? (
+    <div>
+      <p className="micro text-accent">Pro aktif</p>
+      {planExpires && (
+        <p className="num mt-1 text-[12px] text-ink-2">
+          berlaku sampai{" "}
+          {new Date(planExpires).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      )}
+    </div>
+  ) : (
+    <CheckoutButton />
+  );
+
   return (
     <>
       <SiteHeader />
-      <main className="mesh-gradient-bg flex-1 min-h-[calc(100vh-4rem)] py-16 px-4 sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-300 shadow-sm backdrop-blur-md mb-4">
-              <span>Harga jelas · Bayar via QRIS</span>
-            </div>
-            <h1 className="text-3xl font-extrabold text-white sm:text-5xl tracking-tight">
-              Mulai gratis.{" "}
-              <span className="text-gradient-purple">Upgrade saat butuh.</span>
+
+      <main id="main" className="flex-1">
+        <section className="border-b border-rule">
+          <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-18">
+            <p className="micro">Harga</p>
+            <h1 className="mt-4 max-w-2xl text-[34px] leading-[1.08] text-ink sm:text-[44px]">
+              Gratis untuk mencoba. Pro saat lamaranmu menumpuk.
             </h1>
-            <p className="mt-4 text-slate-400 text-base sm:text-lg">
-              Free untuk coba. Pro untuk 50 CV, 12 template, dan link share ke recruiter.
+            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2">
+              Tidak ada langganan otomatis. Pro dibeli per 30 hari, dan setelah
+              masa itu habis paketmu kembali ke Free tanpa penagihan lanjutan.
             </p>
           </div>
+        </section>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
-            <PlanCard
-              name={PLANS.free.name}
-              price={formatIdr(PLANS.free.priceIdr)}
-              period=""
-              features={[...PLANS.free.features]}
-              cta={
-                user ? (
-                  plan === "free" ? (
-                    <Button variant="outline" className="w-full" disabled>
-                      Plan Saat Ini
-                    </Button>
-                  ) : (
-                    <Link href="/dashboard">
-                      <Button variant="outline" className="w-full">
-                        Ke Dashboard
-                      </Button>
-                    </Link>
-                  )
-                ) : (
-                  <Link href="/signup">
-                    <Button variant="outline" className="w-full">
-                      Mulai gratis
-                    </Button>
-                  </Link>
-                )
-              }
-            />
-            <PlanCard
-              name={PLANS.pro.name}
-              price={formatIdr(proPricing.priceIdr)}
-              period={`/${proPricing.periodDays} hari`}
-              features={[...PLANS.pro.features]}
-              highlight
-              cta={
-                user ? (
-                  plan === "pro" || plan === "admin" ? (
-                    <div className="space-y-2 text-center">
-                      <Button variant="secondary" className="w-full" disabled>
-                        Pro Aktif
-                      </Button>
-                      {planExpires && (
-                        <p className="text-xs text-slate-400">
-                          Berlaku s/d{" "}
-                          {new Date(planExpires).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </p>
-                      )}
+        {/* Comparison table — row parity so the differences are readable */}
+        <section className="border-b border-rule bg-sheet">
+          <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+            <table className="hidden w-full border-collapse text-left md:table">
+              <caption className="sr-only">
+                Perbandingan paket Free dan Pro
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="w-[40%] border-b border-rule-strong pb-4">
+                    <span className="micro">Paket</span>
+                  </th>
+                  <th scope="col" className="border-b border-rule-strong px-5 pb-4">
+                    <span className="micro">Free</span>
+                    <span className="font-display mt-2 block text-[26px] text-ink">
+                      {formatIdr(PLANS.free.priceIdr)}
+                    </span>
+                  </th>
+                  <th
+                    scope="col"
+                    className="border-b-2 border-accent border-t-2 border-t-accent bg-accent-soft/45 px-5 pb-4"
+                  >
+                    <span className="micro text-accent">Pro · 30 hari</span>
+                    <span className="font-display num mt-2 block text-[26px] text-ink">
+                      {formatIdr(proPricing.priceIdr)}
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {ROWS.map((row) => (
+                  <tr key={row.label}>
+                    <th
+                      scope="row"
+                      className="border-b border-rule py-4 text-[14px] font-normal text-ink"
+                    >
+                      {row.label}
+                    </th>
+                    <td className="border-b border-rule px-5 py-4 text-[14px] text-ink-2">
+                      {row.free}
+                    </td>
+                    <td className="border-b border-rule bg-accent-soft/45 px-5 py-4 text-[14px] text-ink">
+                      {row.pro}
+                    </td>
+                  </tr>
+                ))}
+                <tr>
+                  <td className="py-6" />
+                  <td className="px-5 py-6 align-top">{freeCta}</td>
+                  <td className="border-b-2 border-b-accent bg-accent-soft/45 px-5 py-6 align-top">
+                    {proCta}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Mobile: same rows, stacked */}
+            <div className="space-y-10 md:hidden">
+              <div>
+                <div className="flex items-baseline justify-between border-b border-rule-strong pb-3">
+                  <span className="micro">Free</span>
+                  <span className="font-display text-[26px] text-ink">
+                    {formatIdr(PLANS.free.priceIdr)}
+                  </span>
+                </div>
+                <dl>
+                  {ROWS.map((row) => (
+                    <div
+                      key={row.label}
+                      className="flex items-baseline justify-between gap-4 border-b border-rule py-3"
+                    >
+                      <dt className="text-[14px] text-ink-2">{row.label}</dt>
+                      <dd className="text-[14px] text-ink">{row.free}</dd>
                     </div>
-                  ) : (
-                    <CheckoutButton />
-                  )
-                ) : (
-                  <Link href="/signup">
-                    <Button className="w-full shadow-indigo-500/30">Daftar & Bayar QRIS</Button>
-                  </Link>
-                )
-              }
-            />
-          </div>
-
-          <div className="mx-auto mt-12 max-w-xl space-y-2 text-center text-xs text-slate-500">
-            <p>
-              Bayar Pro lewat QRIS dinamis (GoPay, OVO, DANA, m-banking). Transfer nominal unik → konfirmasi → Pro 30 hari.
-            </p>
-            <p className="text-slate-600">
-              Bisa batalkan kapan saja di akhir periode. Tidak ada auto-renew tersembunyi.
-            </p>
-          </div>
-        </div>
-      </main>
-    </>
-  );
-}
-
-function PlanCard({
-  name,
-  price,
-  period,
-  features,
-  cta,
-  highlight,
-}: {
-  name: string;
-  price: string;
-  period: string;
-  features: string[];
-  cta: React.ReactNode;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className={`glass-card rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden ${
-        highlight
-          ? "border-indigo-500/50 bg-gradient-to-b from-indigo-950/40 to-slate-950/80 shadow-2xl shadow-indigo-500/10"
-          : ""
-      }`}
-    >
-      {highlight && (
-        <div className="absolute top-0 right-0 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-xl tracking-wider">
-          RECOMMENDED
-        </div>
-      )}
-      <div>
-        <h2 className="text-xl font-bold text-white">{name}</h2>
-        <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-white tracking-tight">{price}</span>
-          {period && <span className="text-slate-400 font-medium text-sm">{period}</span>}
-        </div>
-        <ul className="mt-8 space-y-3.5">
-          {features.map((f) => (
-            <li key={f} className="flex items-center gap-3 text-sm text-slate-300">
-              <div className="h-5 w-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                <Check className="h-3.5 w-3.5" />
+                  ))}
+                </dl>
+                <div className="mt-5">{freeCta}</div>
               </div>
-              <span>{f}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="mt-10">{cta}</div>
-    </div>
+
+              <div className="border-t-2 border-accent pt-4">
+                <div className="flex items-baseline justify-between border-b border-rule-strong pb-3">
+                  <span className="micro text-accent">Pro · 30 hari</span>
+                  <span className="font-display num text-[26px] text-ink">
+                    {formatIdr(proPricing.priceIdr)}
+                  </span>
+                </div>
+                <dl>
+                  {ROWS.map((row) => (
+                    <div
+                      key={row.label}
+                      className="flex items-baseline justify-between gap-4 border-b border-rule py-3"
+                    >
+                      <dt className="text-[14px] text-ink-2">{row.label}</dt>
+                      <dd className="text-[14px] text-ink">{row.pro}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <div className="mt-5">{proCta}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* QRIS explainer */}
+        <section className="border-b border-rule">
+          <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
+              <div>
+                <p className="micro">Pembayaran</p>
+                <h2 className="mt-4 text-[28px] leading-tight text-ink">
+                  Bayarnya lewat QRIS.
+                </h2>
+              </div>
+
+              <ol className="border-t border-rule">
+                {QRIS_STEPS.map((step, i) => (
+                  <li
+                    key={step}
+                    className="grid grid-cols-[40px_1fr] gap-4 border-b border-rule py-5"
+                  >
+                    <span className="micro num pt-1">{`0${i + 1}`}</span>
+                    <p className="text-[14px] leading-relaxed text-ink-2">{step}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <p className="mt-10 max-w-2xl text-[12px] leading-relaxed text-ink-3">
+              Catatan: tanpa integrasi mutasi rekening, konfirmasi pembayaran
+              bisa dilakukan manual oleh admin. Simpan bukti transfer sampai
+              status berubah menjadi Pro.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+    </>
   );
 }

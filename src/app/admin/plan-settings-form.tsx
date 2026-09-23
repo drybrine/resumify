@@ -24,9 +24,9 @@ export function PlanSettingsForm({
   return (
     <form
       action={action}
-      className="mt-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:p-5"
+      className="rounded-print border border-rule bg-sheet p-5 sm:p-6"
     >
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="pro_price_idr">Harga Pro (IDR)</Label>
           <Input
@@ -40,12 +40,13 @@ export function PlanSettingsForm({
             defaultValue={priceIdr}
             required
           />
-          <p className="mt-1 text-[11px] text-slate-500">
-            Saat ini: {formatIdr(priceIdr)}. Min Rp 1 · max 10jt.
+          <p className="num mt-2 text-[12px] text-ink-3">
+            Sekarang {formatIdr(priceIdr)} · min Rp 1, maks Rp 10.000.000.
           </p>
         </div>
+
         <div>
-          <Label htmlFor="pro_period_days">Durasi (hari)</Label>
+          <Label htmlFor="pro_period_days">Masa aktif (hari)</Label>
           <Input
             id="pro_period_days"
             name="pro_period_days"
@@ -57,23 +58,25 @@ export function PlanSettingsForm({
             defaultValue={periodDays}
             required
           />
-          <p className="mt-1 text-[11px] text-slate-500">
-            Masa aktif Pro setelah bayar (1–365 hari).
+          <p className="mt-2 text-[12px] text-ink-3">
+            Dihitung dari waktu pembayaran dikonfirmasi (1–365 hari).
           </p>
         </div>
       </div>
 
       {state?.error && (
-        <p className="mt-3 text-sm text-red-400">{state.error}</p>
+        <p role="alert" className="mt-4 text-[13px] text-danger">
+          {state.error}
+        </p>
       )}
       {state?.success && (
-        <p className="mt-3 text-sm text-emerald-400">{state.success}</p>
+        <p className="mt-4 text-[13px] text-ok">{state.success}</p>
       )}
 
-      <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[11px] text-slate-500">
-          Harga baru berlaku invoice QRIS berikutnya. Pending lama tetap pakai
-          nominal lama.
+      <div className="mt-5 flex flex-col-reverse gap-3 border-t border-rule pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-md text-[12px] leading-relaxed text-ink-3">
+          Perubahan berlaku untuk invoice berikutnya. Tagihan yang sudah terbit
+          tetap memakai nominal saat dibuat.
         </p>
         <Button type="submit" size="sm" disabled={pending} className="sm:shrink-0">
           {pending ? "Menyimpan…" : "Simpan harga"}

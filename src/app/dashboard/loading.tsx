@@ -4,35 +4,22 @@ export default function DashboardLoading() {
   return (
     <>
       <SiteHeader />
-      <main className="mesh-gradient-bg min-h-[calc(100vh-4rem)] flex-1 px-4 py-10 sm:px-6">
-        <div className="mx-auto w-full max-w-6xl space-y-8 animate-pulse">
-          {/* Header Card Skeleton */}
-          <div className="glass-card flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-3xl border border-white/10 p-6 sm:p-8">
-            <div className="space-y-3 flex-1">
-              <div className="h-8 w-60 rounded-xl bg-slate-800"></div>
-              <div className="h-4 w-80 rounded-lg bg-slate-800/60"></div>
-            </div>
-            <div className="h-10 w-36 rounded-xl bg-slate-800"></div>
-          </div>
 
-          {/* Grid Cards Skeleton */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="glass-card flex h-48 flex-col justify-between rounded-2xl border border-white/10 p-6"
-              >
-                <div className="space-y-3">
-                  <div className="h-6 w-3/4 rounded-lg bg-slate-800"></div>
-                  <div className="h-4 w-1/2 rounded-md bg-slate-800/60"></div>
-                </div>
-                <div className="flex gap-2 pt-4 border-t border-white/5">
-                  <div className="h-9 flex-1 rounded-xl bg-slate-800"></div>
-                  <div className="h-9 w-10 rounded-xl bg-slate-800"></div>
-                </div>
+      <main className="flex-1">
+        <div className="mx-auto max-w-5xl animate-pulse px-4 py-10 sm:px-6 sm:py-14">
+          <div className="h-3 w-16 bg-rule" />
+          <div className="mt-4 h-8 w-52 bg-rule" />
+
+          <div className="mt-10 border-t border-rule-strong pt-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="border-b border-rule py-5">
+                <div className="h-5 w-64 bg-rule" />
+                <div className="mt-3 h-3 w-44 bg-rule/70" />
               </div>
             ))}
           </div>
+
+          <p className="mt-6 text-[12px] text-ink-3">Memuat daftar CV…</p>
         </div>
       </main>
     </>

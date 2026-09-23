@@ -1,83 +1,97 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { SignupForm } from "./signup-form";
-import { Check } from "lucide-react";
 
-export const metadata = { title: "Sign up" };
+export const metadata = { title: "Daftar" };
 
-const perks = [
-  "1 CV gratis + export PDF",
-  "Template ATS Jake & Minimal",
-  "Tanpa kartu kredit",
+const PERKS = [
+  "1 CV gratis, dengan ekspor PDF",
+  "Template Jake & Minimal langsung tersedia",
+  "Tersimpan di cloud — bisa dilanjutkan dari perangkat lain",
 ];
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen mesh-gradient-bg flex flex-col">
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-4xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Value panel — desktop */}
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b border-rule">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" aria-label="Resumify — beranda">
+            <Logo markSize={22} subtitle="" />
+          </Link>
+          <Link
+            href="/login"
+            className="text-[13px] text-ink-2 transition-colors hover:text-ink"
+          >
+            Sudah punya akun? Masuk
+          </Link>
+        </div>
+      </header>
+
+      <main id="main" className="flex-1 px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-[1fr_420px] lg:gap-16">
           <div className="hidden lg:block">
-            <Link href="/" className="inline-flex mb-8">
-              <Logo markSize={40} subtitle="ATS Resume" />
-            </Link>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
-              Buat CV yang siap dilamar —{" "}
-              <span className="text-gradient-purple">mulai gratis</span>
+            <p className="micro">Pendaftaran</p>
+            <h1 className="mt-4 max-w-md text-[38px] leading-[1.08] text-ink">
+              Satu akun, lalu langsung mulai mengisi.
             </h1>
-            <p className="mt-3 text-slate-400 text-sm leading-relaxed">
-              Live preview, template profesional, PDF instan. Upgrade Pro via QRIS
-              hanya saat butuh lebih banyak CV & share link.
+            <p className="mt-4 max-w-md text-[14px] leading-relaxed text-ink-2">
+              Tidak ada pertanyaan panjang sebelum masuk editor. Buat CV kosong,
+              pilih template, dan lihat hasilnya sambil mengetik.
             </p>
-            <ul className="mt-8 space-y-3">
-              {perks.map((p) => (
-                <li key={p} className="flex items-center gap-3 text-sm text-slate-300">
-                  <span className="h-6 w-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                    <Check className="h-3.5 w-3.5" />
-                  </span>
-                  {p}
+
+            <ul className="mt-10 max-w-md border-t border-rule">
+              {PERKS.map((perk) => (
+                <li
+                  key={perk}
+                  className="border-b border-rule py-3.5 text-[14px] text-ink"
+                >
+                  {perk}
                 </li>
               ))}
             </ul>
+
+            <p className="mt-8 max-w-md text-[12px] leading-relaxed text-ink-3">
+              Tombol di bawah hanya membuat akun paket gratis. Pro (Rp 49.000 per
+              30 hari) dibayar belakangan lewat QRIS, dan hanya kalau kamu butuh
+              lebih dari 1 CV.
+            </p>
           </div>
 
-          {/* Form card */}
           <div>
-            <div className="lg:hidden mb-6">
-              <Link href="/" className="inline-flex mb-4">
-                <Logo markSize={36} subtitle="ATS Resume" />
-              </Link>
-              <h1 className="text-2xl font-extrabold text-white">Buat akun gratis</h1>
-              <p className="mt-1 text-sm text-slate-400">
-                Free: 1 CV + PDF. Siap dalam 1 menit.
+            <div className="lg:hidden">
+              <p className="micro">Pendaftaran</p>
+              <h1 className="mt-4 text-[30px] leading-tight text-ink">Buat akun gratis</h1>
+              <p className="mt-3 text-[14px] text-ink-2">
+                1 CV + ekspor PDF, tanpa kartu kredit.
               </p>
             </div>
 
-            <div className="glass-card rounded-3xl border border-white/10 p-6 sm:p-8 shadow-2xl">
-              <p className="hidden lg:block text-lg font-bold text-white mb-1">
+            <div className="mt-8 rounded-print border border-rule bg-sheet p-6 sm:p-7 lg:mt-0">
+              <h2 className="font-display text-[20px] text-ink">
                 Daftar Resumify
+              </h2>
+              <p className="mt-1.5 text-[13px] text-ink-2">
+                Pakai Google atau email — keduanya sama saja.
               </p>
-              <p className="hidden lg:block text-sm text-slate-400 mb-6">
-                Free plan includes 1 CV and PDF export.
-              </p>
-              <SignupForm />
-              <p className="mt-6 text-center text-sm text-slate-400">
-                Sudah punya akun?{" "}
-                <Link href="/login" className="font-semibold text-indigo-400 hover:text-indigo-300">
-                  Log in
-                </Link>
-              </p>
+              <div className="mt-6">
+                <SignupForm />
+              </div>
             </div>
 
-            <p className="mt-4 text-center text-[11px] text-slate-600">
-              Dengan daftar, kamu setuju{" "}
-              <Link href="/terms" className="underline hover:text-slate-400">Terms</Link>
-              {" "}&{" "}
-              <Link href="/privacy" className="underline hover:text-slate-400">Privacy</Link>.
+            <p className="mt-5 text-[12px] leading-relaxed text-ink-3">
+              Dengan mendaftar, kamu menyetujui{" "}
+              <Link href="/terms" className="link-rule">
+                syarat penggunaan
+              </Link>{" "}
+              dan{" "}
+              <Link href="/privacy" className="link-rule">
+                kebijakan privasi
+              </Link>
+              .
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

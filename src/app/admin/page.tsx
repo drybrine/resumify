@@ -41,6 +41,7 @@ export default async function AdminPage() {
     listPendingPayments(),
     getProPricing(),
   ]);
+
   const users = profiles || [];
   const proCount = users.filter((u) => u.plan === "pro").length;
   const pendingPays = payments.filter((p) => p.status === "pending");
@@ -48,195 +49,212 @@ export default async function AdminPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-6xl flex-1 px-4 py-10">
-        <h1 className="text-2xl font-semibold text-white">Admin</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          User, plan, konfirmasi QRIS.
-        </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat label="Users" value={String(users.length)} />
-          <Stat label="Pro" value={String(proCount)} />
-          <Stat label="Total CVs" value={String(cvCount || 0)} />
-          <Stat label="QRIS pending" value={String(pendingPays.length)} />
-        </div>
+      <main id="main" className="flex-1">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+          <p className="micro">Admin</p>
+          <h1 className="mt-3 text-[32px] leading-tight text-ink">Operasional</h1>
+          <p className="mt-2 text-[14px] text-ink-2">
+            Pengguna, harga paket, dan konfirmasi pembayaran QRIS.
+          </p>
 
-        <h2 className="mt-10 text-lg font-semibold text-white">Harga Plan</h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Atur harga &amp; durasi paket Pro. Tampil di /pricing &amp; invoice
-          QRIS.
-        </p>
-        <PlanSettingsForm
-          priceIdr={proPricing.priceIdr}
-          periodDays={proPricing.periodDays}
-        />
+          {/* Monitor strip — the numbers actually drive what you do next */}
+          <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-rule py-6 lg:grid-cols-4">
+            {[
+              { label: "Pengguna", value: String(users.length), note: "100 terbaru" },
+              { label: "Pro aktif", value: String(proCount), note: "dari daftar di atas" },
+              { label: "Total CV", value: String(cvCount || 0), note: "seluruh akun" },
+              {
+                label: "QRIS menunggu",
+                value: String(pendingPays.length),
+                note: "perlu konfirmasi",
+              },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <dt className="micro">{stat.label}</dt>
+                <dd className="font-display num mt-2 text-[30px] leading-none text-ink">
+                  {stat.value}
+                </dd>
+                <p className="mt-1.5 text-[12px] text-ink-3">{stat.note}</p>
+              </div>
+            ))}
+          </dl>
 
-        <h2 className="mt-10 text-lg font-semibold text-white">
-          Pembayaran QRIS
-        </h2>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-900/80 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">User</th>
-                <th className="px-4 py-3 font-medium">Nominal</th>
-                <th className="px-4 py-3 font-medium">Ref</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Waktu</th>
-                <th className="px-4 py-3 font-medium">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-4 py-8 text-center text-slate-500"
-                  >
-                    Belum ada pembayaran
-                  </td>
-                </tr>
-              )}
-              {payments.map((p) => {
-                const u = Array.isArray(p.user) ? p.user[0] : p.user;
-                return (
-                  <tr
-                    key={p.id}
-                    className="border-b border-slate-800/80 hover:bg-slate-900/40"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-100">
-                        {(u as { full_name?: string } | null)?.full_name || "—"}
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        {(u as { email?: string } | null)?.email}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-indigo-300">
-                      {formatIdr(p.amount_idr)}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-400">
-                      {p.reference}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        tone={
-                          p.status === "paid"
-                            ? "ok"
-                            : p.status === "pending"
-                              ? "warn"
-                              : "default"
-                        }
-                      >
-                        {p.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-slate-400">
-                      {formatDate(p.created_at)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {p.status === "pending" && (
-                        <form
-                          action={async () => {
-                            "use server";
-                            await confirmPaymentAction(p.id);
-                          }}
-                        >
-                          <Button type="submit" size="sm">
-                            Konfirmasi
-                          </Button>
-                        </form>
-                      )}
-                    </td>
+          <section className="mt-14">
+            <h2 className="font-display text-[24px] text-ink">Harga paket Pro</h2>
+            <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
+              Nilai ini dipakai di halaman harga dan saat membuat invoice QRIS
+              baru. Invoice yang sudah terbit tetap memakai nominal lama.
+            </p>
+            <div className="mt-5">
+              <PlanSettingsForm
+                priceIdr={proPricing.priceIdr}
+                periodDays={proPricing.periodDays}
+              />
+            </div>
+          </section>
+
+          <section className="mt-14">
+            <div className="flex items-baseline justify-between gap-4 border-b border-rule-strong pb-2">
+              <h2 className="font-display text-[24px] text-ink">Pembayaran QRIS</h2>
+              <span className="micro num">{payments.length} baris</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] border-collapse text-left">
+                <thead>
+                  <tr>
+                    {["Pengguna", "Nominal", "Referensi", "Status", "Waktu", "Aksi"].map(
+                      (h) => (
+                        <th key={h} scope="col" className="border-b border-rule py-3 pr-4">
+                          <span className="micro">{h}</span>
+                        </th>
+                      )
+                    )}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {payments.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="border-b border-rule py-8 text-[14px] text-ink-3"
+                      >
+                        Belum ada pembayaran tercatat.
+                      </td>
+                    </tr>
+                  )}
 
-        <h2 className="mt-10 text-lg font-semibold text-white">Users</h2>
-        <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-900/80 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">User</th>
-                <th className="px-4 py-3 font-medium">Plan</th>
-                <th className="px-4 py-3 font-medium">Joined</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr
-                  key={u.id}
-                  className="border-b border-slate-800/80 hover:bg-slate-900/40"
-                >
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-slate-100">
-                      {u.full_name || "—"}
-                      {u.is_admin && (
-                        <Badge tone="pro" className="ml-2">
-                          admin
+                  {payments.map((p) => {
+                    const u = Array.isArray(p.user) ? p.user[0] : p.user;
+                    return (
+                      <tr key={p.id} className="transition-colors hover:bg-sheet">
+                        <td className="border-b border-rule py-3 pr-4">
+                          <div className="text-[14px] text-ink">
+                            {(u as { full_name?: string } | null)?.full_name || "—"}
+                          </div>
+                          <div className="text-[12px] text-ink-3">
+                            {(u as { email?: string } | null)?.email}
+                          </div>
+                        </td>
+                        <td className="num border-b border-rule py-3 pr-4 text-[14px] text-ink">
+                          {formatIdr(p.amount_idr)}
+                        </td>
+                        <td className="num border-b border-rule py-3 pr-4 text-[12px] text-ink-3">
+                          {p.reference}
+                        </td>
+                        <td className="border-b border-rule py-3 pr-4">
+                          <Badge
+                            tone={
+                              p.status === "paid"
+                                ? "ok"
+                                : p.status === "pending"
+                                  ? "warn"
+                                  : "default"
+                            }
+                          >
+                            {p.status}
+                          </Badge>
+                        </td>
+                        <td className="num border-b border-rule py-3 pr-4 text-[13px] text-ink-2">
+                          {formatDate(p.created_at)}
+                        </td>
+                        <td className="border-b border-rule py-3 pr-4">
+                          {p.status === "pending" && (
+                            <form
+                              action={async () => {
+                                "use server";
+                                await confirmPaymentAction(p.id);
+                              }}
+                            >
+                              <Button type="submit" size="sm">
+                                Konfirmasi
+                              </Button>
+                            </form>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="mt-14">
+            <div className="flex items-baseline justify-between gap-4 border-b border-rule-strong pb-2">
+              <h2 className="font-display text-[24px] text-ink">Pengguna</h2>
+              <span className="micro num">{users.length} akun terakhir</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[680px] border-collapse text-left">
+                <thead>
+                  <tr>
+                    {["Akun", "Paket", "Terdaftar", "Ubah paket"].map((h) => (
+                      <th key={h} scope="col" className="border-b border-rule py-3 pr-4">
+                        <span className="micro">{h}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u.id} className="transition-colors hover:bg-sheet">
+                      <td className="border-b border-rule py-3 pr-4">
+                        <div className="flex items-center gap-2 text-[14px] text-ink">
+                          {u.full_name || "—"}
+                          {u.is_admin && <Badge tone="pro">admin</Badge>}
+                        </div>
+                        <div className="text-[12px] text-ink-3">{u.email}</div>
+                      </td>
+                      <td className="border-b border-rule py-3 pr-4">
+                        <Badge tone={u.plan === "pro" ? "pro" : "default"}>
+                          {u.plan}
                         </Badge>
-                      )}
-                    </div>
-                    <div className="text-xs text-slate-500">{u.email}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge tone={u.plan === "pro" ? "pro" : "default"}>
-                      {u.plan}
-                    </Badge>
-                    {u.plan_expires_at && (
-                      <div className="mt-0.5 text-[11px] text-slate-500">
-                        s/d {formatDate(u.plan_expires_at)}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-slate-400">
-                    {formatDate(u.created_at)}
-                  </td>
-                  <td className="px-4 py-3">
-                    {!u.is_admin && (
-                      <div className="flex gap-1">
-                        <form
-                          action={async () => {
-                            "use server";
-                            await setUserPlan(u.id, "pro");
-                          }}
-                        >
-                          <Button type="submit" size="sm" variant="secondary">
-                            Pro
-                          </Button>
-                        </form>
-                        <form
-                          action={async () => {
-                            "use server";
-                            await setUserPlan(u.id, "free");
-                          }}
-                        >
-                          <Button type="submit" size="sm" variant="ghost">
-                            Free
-                          </Button>
-                        </form>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {u.plan_expires_at && (
+                          <div className="num mt-1 text-[11px] text-ink-3">
+                            sampai {formatDate(u.plan_expires_at)}
+                          </div>
+                        )}
+                      </td>
+                      <td className="num border-b border-rule py-3 pr-4 text-[13px] text-ink-2">
+                        {formatDate(u.created_at)}
+                      </td>
+                      <td className="border-b border-rule py-3 pr-4">
+                        {!u.is_admin && (
+                          <div className="flex gap-2">
+                            <form
+                              action={async () => {
+                                "use server";
+                                await setUserPlan(u.id, "pro");
+                              }}
+                            >
+                              <Button type="submit" size="sm" variant="secondary">
+                                Jadikan Pro
+                              </Button>
+                            </form>
+                            <form
+                              action={async () => {
+                                "use server";
+                                await setUserPlan(u.id, "free");
+                              }}
+                            >
+                              <Button type="submit" size="sm" variant="ghost">
+                                Turunkan
+                              </Button>
+                            </form>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </main>
     </>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
-    </div>
   );
 }

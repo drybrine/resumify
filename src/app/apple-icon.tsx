@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-/** Apple touch icon — matches LogoMark */
+/** Apple touch icon — same mark, full bleed (iOS applies its own mask). */
 export default function AppleIcon() {
   return new ImageResponse(
     (
@@ -12,37 +12,18 @@ export default function AppleIcon() {
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           justifyContent: "center",
-          borderRadius: 40,
-          background:
-            "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%)",
-          position: "relative",
+          background: "#191712",
+          padding: "34px 30px",
+          gap: 14,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            color: "#fff",
-            fontSize: 100,
-            fontWeight: 800,
-            fontFamily: "system-ui, sans-serif",
-            lineHeight: 1,
-          }}
-        >
-          R
-        </div>
-        <div
-          style={{
-            position: "absolute",
-            top: 28,
-            right: 28,
-            width: 36,
-            height: 36,
-            borderRadius: 999,
-            background: "#10B981",
-          }}
-        />
+        <div style={{ width: "100%", height: 14, background: "#B4311C" }} />
+        <div style={{ width: "100%", height: 8, background: "#F4F1E9" }} />
+        <div style={{ width: "100%", height: 8, background: "#F4F1E9", opacity: 0.7 }} />
+        <div style={{ width: "62%", height: 8, background: "#F4F1E9", opacity: 0.7 }} />
+        <div style={{ width: "100%", height: 8, background: "#F4F1E9", opacity: 0.45 }} />
       </div>
     ),
     { ...size }

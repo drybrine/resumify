@@ -1,5 +1,11 @@
 import { cn } from "@/lib/utils";
 
+type Tone = "default" | "pro" | "ok" | "warn" | "danger";
+
+/**
+ * Backwards-compatible status badge, restyled to the print system:
+ * a squared hairline tag in micro caps instead of a glowing pill.
+ */
 export function Badge({
   children,
   className,
@@ -8,30 +14,29 @@ export function Badge({
 }: {
   children: React.ReactNode;
   className?: string;
-  tone?: "default" | "pro" | "ok" | "warn";
+  tone?: Tone;
   variant?: "default" | "secondary" | "outline" | "destructive";
 }) {
-  const tones = {
-    default: "bg-slate-800 text-slate-300 border-slate-700",
-    pro: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-    ok: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-    warn: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  const tones: Record<Tone, string> = {
+    default: "border-rule-strong text-ink-3",
+    pro: "border-accent text-accent",
+    ok: "border-ok text-ok",
+    warn: "border-warn text-warn",
+    danger: "border-danger text-danger",
   };
 
-  const variants = {
-    default: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-    secondary: "bg-white/10 text-slate-300 border-transparent",
-    outline: "border-slate-700 bg-white/5 text-slate-300",
-    destructive: "bg-red-500/15 text-red-300 border-red-500/30",
+  const variants: Record<string, string> = {
+    default: tones.default,
+    secondary: "border-rule text-ink-3",
+    outline: "border-rule-strong text-ink-2",
+    destructive: tones.danger,
   };
-
-  const activeStyle = variant ? variants[variant] : tones[tone];
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        activeStyle,
+        "micro inline-flex items-center rounded-print border px-1.5 py-0.5 text-[10px]",
+        variant ? variants[variant] : tones[tone],
         className
       )}
     >

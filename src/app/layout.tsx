@@ -1,24 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Newsreader, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const display = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Resumify — AI & ATS Resume Builder SaaS",
+    default: "Resumify — CV ATS-friendly, bayar pakai QRIS",
     template: "%s · Resumify",
   },
   description:
-    "Buat CV ATS-friendly: live preview, 12+ template profesional, cloud save, export PDF, share link. Bayar Pro via QRIS.",
+    "Buat CV ATS-friendly dengan editor pratinjau langsung, 12 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro Rp 49.000 lewat QRIS.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
@@ -39,10 +44,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="id"
+      className={`${display.variable} ${sans.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+      <body className="flex min-h-full flex-col bg-paper text-ink">
         {children}
       </body>
     </html>

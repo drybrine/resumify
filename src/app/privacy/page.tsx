@@ -1,48 +1,72 @@
-import { SiteHeader } from "@/components/site-header";
+import { LegalPage } from "@/components/legal-page";
 
-export const metadata = { title: "Privacy Policy — CV Builder" };
+export const metadata = { title: "Kebijakan privasi" };
 
 export default function PrivacyPage() {
   return (
-    <>
-      <SiteHeader />
-      <main className="mesh-gradient-bg flex-1 min-h-[calc(100vh-4rem)] py-16 px-4 sm:px-6">
-        <div className="mx-auto max-w-4xl glass-card rounded-3xl p-8 sm:p-12 border border-white/10 space-y-6 text-slate-300 text-sm leading-relaxed">
-          <h1 className="text-3xl font-extrabold text-white text-gradient">Kebijakan Privasi (Privacy Policy)</h1>
-          <p className="text-xs text-slate-400">Terakhir diperbarui: {new Date().toLocaleDateString("id-ID")}</p>
+    <LegalPage
+      eyebrow="Legal"
+      title="Kebijakan privasi"
+      updated={new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })}
+    >
+      <section>
+        <h2>1. Data yang dikumpulkan</h2>
+        <p>
+          Saat mendaftar, kami menyimpan email dan nama yang kamu masukkan. Saat
+          mengisi editor, kami menyimpan isi CV-mu: identitas, ringkasan,
+          pendidikan, pengalaman, proyek, publikasi, keahlian, dan bahasa.
+        </p>
+        <p>
+          Untuk pembayaran Pro, kami menyimpan nominal, kode referensi, status,
+          dan waktu transaksi QRIS. Kami tidak menyimpan nomor kartu, PIN, atau
+          kredensial m-banking/e-wallet-mu.
+        </p>
+      </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-bold text-white">1. Informasi yang Kami Kumpulkan</h2>
-            <p>
-              Kami mengumpulkan informasi yang Anda berikan secara langsung saat mendaftar akun CV Builder, termasuk alamat email, nama lengkap, dan data resume/CV (riwayat pendidikan, pengalaman kerja, keahlian) yang Anda masukkan ke dalam sistem editor.
-            </p>
-          </section>
+      <section>
+        <h2>2. Cara data dipakai</h2>
+        <ul>
+          <li>Menampilkan dan menyimpan CV-mu agar bisa dilanjutkan kapan saja.</li>
+          <li>Merender PDF yang kamu unduh.</li>
+          <li>Memproses dan memverifikasi pembayaran paket Pro.</li>
+          <li>
+            Menampilkan CV-mu ke publik — hanya jika kamu sendiri mengaktifkan
+            link share.
+          </li>
+        </ul>
+      </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-bold text-white">2. Penggunaan Informasi</h2>
-            <p>Informasi yang dikumpulkan digunakan semata-mata untuk:</p>
-            <ul className="list-disc ml-5 space-y-1">
-              <li>Menyediakan layanan pembuat CV dan ekspor PDF.</li>
-              <li>Menyimpan draf CV Anda di cloud agar dapat diakses kembali.</li>
-              <li>Memproses transaksi pembayaran paket Pro melalui QRIS.</li>
-            </ul>
-          </section>
+      <section>
+        <h2>3. Penyimpanan dan keamanan</h2>
+        <p>
+          Data disimpan di Supabase (Postgres) dengan Row Level Security: setiap
+          baris CV terikat pada akun pembuatnya, sehingga akun lain tidak bisa
+          membacanya lewat API. Sesi login dikelola lewat cookie yang hanya bisa
+          dibaca di sisi server.
+        </p>
+      </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-bold text-white">3. Keamanan Data</h2>
-            <p>
-              Data Anda disimpan dengan aman menggunakan infrastruktur Supabase dengan enkripsi standar industri dan aturan Row Level Security (RLS) yang ketat. Kami tidak pernah menjual data pribadi Anda kepada pihak ketiga mana pun.
-            </p>
-          </section>
+      <section>
+        <h2>4. Yang tidak kami lakukan</h2>
+        <p>
+          Kami tidak menjual data pribadi, tidak memakai isi CV untuk melatih
+          model, dan tidak mengirim email promosi tanpa persetujuanmu.
+        </p>
+      </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-bold text-white">4. Hak Pengguna</h2>
-            <p>
-              Anda berhak memperbarui, mengunduh, atau menghapus seluruh data CV dan profil akun Anda kapan saja melalui dashboard aplikasi CV Builder.
-            </p>
-          </section>
-        </div>
-      </main>
-    </>
+      <section>
+        <h2>5. Hak kamu</h2>
+        <p>
+          Kamu bisa memperbarui CV kapan saja dari dasbor, mematikan link publik
+          dari editor, dan menghapus CV satu per satu. Untuk penghapusan akun
+          beserta seluruh datanya, hubungi admin lewat kontak yang tertera di
+          halaman ini.
+        </p>
+      </section>
+    </LegalPage>
   );
 }

@@ -1,100 +1,60 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
-import { HeroInteractiveDemo } from "@/components/hero-interactive-demo";
-import {
-  Check,
-  FileText,
-  Cloud,
-  Share2,
-  Palette,
-  Download,
-  Shield,
-  Sparkles,
-  ArrowRight,
-  Zap,
-  MousePointerClick,
-  LayoutTemplate,
-  FileDown,
-  ChevronDown,
-} from "lucide-react";
+import { HeroShowcase, TemplateGallery } from "@/components/template-showcase";
 
-const features = [
-  {
-    icon: FileText,
-    title: "ATS-friendly templates",
-    desc: "Single-column layouts recruiters & parsers love — Jake, Harvard, Corporate, Tech, and more.",
-    badge: "Pass ATS",
-  },
-  {
-    icon: Palette,
-    title: "Live split editor",
-    desc: "Edit left, see right. Every keystroke updates the preview instantly — no refresh, no lag.",
-    badge: "Realtime",
-  },
-  {
-    icon: Download,
-    title: "Print-ready PDF",
-    desc: "Server-side Chromium export for crisp, consistent PDFs — not browser print hacks.",
-    badge: "HD Export",
-  },
-  {
-    icon: Share2,
-    title: "Shareable link",
-    desc: "One-click public URL for recruiters. Perfect for email applications (Pro).",
-    badge: "Pro",
-  },
-  {
-    icon: Cloud,
-    title: "Cloud autosave",
-    desc: "Drafts sync to the cloud every change. Switch devices without losing work.",
-    badge: "Safe",
-  },
-  {
-    icon: Shield,
-    title: "Private by design",
-    desc: "Row-level security on every CV. Your data stays yours — not sold, not scraped.",
-    badge: "Secure",
-  },
+const SPECS = [
+  { k: "Template", v: "12 layout, 2 bisa dipakai di paket gratis" },
+  { k: "Ekspor", v: "PDF Letter & A4, dirender di server" },
+  { k: "Simpan", v: "Cloud otomatis tiap perubahan" },
+  { k: "Bayar", v: "QRIS sekali bayar, tanpa auto-renew" },
 ];
 
-const steps = [
+const STEPS = [
   {
     n: "01",
-    icon: MousePointerClick,
-    title: "Sign up free",
-    desc: "Google or email. No credit card. Ready in under a minute.",
+    title: "Daftar, lalu buat CV kosong",
+    body: "Email atau Google. Tidak ada wizard bertele-tele — langsung masuk ke editor dengan form kosong siap diisi.",
   },
   {
     n: "02",
-    icon: LayoutTemplate,
-    title: "Pick a template",
-    desc: "12 professional layouts. Switch anytime without losing content.",
+    title: "Isi di kiri, lihat kertasnya di kanan",
+    body: "Pratinjau memakai mesin render yang sama dengan PDF, jadi yang kamu lihat di layar persis yang keluar saat diunduh.",
   },
   {
     n: "03",
-    icon: FileDown,
-    title: "Fill & export PDF",
-    desc: "Live preview as you type. Download a recruiter-ready PDF.",
+    title: "Unduh PDF, atau bagikan link",
+    body: "PDF dibuat server-side sehingga jarak, font, dan margin konsisten di setiap perangkat. Pengguna Pro bisa mengaktifkan link publik untuk recruiter.",
   },
 ];
 
-const faqs = [
+const ATS_POINTS = [
+  "Satu kolom, dibaca dari atas ke bawah — urutan teks tidak tertukar.",
+  "Heading standar (Experience, Education, Skills) yang dikenali parser.",
+  "Teks bisa diseleksi dan disalin; tidak ada teks yang jadi gambar.",
+];
+
+const FAQS = [
   {
-    q: "Apakah CV-nya lolos ATS?",
-    a: "Ya. Template Resumify pakai struktur single-column, heading jelas, dan teks selectable — format yang ATS & recruiter suka. Hindari layout multi-kolom berisiko parse error.",
+    q: "Benarkah CV dari sini lolos ATS?",
+    a: "Template kategori ATS memakai satu kolom, heading standar, dan teks asli — struktur yang paling aman untuk parser. Yang menentukan hasil akhir tetap isi CV-mu: kata kunci lowongan, angka pencapaian, dan penulisan yang jelas.",
   },
   {
-    q: "Gratis sampai mana?",
-    a: "Paket Free: 1 CV, template Jake + Minimal, export PDF, simpan cloud. Pro buka 50 CV, 12 template, dan link share publik.",
+    q: "Gratisnya sampai mana?",
+    a: "Paket gratis: 1 CV, template Jake dan Minimal, ekspor PDF, dan penyimpanan cloud. Pro membuka 50 CV, 12 template, dan link share publik.",
   },
   {
-    q: "Bagaimana bayar Pro?",
-    a: "QRIS dinamis (GoPay, OVO, DANA, m-banking, dll). Transfer nominal unik, konfirmasi cepat, Pro aktif 30 hari.",
+    q: "Bagaimana cara bayar Pro?",
+    a: "QRIS dinamis: klik bayar, nominal unik muncul (Rp 49.000 + kode), lalu scan dari GoPay, OVO, DANA, ShopeePay, atau m-banking. Setelah terkonfirmasi, Pro aktif 30 hari. Tidak ada penagihan otomatis.",
   },
   {
-    q: "Data saya aman?",
-    a: "Autentikasi Supabase + Row Level Security. Hanya kamu yang akses CV-mu. Public share hanya jika kamu aktifkan sendiri.",
+    q: "Data CV saya aman?",
+    a: "CV tersimpan di Supabase dengan Row Level Security — hanya akunmu yang bisa membacanya. Link publik hanya aktif kalau kamu menyalakannya sendiri, dan bisa dimatikan kapan saja.",
+  },
+  {
+    q: "Sudah mengisi data, bisa ganti template?",
+    a: "Bisa, kapan saja. Isi CV tetap; hanya layout dan tipografinya yang berubah. Template Pro terkunci sampai kamu upgrade, tapi data tetap utuh.",
   },
 ];
 
@@ -102,229 +62,262 @@ export default function HomePage() {
   return (
     <>
       <SiteHeader />
-      <main className="flex-1 overflow-hidden mesh-gradient-bg">
-        {/* Hero */}
-        <section className="relative pt-16 pb-20 sm:pt-24 sm:pb-28">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center relative z-10">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 backdrop-blur-md">
-              <Shield className="h-3.5 w-3.5" />
-              <span>ATS-optimized · Trusted by job seekers</span>
-            </div>
 
-            <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-[4.25rem] leading-[1.08] text-white">
-              CV profesional yang{" "}
-              <span className="text-gradient-purple">lolos ATS</span>
-              <br className="hidden sm:block" /> & siap dilamar hari ini
-            </h1>
+      <main id="main" className="flex-1">
+        {/* Hero — asymmetric: argument on the left, the actual product on the right */}
+        <section className="border-b border-rule">
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+            <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-16">
+              <div className="lg:pt-2">
+                <p className="micro">CV · ATS · Indonesia</p>
 
-            <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg text-slate-400 leading-relaxed">
-              Live preview, 12 template, autosave cloud, export PDF instan.
-              Mulai gratis — upgrade Pro lewat QRIS kapan saja.
-            </p>
+                <h1 className="mt-5 text-[38px] leading-[1.05] tracking-[-0.02em] text-ink sm:text-[52px]">
+                  CV rapi satu halaman, siap dikirim hari ini.
+                </h1>
 
-            <div className="mt-9 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3">
-              <Link href="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto px-8 h-12 shadow-indigo-500/30">
-                  Buat CV gratis
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/pricing" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto px-8 h-12">
-                  Lihat harga Pro
-                </Button>
-              </Link>
-            </div>
+                <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2">
+                  Isi di kiri, kertasnya tampil di kanan — dengan tipografi yang
+                  sama persis seperti PDF-nya. Ada 12 template siap pakai, isi
+                  tersimpan otomatis, dan PDF-nya dirender di server.
+                </p>
 
-            <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-400">
-              {["Tanpa kartu kredit", "1 CV gratis", "Export PDF"].map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <Check className="h-4 w-4 text-emerald-400 shrink-0" />
-                  {t}
-                </li>
-              ))}
-            </ul>
-
-            <HeroInteractiveDemo />
-          </div>
-        </section>
-
-        {/* Social proof strip — honest, no fake metrics */}
-        <section className="border-y border-white/5 bg-slate-950/70 py-8">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-              {[
-                { k: "12+", v: "Template profesional" },
-                { k: "ATS", v: "Layout parser-friendly" },
-                { k: "PDF", v: "Export server-side" },
-                { k: "QRIS", v: "Bayar Pro lokal" },
-              ].map((s) => (
-                <div key={s.v}>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{s.k}</p>
-                  <p className="mt-1 text-xs sm:text-sm text-slate-500">{s.v}</p>
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <Link href="/signup">
+                    <Button size="lg">Bikin CV gratis →</Button>
+                  </Link>
+                  <Link href="#template">
+                    <Button size="lg" variant="secondary">
+                      Lihat 12 template
+                    </Button>
+                  </Link>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* How it works */}
-        <section className="py-20 sm:py-24 border-b border-white/5">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-3">Cara kerja</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Dari kosong ke PDF dalam 3 langkah
-              </h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {steps.map(({ n, icon: Icon, title, desc }) => (
-                <div
-                  key={n}
-                  className="glass-card relative rounded-2xl p-6 sm:p-7 border border-white/10"
-                >
-                  <span className="text-[11px] font-mono font-bold text-indigo-400/80">{n}</span>
-                  <div className="mt-3 mb-4 h-11 w-11 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-300">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white">{title}</h3>
-                  <p className="mt-2 text-sm text-slate-400 leading-relaxed">{desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 text-center">
-              <Link href="/signup">
-                <Button size="lg" className="px-8">
-                  Mulai langkah 1
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section className="py-20 sm:py-28 bg-slate-950/50">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-3">Fitur</p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                Semua yang dibutuhkan job seeker modern
-              </h2>
-              <p className="mt-3 text-slate-400 text-base">
-                Fokus ke hasil lamar kerja — bukan fitur yang bikin bingung.
-              </p>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map(({ icon: Icon, title, desc, badge }) => (
-                <div
-                  key={title}
-                  className="glass-card rounded-2xl p-6 flex flex-col border border-white/8 group"
-                >
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-300 group-hover:scale-105 transition-transform">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <span className="text-[10px] font-bold tracking-wider text-indigo-300/90 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase">
-                      {badge}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-100">{title}</h3>
-                  <p className="mt-2 text-sm text-slate-400 leading-relaxed flex-1">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Trust / ATS callout */}
-        <section className="py-16 border-y border-white/5">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6">
-            <div className="glass-card rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-8 sm:p-10 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <div className="h-14 w-14 shrink-0 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                <Sparkles className="h-7 w-7" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white">
-                  Dirancang lolos sistem ATS
-                </h2>
-                <p className="mt-2 text-sm sm:text-base text-slate-400 leading-relaxed">
-                  Banyak CV indah gagal di parsing otomatis. Resumify pakai hierarki heading jelas,
-                  bullet bersih, dan font standar — supaya isimu terbaca manusia <em>dan</em> mesin.
+                <p className="mt-6 max-w-xl text-[12px] leading-relaxed text-ink-3">
+                  Gratis untuk 1 CV · tanpa kartu kredit · Pro Rp 49.000 sekali
+                  bayar lewat QRIS, tanpa langganan otomatis.
                 </p>
               </div>
-              <Link href="/signup" className="shrink-0 w-full sm:w-auto">
-                <Button className="w-full sm:w-auto">Coba template ATS</Button>
-              </Link>
+
+              <div className="min-w-0 lg:max-w-[490px] lg:justify-self-end">
+                <HeroShowcase />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Spec strip — plain facts, not monument numbers */}
+        <section className="border-b border-rule bg-sheet">
+          <dl className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-6 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+            {SPECS.map((s) => (
+              <div key={s.k}>
+                <dt className="micro">{s.k}</dt>
+                <dd className="mt-1.5 text-[13px] leading-relaxed text-ink-2">{s.v}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        {/* How it works — numbered editorial rows, hairline separated */}
+        <section id="cara-kerja" className="border-b border-rule">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
+              <div>
+                <p className="micro">Cara kerja</p>
+                <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
+                  Tiga langkah, tanpa bagian yang tidak perlu.
+                </h2>
+              </div>
+
+              <ol className="divide-y divide-rule border-t border-rule">
+                {STEPS.map((step) => (
+                  <li key={step.n} className="grid gap-3 py-6 sm:grid-cols-[64px_1fr] sm:gap-6">
+                    <span className="micro num pt-1 text-[12px]">{step.n}</span>
+                    <div>
+                      <h3 className="font-display text-[20px] text-ink">{step.title}</h3>
+                      <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
+                        {step.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* ATS explainer — honest, two columns */}
+        <section id="ats" className="border-b border-rule bg-sheet">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
+              <div>
+                <p className="micro">Soal ATS</p>
+                <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
+                  Kenapa layout satu kolom lebih aman.
+                </h2>
+              </div>
+
+              <div>
+                <p className="max-w-2xl text-[15px] leading-relaxed text-ink-2">
+                  ATS membaca CV sebagai urutan teks, bukan sebagai tampilan.
+                  Begitu ada dua kolom, tabel, atau teks di dalam gambar, urutan
+                  bacanya bisa kacau: pengalaman kerja terbaca sebelum nama, atau
+                  judul terbaca menyatu dengan isi kolom sebelahnya.
+                </p>
+                <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-2">
+                  Template kategori ATS di Resumify menghindari semua itu, dan
+                  template kreatif tetap tersedia untuk kiriman langsung ke
+                  manusia.
+                </p>
+
+                <ul className="mt-8 space-y-4">
+                  {ATS_POINTS.map((point) => (
+                    <li
+                      key={point}
+                      className="flex gap-3 border-t border-rule pt-4 text-[14px] leading-relaxed text-ink"
+                    >
+                      <span aria-hidden className="mt-2 h-px w-4 shrink-0 bg-accent" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Template gallery — real renders */}
+        <section id="template" className="border-b border-rule">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+            <div className="max-w-2xl">
+              <p className="micro">12 template</p>
+              <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
+                Semuanya ditampilkan apa adanya.
+              </h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-ink-2">
+                Ini hasil render asli dari setiap template — bukan gambar contoh.
+                Klik salah satu nama di bagian atas untuk mencobanya lebih besar.
+              </p>
+            </div>
+
+            <div className="mt-12">
+              <TemplateGallery />
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing summary */}
+        <section className="border-b border-rule bg-sheet">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
+              <div>
+                <p className="micro">Harga</p>
+                <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
+                  Gratis untuk mencoba. Pro saat lamaranmu banyak.
+                </h2>
+                <Link
+                  href="/pricing"
+                  className="link-rule mt-6 inline-block text-[14px] text-ink"
+                >
+                  Bandingkan lengkap di halaman harga
+                </Link>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="border-t-2 border-rule-strong pt-5">
+                  <p className="micro">Free</p>
+                  <p className="font-display mt-3 text-[32px] text-ink">Rp 0</p>
+                  <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
+                    <li>1 CV</li>
+                    <li>Template Jake &amp; Minimal</li>
+                    <li>Ekspor PDF</li>
+                    <li>Simpan cloud</li>
+                  </ul>
+                </div>
+
+                <div className="border-t-2 border-accent pt-5">
+                  <p className="micro text-accent">Pro · 30 hari</p>
+                  <p className="font-display num mt-3 text-[32px] text-ink">Rp 49.000</p>
+                  <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
+                    <li>50 CV</li>
+                    <li>12 template</li>
+                    <li>Link share publik</li>
+                    <li>Bayar sekali via QRIS</li>
+                  </ul>
+                  <Link href="/pricing" className="mt-5 inline-block">
+                    <Button variant="secondary" size="sm">
+                      Pilih Pro
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section className="py-20 sm:py-24">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-3">FAQ</p>
-              <h2 className="text-3xl font-extrabold text-white">Pertanyaan umum</h2>
-            </div>
-            <div className="space-y-3">
-              {faqs.map(({ q, a }) => (
-                <details
-                  key={q}
-                  className="group glass-card rounded-2xl border border-white/10 open:border-indigo-500/30 open:bg-indigo-500/5 transition-colors"
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 text-left text-sm sm:text-base font-semibold text-white marker:content-none">
-                    {q}
-                    <ChevronDown className="h-4 w-4 shrink-0 text-slate-500 transition group-open:rotate-180 group-open:text-indigo-400" />
-                  </summary>
-                  <p className="px-5 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-                    {a}
-                  </p>
-                </details>
-              ))}
+        <section id="faq" className="border-b border-rule">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
+              <div>
+                <p className="micro">Tanya jawab</p>
+                <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
+                  Yang biasanya ditanyakan.
+                </h2>
+              </div>
+
+              <div className="border-t border-rule">
+                {FAQS.map((item) => (
+                  <details key={item.q} className="group border-b border-rule">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[15px] text-ink marker:content-none">
+                      {item.q}
+                      <span
+                        aria-hidden
+                        className="text-ink-3 transition-transform group-open:rotate-45"
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <p className="max-w-2xl pb-6 text-[14px] leading-relaxed text-ink-2">
+                      {item.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="pb-20 sm:pb-28 px-4 sm:px-6">
-          <div className="mx-auto max-w-4xl relative rounded-3xl border border-indigo-500/30 bg-gradient-to-b from-indigo-950/70 to-slate-950 p-8 sm:p-14 text-center overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 -mt-16 -mr-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-            <h2 className="relative text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Siap kirim CV yang lebih meyakinkan?
-            </h2>
-            <p className="relative mt-3 text-slate-400 max-w-lg mx-auto text-sm sm:text-base">
-              Buat akun gratis, pilih template, export PDF. Upgrade Pro hanya jika butuh lebih.
-            </p>
-            <div className="relative mt-8 flex flex-col sm:flex-row justify-center gap-3">
+        {/* Closing poster — ink band */}
+        <section className="bg-ink text-sheet">
+          <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:py-20">
+            <div className="max-w-2xl">
+              <p className="micro text-rule-strong">Mulai sekarang</p>
+              <h2 className="mt-4 text-[32px] leading-[1.08] text-sheet sm:text-[44px]">
+                Mulai dari CV kosong, keluar dengan PDF yang layak dikirim.
+              </h2>
+              <p className="mt-4 text-[14px] leading-relaxed text-[color:var(--color-rule-strong)]">
+                Butuh sekitar sepuluh menit untuk CV pertamamu. Tidak ada
+                pertanyaan-pertanyaan yang harus dilewati dulu.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
               <Link href="/signup">
-                <Button size="lg" className="w-full sm:w-auto px-8 shadow-indigo-500/40">
-                  <Zap className="h-4 w-4" />
-                  Buat CV sekarang
+                <Button size="lg" variant="primary">
+                  Daftar &amp; bikin CV
                 </Button>
               </Link>
-              <Link href="/pricing">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto px-8">
-                  Bandingkan paket
-                </Button>
+              <Link
+                href="/pricing"
+                className="text-[14px] text-sheet underline decoration-[color:var(--color-rule-strong)] underline-offset-4 transition-colors hover:decoration-sheet"
+              >
+                Lihat harga Pro
               </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-white/5 py-10 bg-slate-950">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Resumify · CV builder untuk job seeker Indonesia
-          </p>
-          <div className="flex items-center gap-6 text-xs text-slate-400">
-            <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
-            <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
-            <Link href="/terms" className="hover:text-white transition">Terms</Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
