@@ -29,18 +29,32 @@ export default async function LoginPage({
 
       <main id="main" className="flex flex-1 items-start justify-center px-4 py-14 sm:py-20">
         <div className="w-full max-w-[420px]">
-          <p className="micro">Akun</p>
-          <h1 className="mt-4 text-[32px] leading-tight text-ink">Masuk</h1>
-          <p className="mt-3 text-[14px] leading-relaxed text-ink-2">
+          <p className="micro enter">Akun</p>
+          <h1
+            className="enter mt-4 text-[32px] leading-tight text-ink"
+            style={{ "--d": "70ms" } as React.CSSProperties}
+          >
+            Masuk
+          </h1>
+          <p
+            className="enter mt-3 text-[14px] leading-relaxed text-ink-2"
+            style={{ "--d": "140ms" } as React.CSSProperties}
+          >
             Lanjutkan mengisi CV dan unduh PDF-nya. Semua perubahan tersimpan
             otomatis setelah kamu masuk.
           </p>
 
-          <div className="mt-8 rounded-print border border-rule bg-sheet p-6 sm:p-7">
+          <div
+            className="enter-sheet mt-8 rounded-print border border-rule bg-sheet p-6 sm:p-7"
+            style={{ "--d": "200ms" } as React.CSSProperties}
+          >
             <LoginForm next={next || "/dashboard"} />
           </div>
 
-          <p className="mt-6 text-[13px] text-ink-3">
+          <p
+            className="enter mt-6 text-[13px] text-ink-3"
+            style={{ "--d": "280ms" } as React.CSSProperties}
+          >
             Dengan masuk, kamu menyetujui{" "}
             <Link href="/terms" className="link-rule">
               syarat penggunaan

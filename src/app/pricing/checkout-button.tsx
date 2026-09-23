@@ -121,7 +121,7 @@ export function CheckoutButton() {
             <img
               src={qr}
               alt="Kode QRIS untuk pembayaran Pro"
-              className="mx-auto mt-5 w-[220px] border border-rule bg-white p-2"
+              className="enter-stamp mx-auto mt-5 w-[220px] border border-rule bg-white p-2"
               width={220}
               height={220}
             />

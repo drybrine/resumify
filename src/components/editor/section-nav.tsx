@@ -67,7 +67,7 @@ export function SectionRail({
                 onClick={() => onChange(section.id)}
                 aria-current={isActive ? "true" : undefined}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-print border-l-2 px-2 py-2 text-left text-[13px] transition-colors",
+                  "flex w-full items-center gap-2.5 rounded-print border-l-2 px-2 py-2 text-left text-[13px] transition-[color,background-color,border-color] duration-200 ease-ink",
                   isActive
                     ? "border-accent bg-sheet text-ink"
                     : "border-transparent text-ink-2 hover:bg-sheet hover:text-ink"
@@ -112,7 +112,7 @@ export function SectionTabs({
                 onClick={() => onChange(section.id)}
                 aria-current={isActive ? "true" : undefined}
                 className={cn(
-                  "flex items-center gap-2 border-b-2 pb-0.5 text-[13px] transition-colors",
+                  "relative flex items-center gap-2 border-b-2 pb-0.5 text-[13px] transition-[color,border-color] duration-200 ease-ink",
                   isActive
                     ? "border-accent text-ink"
                     : "border-transparent text-ink-3"

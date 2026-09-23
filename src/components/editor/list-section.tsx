@@ -88,7 +88,11 @@ export function ListSection<T extends Record<string, any>>({
 
       <ul className="mt-4 space-y-4">
         {items.map((item, i) => (
-          <li key={i} className="rounded-print border border-rule bg-sheet p-4">
+          <li
+            key={i}
+            className="enter rounded-print border border-rule bg-sheet p-4"
+            style={{ "--rise": "8px" } as React.CSSProperties}
+          >
             <div className="flex items-center justify-between gap-3 border-b border-rule pb-2.5">
               <span className="micro num">
                 {title} {String(i + 1).padStart(2, "0")}

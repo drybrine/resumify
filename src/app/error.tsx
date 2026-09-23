@@ -18,11 +18,17 @@ export default function ErrorBoundary({
   return (
     <main className="flex flex-1 items-center px-4 py-20 sm:px-6">
       <div className="mx-auto w-full max-w-xl">
-        <p className="micro text-accent">Terjadi kesalahan</p>
-        <h1 className="mt-4 text-[32px] leading-tight text-ink">
+        <p className="micro enter text-accent">Terjadi kesalahan</p>
+        <h1
+          className="enter mt-4 text-[32px] leading-tight text-ink"
+          style={{ "--d": "70ms" } as React.CSSProperties}
+        >
           Halaman ini gagal dimuat.
         </h1>
-        <p className="mt-3 text-[14px] leading-relaxed text-ink-2">
+        <p
+          className="enter mt-3 text-[14px] leading-relaxed text-ink-2"
+          style={{ "--d": "140ms" } as React.CSSProperties}
+        >
           Perubahan yang sudah tersimpan tetap aman. Coba muat ulang halaman;
           kalau tetap gagal, buka dasbor lalu masuk ke CV-nya lagi.
         </p>

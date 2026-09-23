@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { PLANS, formatIdr } from "@/lib/plans";
 import { getProPricing } from "@/lib/plan-pricing";
+import { Reveal } from "@/components/reveal";
 import { CheckoutButton } from "./checkout-button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -93,11 +94,17 @@ export default async function PricingPage() {
       <main id="main" className="flex-1">
         <section className="border-b border-rule">
           <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:py-18">
-            <p className="micro">Harga</p>
-            <h1 className="mt-4 max-w-2xl text-[34px] leading-[1.08] text-ink sm:text-[44px]">
+            <p className="micro enter">Harga</p>
+            <h1
+              className="enter mt-4 max-w-2xl text-[34px] leading-[1.08] text-ink sm:text-[44px]"
+              style={{ "--d": "70ms" } as React.CSSProperties}
+            >
               Gratis untuk mencoba. Pro saat lamaranmu menumpuk.
             </h1>
-            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2">
+            <p
+              className="enter mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2"
+              style={{ "--d": "150ms" } as React.CSSProperties}
+            >
               Tidak ada langganan otomatis. Pro dibeli per 30 hari, dan setelah
               masa itu habis paketmu kembali ke Free tanpa penagihan lanjutan.
             </p>
@@ -134,8 +141,13 @@ export default async function PricingPage() {
                 </tr>
               </thead>
               <tbody>
-                {ROWS.map((row) => (
-                  <tr key={row.label}>
+                {ROWS.map((row, i) => (
+                  <Reveal
+                    key={row.label}
+                    as="tr"
+                    rise="6px"
+                    delay={Math.min(i, 5) * 70}
+                  >
                     <th
                       scope="row"
                       className="border-b border-rule py-4 text-[14px] font-normal text-ink"
@@ -148,7 +160,7 @@ export default async function PricingPage() {
                     <td className="border-b border-rule bg-accent-soft/45 px-5 py-4 text-[14px] text-ink">
                       {row.pro}
                     </td>
-                  </tr>
+                  </Reveal>
                 ))}
                 <tr>
                   <td className="py-6" />
@@ -162,7 +174,7 @@ export default async function PricingPage() {
 
             {/* Mobile: same rows, stacked */}
             <div className="space-y-10 md:hidden">
-              <div>
+              <Reveal>
                 <div className="flex items-baseline justify-between border-b border-rule-strong pb-3">
                   <span className="micro">Free</span>
                   <span className="font-display text-[26px] text-ink">
@@ -181,9 +193,9 @@ export default async function PricingPage() {
                   ))}
                 </dl>
                 <div className="mt-5">{freeCta}</div>
-              </div>
+              </Reveal>
 
-              <div className="border-t-2 border-accent pt-4">
+              <Reveal delay={90} className="border-t-2 border-accent pt-4">
                 <div className="flex items-baseline justify-between border-b border-rule-strong pb-3">
                   <span className="micro text-accent">Pro · 30 hari</span>
                   <span className="font-display num text-[26px] text-ink">
@@ -202,7 +214,7 @@ export default async function PricingPage() {
                   ))}
                 </dl>
                 <div className="mt-5">{proCta}</div>
-              </div>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -211,22 +223,25 @@ export default async function PricingPage() {
         <section className="border-b border-rule">
           <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="micro">Pembayaran</p>
                 <h2 className="mt-4 text-[28px] leading-tight text-ink">
                   Bayarnya lewat QRIS.
                 </h2>
-              </div>
+              </Reveal>
 
               <ol className="border-t border-rule">
                 {QRIS_STEPS.map((step, i) => (
-                  <li
+                  <Reveal
                     key={step}
+                    as="li"
+                    rise="8px"
+                    delay={i * 110}
                     className="grid grid-cols-[40px_1fr] gap-4 border-b border-rule py-5"
                   >
                     <span className="micro num pt-1">{`0${i + 1}`}</span>
                     <p className="text-[14px] leading-relaxed text-ink-2">{step}</p>
-                  </li>
+                  </Reveal>
                 ))}
               </ol>
             </div>

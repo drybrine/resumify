@@ -57,10 +57,12 @@ export default async function SharePage({
       </header>
 
       <main id="main" className="flex flex-1 justify-center px-3 py-8 sm:px-6 sm:py-12">
-        <article
-          className={`resume-preview template-${cv.template}`}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div className="enter-sheet">
+          <article
+            className={`resume-preview template-${cv.template}`}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
       </main>
 
       <footer className="border-t border-rule bg-paper px-4 py-5 text-center text-[12px] text-ink-3">

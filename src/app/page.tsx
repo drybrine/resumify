@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/reveal";
 import { HeroShowcase, TemplateGallery } from "@/components/template-showcase";
 
 const SPECS = [
@@ -58,30 +59,45 @@ const FAQS = [
   },
 ];
 
+/** Stagger offset for the CSS-driven `.enter-*` classes. */
+const at = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
+
 export default function HomePage() {
   return (
     <>
       <SiteHeader />
 
       <main id="main" className="flex-1">
-        {/* Hero — asymmetric: argument on the left, the actual product on the right */}
+        {/* Hero — asymmetric: argument on the left, the actual product on the right.
+            Above the fold, so the entrance is CSS-only and plays at first paint. */}
         <section className="border-b border-rule">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
             <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-16">
               <div className="lg:pt-2">
-                <p className="micro">CV · ATS · Indonesia</p>
+                <p className="micro enter" style={at(0)}>
+                  CV · ATS · Indonesia
+                </p>
 
-                <h1 className="mt-5 text-[38px] leading-[1.05] tracking-[-0.02em] text-ink sm:text-[52px]">
+                <h1
+                  className="enter mt-5 text-[38px] leading-[1.05] tracking-[-0.02em] text-ink sm:text-[52px]"
+                  style={at(70)}
+                >
                   CV rapi satu halaman, siap dikirim hari ini.
                 </h1>
 
-                <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2">
+                <p
+                  className="enter mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2"
+                  style={at(150)}
+                >
                   Isi di kiri, kertasnya tampil di kanan — dengan tipografi yang
                   sama persis seperti PDF-nya. Ada 12 template siap pakai, isi
                   tersimpan otomatis, dan PDF-nya dirender di server.
                 </p>
 
-                <div className="mt-8 flex flex-wrap items-center gap-3">
+                <div
+                  className="enter mt-8 flex flex-wrap items-center gap-3"
+                  style={at(220)}
+                >
                   <Link href="/signup">
                     <Button size="lg">Bikin CV gratis →</Button>
                   </Link>
@@ -92,14 +108,19 @@ export default function HomePage() {
                   </Link>
                 </div>
 
-                <p className="mt-6 max-w-xl text-[12px] leading-relaxed text-ink-3">
+                <p
+                  className="enter mt-6 max-w-xl text-[12px] leading-relaxed text-ink-3"
+                  style={at(290)}
+                >
                   Gratis untuk 1 CV · tanpa kartu kredit · Pro Rp 49.000 sekali
                   bayar lewat QRIS, tanpa langganan otomatis.
                 </p>
               </div>
 
               <div className="min-w-0 lg:max-w-[490px] lg:justify-self-end">
-                <HeroShowcase />
+                <div className="enter-sheet" style={at(160)}>
+                  <HeroShowcase />
+                </div>
               </div>
             </div>
           </div>
@@ -108,11 +129,13 @@ export default function HomePage() {
         {/* Spec strip — plain facts, not monument numbers */}
         <section className="border-b border-rule bg-sheet">
           <dl className="mx-auto grid max-w-6xl grid-cols-1 gap-x-10 gap-y-6 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-            {SPECS.map((s) => (
-              <div key={s.k}>
+            {SPECS.map((s, i) => (
+              <Reveal key={s.k} delay={i * 70} rise="8px">
                 <dt className="micro">{s.k}</dt>
-                <dd className="mt-1.5 text-[13px] leading-relaxed text-ink-2">{s.v}</dd>
-              </div>
+                <dd className="mt-1.5 text-[13px] leading-relaxed text-ink-2">
+                  {s.v}
+                </dd>
+              </Reveal>
             ))}
           </dl>
         </section>
@@ -121,24 +144,31 @@ export default function HomePage() {
         <section id="cara-kerja" className="border-b border-rule">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="micro">Cara kerja</p>
                 <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                   Tiga langkah, tanpa bagian yang tidak perlu.
                 </h2>
-              </div>
+              </Reveal>
 
               <ol className="divide-y divide-rule border-t border-rule">
-                {STEPS.map((step) => (
-                  <li key={step.n} className="grid gap-3 py-6 sm:grid-cols-[64px_1fr] sm:gap-6">
+                {STEPS.map((step, i) => (
+                  <Reveal
+                    key={step.n}
+                    as="li"
+                    delay={i * 110}
+                    className="grid gap-3 py-6 sm:grid-cols-[64px_1fr] sm:gap-6"
+                  >
                     <span className="micro num pt-1 text-[12px]">{step.n}</span>
                     <div>
-                      <h3 className="font-display text-[20px] text-ink">{step.title}</h3>
+                      <h3 className="font-display text-[20px] text-ink">
+                        {step.title}
+                      </h3>
                       <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-2">
                         {step.body}
                       </p>
                     </div>
-                  </li>
+                  </Reveal>
                 ))}
               </ol>
             </div>
@@ -149,35 +179,45 @@ export default function HomePage() {
         <section id="ats" className="border-b border-rule bg-sheet">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="micro">Soal ATS</p>
                 <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                   Kenapa layout satu kolom lebih aman.
                 </h2>
-              </div>
+              </Reveal>
 
               <div>
-                <p className="max-w-2xl text-[15px] leading-relaxed text-ink-2">
-                  ATS membaca CV sebagai urutan teks, bukan sebagai tampilan.
-                  Begitu ada dua kolom, tabel, atau teks di dalam gambar, urutan
-                  bacanya bisa kacau: pengalaman kerja terbaca sebelum nama, atau
-                  judul terbaca menyatu dengan isi kolom sebelahnya.
-                </p>
-                <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-2">
-                  Template kategori ATS di Resumify menghindari semua itu, dan
-                  template kreatif tetap tersedia untuk kiriman langsung ke
-                  manusia.
-                </p>
+                <Reveal delay={80}>
+                  <p className="max-w-2xl text-[15px] leading-relaxed text-ink-2">
+                    ATS membaca CV sebagai urutan teks, bukan sebagai tampilan.
+                    Begitu ada dua kolom, tabel, atau teks di dalam gambar,
+                    urutan bacanya bisa kacau: pengalaman kerja terbaca sebelum
+                    nama, atau judul terbaca menyatu dengan isi kolom
+                    sebelahnya.
+                  </p>
+                  <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-2">
+                    Template kategori ATS di Resumify menghindari semua itu, dan
+                    template kreatif tetap tersedia untuk kiriman langsung ke
+                    manusia.
+                  </p>
+                </Reveal>
 
                 <ul className="mt-8 space-y-4">
-                  {ATS_POINTS.map((point) => (
-                    <li
+                  {ATS_POINTS.map((point, i) => (
+                    <Reveal
                       key={point}
+                      as="li"
+                      delay={160 + i * 110}
+                      rise="8px"
                       className="flex gap-3 border-t border-rule pt-4 text-[14px] leading-relaxed text-ink"
                     >
-                      <span aria-hidden className="mt-2 h-px w-4 shrink-0 bg-accent" />
+                      <span
+                        aria-hidden
+                        className="rule-draw mt-2 h-px w-4 shrink-0 bg-accent"
+                        style={{ "--rule-delay": `${320 + i * 110}ms` } as React.CSSProperties}
+                      />
                       {point}
-                    </li>
+                    </Reveal>
                   ))}
                 </ul>
               </div>
@@ -185,10 +225,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Template gallery — real renders */}
+        {/* Template gallery — real renders, each sheet settling in turn */}
         <section id="template" className="border-b border-rule">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-            <div className="max-w-2xl">
+            <Reveal className="max-w-2xl">
               <p className="micro">12 template</p>
               <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                 Semuanya ditampilkan apa adanya.
@@ -197,7 +237,7 @@ export default function HomePage() {
                 Ini hasil render asli dari setiap template — bukan gambar contoh.
                 Klik salah satu nama di bagian atas untuk mencobanya lebih besar.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12">
               <TemplateGallery />
@@ -209,7 +249,7 @@ export default function HomePage() {
         <section className="border-b border-rule bg-sheet">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="micro">Harga</p>
                 <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                   Gratis untuk mencoba. Pro saat lamaranmu banyak.
@@ -220,35 +260,41 @@ export default function HomePage() {
                 >
                   Bandingkan lengkap di halaman harga
                 </Link>
-              </div>
+              </Reveal>
 
               <div className="grid gap-6 sm:grid-cols-2">
-                <div className="border-t-2 border-rule-strong pt-5">
-                  <p className="micro">Free</p>
-                  <p className="font-display mt-3 text-[32px] text-ink">Rp 0</p>
-                  <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
-                    <li>1 CV</li>
-                    <li>Template Jake &amp; Minimal</li>
-                    <li>Ekspor PDF</li>
-                    <li>Simpan cloud</li>
-                  </ul>
-                </div>
+                <Reveal delay={90} rise="8px">
+                  <div className="border-t-2 border-rule-strong pt-5">
+                    <p className="micro">Free</p>
+                    <p className="font-display mt-3 text-[32px] text-ink">Rp 0</p>
+                    <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
+                      <li>1 CV</li>
+                      <li>Template Jake &amp; Minimal</li>
+                      <li>Ekspor PDF</li>
+                      <li>Simpan cloud</li>
+                    </ul>
+                  </div>
+                </Reveal>
 
-                <div className="border-t-2 border-accent pt-5">
-                  <p className="micro text-accent">Pro · 30 hari</p>
-                  <p className="font-display num mt-3 text-[32px] text-ink">Rp 49.000</p>
-                  <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
-                    <li>50 CV</li>
-                    <li>12 template</li>
-                    <li>Link share publik</li>
-                    <li>Bayar sekali via QRIS</li>
-                  </ul>
-                  <Link href="/pricing" className="mt-5 inline-block">
-                    <Button variant="secondary" size="sm">
-                      Pilih Pro
-                    </Button>
-                  </Link>
-                </div>
+                <Reveal delay={180} rise="8px">
+                  <div className="border-t-2 border-accent pt-5">
+                    <p className="micro text-accent">Pro · 30 hari</p>
+                    <p className="font-display num mt-3 text-[32px] text-ink">
+                      Rp 49.000
+                    </p>
+                    <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
+                      <li>50 CV</li>
+                      <li>12 template</li>
+                      <li>Link share publik</li>
+                      <li>Bayar sekali via QRIS</li>
+                    </ul>
+                    <Link href="/pricing" className="mt-5 inline-block">
+                      <Button variant="secondary" size="sm">
+                        Pilih Pro
+                      </Button>
+                    </Link>
+                  </div>
+                </Reveal>
               </div>
             </div>
           </div>
@@ -258,29 +304,36 @@ export default function HomePage() {
         <section id="faq" className="border-b border-rule">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
             <div className="grid gap-8 lg:grid-cols-[0.8fr_1.6fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="micro">Tanya jawab</p>
                 <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                   Yang biasanya ditanyakan.
                 </h2>
-              </div>
+              </Reveal>
 
               <div className="border-t border-rule">
-                {FAQS.map((item) => (
-                  <details key={item.q} className="group border-b border-rule">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[15px] text-ink marker:content-none">
-                      {item.q}
-                      <span
-                        aria-hidden
-                        className="text-ink-3 transition-transform group-open:rotate-45"
-                      >
-                        +
-                      </span>
-                    </summary>
-                    <p className="max-w-2xl pb-6 text-[14px] leading-relaxed text-ink-2">
-                      {item.a}
-                    </p>
-                  </details>
+                {FAQS.map((item, i) => (
+                  <Reveal
+                    key={item.q}
+                    delay={i * 80}
+                    rise="8px"
+                    className="border-b border-rule"
+                  >
+                    <details className="group">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[15px] text-ink marker:content-none">
+                        {item.q}
+                        <span
+                          aria-hidden
+                          className="text-ink-3 transition-transform duration-300 ease-print group-open:rotate-45"
+                        >
+                          +
+                        </span>
+                      </summary>
+                      <p className="max-w-2xl pb-6 text-[14px] leading-relaxed text-ink-2">
+                        {item.a}
+                      </p>
+                    </details>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -290,7 +343,7 @@ export default function HomePage() {
         {/* Closing poster — ink band */}
         <section className="bg-ink text-sheet">
           <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:py-20">
-            <div className="max-w-2xl">
+            <Reveal className="max-w-2xl">
               <p className="micro text-rule-strong">Mulai sekarang</p>
               <h2 className="mt-4 text-[32px] leading-[1.08] text-sheet sm:text-[44px]">
                 Mulai dari CV kosong, keluar dengan PDF yang layak dikirim.
@@ -299,8 +352,8 @@ export default function HomePage() {
                 Butuh sekitar sepuluh menit untuk CV pertamamu. Tidak ada
                 pertanyaan-pertanyaan yang harus dilewati dulu.
               </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
+            </Reveal>
+            <Reveal delay={120} className="flex flex-wrap items-center gap-3">
               <Link href="/signup">
                 <Button size="lg" variant="primary">
                   Daftar &amp; bikin CV
@@ -312,7 +365,7 @@ export default function HomePage() {
               >
                 Lihat harga Pro
               </Link>
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>

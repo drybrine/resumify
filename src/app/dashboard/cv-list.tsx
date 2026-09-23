@@ -7,6 +7,7 @@ import { formatDistance } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { deleteCv } from "@/lib/actions/cvs";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/reveal";
 import { Input } from "@/components/ui/input";
 import { TEMPLATE_META } from "@/lib/templates/render";
 import type { TemplateId } from "@/lib/types";
@@ -78,7 +79,7 @@ export function CvList({ cvs, now }: { cvs: CvRow[]; now: string }) {
       )}
 
       <ul>
-        {filtered.map((cv) => {
+        {filtered.map((cv, i) => {
           const meta = TEMPLATE_META[cv.template as TemplateId] || TEMPLATE_META.jake;
           // Base date comes from the server (see `now` above) so the label is
           // byte-identical during SSR and hydration — reading Date.now() here
@@ -91,9 +92,12 @@ export function CvList({ cvs, now }: { cvs: CvRow[]; now: string }) {
           );
 
           return (
-            <li
+            <Reveal
               key={cv.id}
-              className="flex flex-col gap-3 border-b border-rule py-5 transition-colors hover:bg-sheet sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+              as="li"
+              rise="8px"
+              delay={Math.min(i, 6) * 60}
+              className="row-lift relative flex flex-col gap-3 border-b border-rule py-5 hover:bg-sheet sm:flex-row sm:items-center sm:justify-between sm:gap-6"
             >
               <div className="min-w-0">
                 <Link
@@ -162,7 +166,7 @@ export function CvList({ cvs, now }: { cvs: CvRow[]; now: string }) {
                   </>
                 )}
               </div>
-            </li>
+            </Reveal>
           );
         })}
       </ul>

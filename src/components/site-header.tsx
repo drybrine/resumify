@@ -18,7 +18,7 @@ export async function SiteHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-rule bg-paper/95 backdrop-blur-[2px]">
+    <header className="site-header sticky top-0 z-50 border-b border-rule bg-paper/95 backdrop-blur-[2px]">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" aria-label="Resumify — beranda">
           <Logo markSize={22} subtitle="" />
@@ -30,7 +30,7 @@ export async function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[13px] text-ink-2 transition-colors hover:text-ink"
+                className="nav-link relative text-[13px] text-ink-2 transition-colors hover:text-ink"
               >
                 {item.label}
               </Link>
@@ -62,7 +62,7 @@ export async function SiteHeader() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-2 text-[13px] text-ink-2 transition-colors hover:text-ink"
+                className="nav-link relative px-2 text-[13px] text-ink-2 transition-colors hover:text-ink"
               >
                 Masuk
               </Link>

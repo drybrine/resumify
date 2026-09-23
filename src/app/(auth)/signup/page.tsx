@@ -30,20 +30,27 @@ export default function SignupPage() {
       <main id="main" className="flex-1 px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-[1fr_420px] lg:gap-16">
           <div className="hidden lg:block">
-            <p className="micro">Pendaftaran</p>
-            <h1 className="mt-4 max-w-md text-[38px] leading-[1.08] text-ink">
+            <p className="micro enter">Pendaftaran</p>
+            <h1
+              className="enter mt-4 max-w-md text-[38px] leading-[1.08] text-ink"
+              style={{ "--d": "70ms" } as React.CSSProperties}
+            >
               Satu akun, lalu langsung mulai mengisi.
             </h1>
-            <p className="mt-4 max-w-md text-[14px] leading-relaxed text-ink-2">
+            <p
+              className="enter mt-4 max-w-md text-[14px] leading-relaxed text-ink-2"
+              style={{ "--d": "140ms" } as React.CSSProperties}
+            >
               Tidak ada pertanyaan panjang sebelum masuk editor. Buat CV kosong,
               pilih template, dan lihat hasilnya sambil mengetik.
             </p>
 
             <ul className="mt-10 max-w-md border-t border-rule">
-              {PERKS.map((perk) => (
+              {PERKS.map((perk, i) => (
                 <li
                   key={perk}
-                  className="border-b border-rule py-3.5 text-[14px] text-ink"
+                  className="enter border-b border-rule py-3.5 text-[14px] text-ink"
+                  style={{ "--d": `${220 + i * 80}ms` } as React.CSSProperties}
                 >
                   {perk}
                 </li>
@@ -59,14 +66,25 @@ export default function SignupPage() {
 
           <div>
             <div className="lg:hidden">
-              <p className="micro">Pendaftaran</p>
-              <h1 className="mt-4 text-[30px] leading-tight text-ink">Buat akun gratis</h1>
-              <p className="mt-3 text-[14px] text-ink-2">
+              <p className="micro enter">Pendaftaran</p>
+              <h1
+                className="enter mt-4 text-[30px] leading-tight text-ink"
+                style={{ "--d": "70ms" } as React.CSSProperties}
+              >
+                Buat akun gratis
+              </h1>
+              <p
+                className="enter mt-3 text-[14px] text-ink-2"
+                style={{ "--d": "140ms" } as React.CSSProperties}
+              >
                 1 CV + ekspor PDF, tanpa kartu kredit.
               </p>
             </div>
 
-            <div className="mt-8 rounded-print border border-rule bg-sheet p-6 sm:p-7 lg:mt-0">
+            <div
+              className="enter-sheet mt-8 rounded-print border border-rule bg-sheet p-6 sm:p-7 lg:mt-0"
+              style={{ "--d": "120ms" } as React.CSSProperties}
+            >
               <h2 className="font-display text-[20px] text-ink">
                 Daftar Resumify
               </h2>

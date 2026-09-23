@@ -35,6 +35,11 @@
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
 
   --radius-print: 3px;
+
+  /* motion easings — declared here so `ease-print` works as a utility too.
+     Nothing overshoots: things settle, they never spring. */
+  --ease-print: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ink: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ---------- base ---------- */
@@ -139,6 +144,285 @@ a {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   Motion — a sheet of paper settling, not an app bouncing.
+   Nothing overshoots, nothing loops for decoration. Entrances
+   are single arrivals; interactions are state changes you can
+   read. Two mechanisms, on purpose:
+
+   1. .enter-*  — CSS animation, plays at first paint, no JS.
+                  For above-the-fold content: waiting on hydration
+                  would show a flash of nothing first.
+   2. [data-reveal] — waits until the element is actually seen.
+                  The hiding rule is gated on [data-motion="on"],
+                  which an inline script in the root layout sets only
+                  when motion is welcome — so a reader who asked for
+                  reduced motion never sees a hidden state, and if
+                  that one script is blocked the content stays visible
+                  rather than waiting on an animation that cannot run.
+   ============================================================ */
+
+:root {
+  /* durations live here only — they are read as var() below, never as utilities */
+  --dur-press: 110ms;
+  --dur-quick: 180ms;
+  --dur-base: 300ms;
+  --dur-settle: 480ms;
+  --dur-sweep: 680ms;
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise, 10px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet-settle {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes veil {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ink-sweep {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes press-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ---------- entrances: first paint, no JS ---------- */
+
+.enter {
+  animation: ink-in var(--dur-settle) var(--ease-print) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-sheet {
+  animation: sheet-settle var(--dur-settle) var(--ease-print) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-stamp {
+  animation: stamp var(--dur-base) var(--ease-print) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.enter-veil {
+  animation: veil var(--dur-base) var(--ease-ink) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* loading: ink travelling along a printed rule, not a spinner */
+.sweep {
+  animation: ink-sweep 1.6s var(--ease-ink) infinite;
+}
+
+/* the "saving" tick — a breath, not a spinner */
+.pulse {
+  animation: press-pulse 1.5s var(--ease-ink) infinite;
+}
+
+/* a hairline that draws itself in from the left, like a printed rule */
+.rule-draw {
+  transform-origin: left center;
+  transition: transform var(--dur-sweep) var(--ease-print);
+  transition-delay: var(--rule-delay, 140ms);
+}
+
+/* ---------- entrances: wait until seen ---------- */
+
+[data-reveal] {
+  transition:
+    opacity var(--dur-settle) var(--ease-print),
+    transform var(--dur-settle) var(--ease-print);
+  transition-delay: var(--d, 0ms);
+}
+
+[data-motion="on"] [data-reveal]:not([data-in]) {
+  opacity: 0;
+  transform: translateY(var(--rise, 10px));
+}
+
+[data-motion="on"] [data-reveal]:not([data-in]) .rule-draw {
+  transform: scaleX(0);
+}
+
+/* ---------- interactive micro-motion ---------- */
+
+/* a printed control lifts a hair off the page, then presses back down */
+.press {
+  transition:
+    background-color var(--dur-quick) var(--ease-ink),
+    border-color var(--dur-quick) var(--ease-ink),
+    color var(--dur-quick) var(--ease-ink),
+    box-shadow var(--dur-quick) var(--ease-ink),
+    transform var(--dur-press) var(--ease-ink);
+}
+
+.press:hover:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 0 rgb(25 23 18 / 0.16);
+}
+
+.press:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(0);
+  box-shadow: 0 0 0 0 rgb(25 23 18 / 0);
+  transition-duration: var(--dur-press);
+}
+
+/* a link that underlines itself rather than switching colour */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-print);
+}
+
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* a list row that steps towards you and marks itself with a rule */
+.row-lift {
+  transition:
+    background-color var(--dur-quick) var(--ease-ink),
+    transform var(--dur-base) var(--ease-print);
+}
+
+.row-lift::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: center top;
+  transition: transform var(--dur-base) var(--ease-print);
+}
+
+.row-lift:hover {
+  transform: translateX(3px);
+}
+
+.row-lift:hover::before {
+  transform: scaleY(1);
+}
+
+/* ---------- the header tightens as the page moves under it ---------- */
+
+@keyframes header-lift {
+  from {
+    border-bottom-color: var(--color-rule);
+    box-shadow: 0 0 0 0 rgb(25 23 18 / 0);
+  }
+  to {
+    border-bottom-color: var(--color-rule-strong);
+    box-shadow: 0 8px 18px -16px rgb(25 23 18 / 0.55);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .site-header {
+      animation: header-lift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 72px;
+    }
+  }
+}
+
+/* ---------- route change: a new page arriving on the desk ---------- */
+
+.page-enter {
+  animation: veil var(--dur-base) var(--ease-ink) both;
+}
+
+/* ---------- anchors land below the sticky header, smoothly ---------- */
+
+[id] {
+  scroll-margin-top: 84px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- FAQ only, where the browser supports animating it ---------- */
+
+@supports selector(::details-content) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  details::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size var(--dur-base) var(--ease-print),
+      opacity var(--dur-base) var(--ease-print),
+      content-visibility var(--dur-base) allow-discrete;
+  }
+
+  details[open]::details-content {
+    block-size: auto;
+    opacity: 1;
   }
 }
 

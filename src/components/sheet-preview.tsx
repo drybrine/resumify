@@ -16,11 +16,14 @@ export function SheetPreview({
   templateId,
   className,
   sheetClassName,
+  animateKey,
 }: {
   html: string;
   templateId: TemplateId;
   className?: string;
   sheetClassName?: string;
+  /** change this value to replay the settle animation — e.g. on template switch */
+  animateKey?: string;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +65,12 @@ export function SheetPreview({
         }}
       >
         <article
-          className={cn(`resume-preview template-${templateId}`, sheetClassName)}
+          key={animateKey}
+          className={cn(
+            `resume-preview template-${templateId}`,
+            animateKey && "enter-sheet",
+            sheetClassName
+          )}
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>

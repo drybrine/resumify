@@ -5,6 +5,7 @@ import { renderResumeHtml, TEMPLATE_META } from "@/lib/templates/render";
 import { SAMPLE_CV } from "@/lib/cv-data";
 import { ALL_TEMPLATES, type TemplateId } from "@/lib/types";
 import { SheetPreview } from "@/components/sheet-preview";
+import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 
 const HERO_TABS: TemplateId[] = ["jake", "harvard", "sidebar", "modern", "minimal"];
@@ -31,7 +32,7 @@ export function HeroShowcase() {
               onClick={() => setActive(id)}
               aria-pressed={isActive}
               className={cn(
-                "flex shrink-0 items-baseline gap-1.5 pb-1 text-[13px] transition-colors",
+                "flex shrink-0 items-baseline gap-1.5 pb-1 text-[13px] transition-colors duration-200 ease-ink",
                 isActive
                   ? "border-b-2 border-accent text-ink"
                   : "border-b-2 border-transparent text-ink-3 hover:text-ink"
@@ -49,7 +50,7 @@ export function HeroShowcase() {
       </div>
 
       <div className="mt-4 bg-sheet p-2 shadow-[0_1px_2px_rgba(25,23,18,0.12)] ring-1 ring-rule sm:p-3">
-        <SheetPreview html={html} templateId={active} />
+        <SheetPreview html={html} templateId={active} animateKey={active} />
       </div>
 
       <figcaption className="mt-3 flex flex-wrap items-baseline gap-x-2 text-[12px] text-ink-3">
@@ -77,11 +78,19 @@ export function TemplateGallery() {
 
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-      {ALL_TEMPLATES.map((id) => {
+      {ALL_TEMPLATES.map((id, i) => {
         const meta = TEMPLATE_META[id];
         return (
-          <figure key={id} className="flex flex-col">
-            <div className="bg-sheet p-1.5 ring-1 ring-rule transition-shadow hover:shadow-[0_2px_10px_rgba(25,23,18,0.14)]">
+          // Offsetting by column position instead of absolute index keeps a row
+          // sweeping left to right without the last row waiting half a second.
+          <Reveal
+            key={id}
+            as="figure"
+            rise="12px"
+            delay={Math.min(i % 3, 2) * 90}
+            className="flex flex-col"
+          >
+            <div className="bg-sheet p-1.5 ring-1 ring-rule transition-shadow duration-300 ease-print hover:shadow-[0_2px_10px_rgba(25,23,18,0.14)]">
               <SheetPreview html={rendered[id]} templateId={id} />
             </div>
             <figcaption className="mt-3 flex items-baseline justify-between gap-3 border-t border-rule pt-2">
@@ -94,7 +103,7 @@ export function TemplateGallery() {
               </span>
             </figcaption>
             <p className="mt-1 text-[12px] leading-relaxed text-ink-2">{meta.description}</p>
-          </figure>
+          </Reveal>
         );
       })}
     </div>

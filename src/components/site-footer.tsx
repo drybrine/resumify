@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { Reveal } from "@/components/reveal";
 
 const COLUMNS = [
   {
@@ -33,16 +34,16 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-rule bg-paper">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
-          <div>
+          <Reveal>
             <Logo markSize={24} />
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-2">
               Editor CV dengan pratinjau langsung. Isi data, pilih template ATS,
               unduh PDF — tanpa langganan otomatis.
             </p>
-          </div>
+          </Reveal>
 
-          {COLUMNS.map((col) => (
-            <nav key={col.title} aria-label={col.title}>
+          {COLUMNS.map((col, i) => (
+            <Reveal key={col.title} as="nav" aria-label={col.title} delay={90 + i * 70}>
               <h2 className="micro">{col.title}</h2>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((link) => (
@@ -56,7 +57,7 @@ export function SiteFooter() {
                   </li>
                 ))}
               </ul>
-            </nav>
+            </Reveal>
           ))}
         </div>
 

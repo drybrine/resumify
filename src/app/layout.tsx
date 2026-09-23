@@ -37,6 +37,14 @@ export const metadata: Metadata = {
   ),
 };
 
+/**
+ * Flips on the scroll-reveal hidden state. Runs as the first thing in <body>,
+ * before anything below it paints, so there is no flash of visible-then-hidden.
+ * Skipped entirely when the reader has asked for reduced motion — in that case
+ * the CSS never hides anything.
+ */
+const MOTION_FLAG = `try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.dataset.motion='on'}}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,8 +54,10 @@ export default function RootLayout({
     <html
       lang="id"
       className={`${display.variable} ${sans.variable} h-full`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
+        <script dangerouslySetInnerHTML={{ __html: MOTION_FLAG }} />
         {children}
       </body>
     </html>

@@ -276,8 +276,9 @@ export function CvEditor({
             />
             <p
               className={cn(
-                "px-1 text-[11px]",
-                alert ? "text-accent" : "text-ink-3"
+                "px-1 text-[11px] transition-colors duration-300 ease-ink",
+                alert ? "text-accent" : "text-ink-3",
+                (pending || pdfLoading) && "pulse"
               )}
               role="status"
               title="Tersimpan otomatis setiap perubahan · Ctrl/Cmd + S untuk menyimpan sekarang"
@@ -296,7 +297,7 @@ export function CvEditor({
             <span className="num text-[12px] text-ink-2">{completeness}%</span>
             <span aria-hidden className="block h-[3px] w-20 bg-rule-strong">
               <span
-                className="block h-[3px] bg-accent"
+                className="block h-[3px] bg-accent transition-[width] duration-500 ease-print"
                 style={{ width: `${completeness}%` }}
               />
             </span>
@@ -377,7 +378,11 @@ export function CvEditor({
         >
           <SectionTabs active={section} completed={completed} onChange={setSection} />
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5">
+          <div
+            key={section}
+            className="enter min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5"
+            style={{ "--rise": "6px" } as React.CSSProperties}
+          >
             {section === "personal" && (
               <div>
                 <h2 className="font-display text-[19px] leading-tight text-ink">
@@ -559,8 +564,8 @@ export function CvEditor({
                       ZOOM_STEPS.filter((z) => z < scale - 0.001).pop() ?? ZOOM_STEPS[0]
                   )
                 }
-                className="h-8 w-8 rounded-print border border-rule-strong bg-sheet text-[13px] text-ink-2 transition-colors hover:text-ink"
-                                aria-label="Perkecil"
+                className="press h-8 w-8 rounded-print border border-rule-strong bg-sheet text-[13px] text-ink-2 hover:text-ink"
+                aria-label="Perkecil"
               >
                 −
               </button>
@@ -574,8 +579,8 @@ export function CvEditor({
                     () => ZOOM_STEPS.find((z) => z > scale + 0.001) ?? ZOOM_STEPS.at(-1)!
                   )
                 }
-                className="h-8 w-8 rounded-print border border-rule-strong bg-sheet text-[13px] text-ink-2 transition-colors hover:text-ink"
-                                aria-label="Perbesar"
+                className="press h-8 w-8 rounded-print border border-rule-strong bg-sheet text-[13px] text-ink-2 hover:text-ink"
+                aria-label="Perbesar"
               >
                 +
               </button>
@@ -610,7 +615,8 @@ export function CvEditor({
                   }}
                 >
                   <article
-                    className={`resume-preview template-${template}`}
+                    key={template}
+                    className={`resume-preview template-${template} enter-sheet`}
                     dangerouslySetInnerHTML={{ __html: previewHtml }}
                   />
                 </div>
@@ -630,7 +636,7 @@ export function CvEditor({
             onClick={() => setMobilePane(pane)}
             aria-pressed={mobilePane === pane}
             className={cn(
-              "rounded-print border px-3 py-1 text-[12px]",
+              "press rounded-print border px-3 py-1 text-[12px]",
               mobilePane === pane
                 ? "border-accent text-accent"
                 : "border-rule-strong text-ink-2"
@@ -644,7 +650,7 @@ export function CvEditor({
       {/* ---------- template dialog ---------- */}
       {dialogOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/45 p-3 sm:p-6"
+          className="enter-veil fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/45 p-3 sm:p-6"
           onClick={(e) => {
             if (e.target === e.currentTarget) setDialogOpen(false);
           }}
@@ -654,7 +660,7 @@ export function CvEditor({
             role="dialog"
             aria-modal="true"
             aria-labelledby="template-dialog-title"
-            className="w-full max-w-5xl rounded-print border border-rule bg-paper shadow-[0_24px_60px_-24px_rgba(25,23,18,0.5)]"
+            className="enter-sheet w-full max-w-5xl rounded-print border border-rule bg-paper shadow-[0_24px_60px_-24px_rgba(25,23,18,0.5)]"
           >
             <div className="flex items-start justify-between gap-4 border-b border-rule px-5 py-4">
               <div>
@@ -694,7 +700,7 @@ export function CvEditor({
                       notice(`Template diganti ke ${meta.name}`);
                     }}
                     className={cn(
-                      "flex flex-col gap-2 rounded-print border p-2 text-left transition-colors",
+                      "press flex flex-col gap-2 rounded-print border p-2 text-left",
                       isSelected
                         ? "border-accent bg-accent-soft/50"
                         : "border-rule hover:border-ink-3 hover:bg-sheet"
