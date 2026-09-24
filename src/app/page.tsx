@@ -6,7 +6,7 @@ import { Reveal } from "@/components/reveal";
 import { HeroShowcase, TemplateGallery } from "@/components/template-showcase";
 
 const SPECS = [
-  { k: "Template", v: "12 layout, 2 bisa dipakai di paket gratis" },
+  { k: "Template", v: "20 layout, 2 bisa dipakai di paket gratis" },
   { k: "Ekspor", v: "PDF Letter & A4, dirender di server" },
   { k: "Simpan", v: "Cloud otomatis tiap perubahan" },
   { k: "Bayar", v: "QRIS sekali bayar, tanpa auto-renew" },
@@ -43,7 +43,7 @@ const FAQS = [
   },
   {
     q: "Gratisnya sampai mana?",
-    a: "Paket gratis: 1 CV, template Jake dan Minimal, ekspor PDF, dan penyimpanan cloud. Pro membuka 50 CV, 12 template, dan link share publik.",
+    a: "Paket gratis: 1 CV, template Jake dan Minimal, ekspor PDF, dan penyimpanan cloud. Pro membuka 50 CV, 18 template Pro, dan link share publik.",
   },
   {
     q: "Bagaimana cara bayar Pro?",
@@ -90,7 +90,7 @@ export default function HomePage() {
                   style={at(150)}
                 >
                   Isi di kiri, kertasnya tampil di kanan — dengan tipografi yang
-                  sama persis seperti PDF-nya. Ada 12 template siap pakai, isi
+                  sama persis seperti PDF-nya. Ada 20 template siap pakai, isi
                   tersimpan otomatis, dan PDF-nya dirender di server.
                 </p>
 
@@ -103,7 +103,7 @@ export default function HomePage() {
                   </Link>
                   <Link href="#template">
                     <Button size="lg" variant="secondary">
-                      Lihat 12 template
+                      Lihat 20 template
                     </Button>
                   </Link>
                 </div>
@@ -229,7 +229,7 @@ export default function HomePage() {
         <section id="template" className="border-b border-rule">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
             <Reveal className="max-w-2xl">
-              <p className="micro">12 template</p>
+              <p className="micro">20 template</p>
               <h2 className="mt-4 text-[30px] leading-[1.1] text-ink sm:text-[38px]">
                 Semuanya ditampilkan apa adanya.
               </h2>
@@ -284,7 +284,7 @@ export default function HomePage() {
                     </p>
                     <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
                       <li>50 CV</li>
-                      <li>12 template</li>
+                      <li>20 template</li>
                       <li>Link share publik</li>
                       <li>Bayar sekali via QRIS</li>
                     </ul>

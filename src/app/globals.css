@@ -460,6 +460,7 @@ a {
 .resume-preview li { margin-bottom: 1.5pt; line-height: 1.28; }
 .resume-preview .summary { text-align: justify; margin-bottom: 2pt; }
 .resume-preview .skills-block .row { margin-bottom: 1pt; }
+.resume-preview .pub-item { margin-bottom: 3pt; }
 .resume-preview .tag-cloud { display: flex; flex-wrap: wrap; gap: 4pt; }
 .resume-preview .tag {
   display: inline-block;
@@ -709,3 +710,116 @@ a {
 .resume-preview.template-terminal header h1 { font-size: 18pt; font-weight: 700; color: #00ff66; margin-bottom: 4pt; }
 .resume-preview.template-terminal h2 { font-size: 10pt; font-weight: 700; color: #38bdf8; border-bottom: 1px solid #1e293b; padding-bottom: 2pt; margin-bottom: 6pt; }
 .resume-preview.template-terminal a { color: #38bdf8; }
+
+/* ===== Swiss ===== */
+.resume-preview.template-swiss {
+  font-family: Arial, sans-serif;
+  font-size: 9.6pt; line-height: 1.34; color: #17202b; padding: 0.55in 0.58in;
+}
+.resume-preview.template-swiss .swiss-header { border-bottom: 2pt solid #cf312b; padding-bottom: 12pt; margin-bottom: 13pt; }
+.resume-preview.template-swiss .swiss-kicker { font-size: 7.5pt; letter-spacing: 1.7pt; color: #cf312b; margin-bottom: 8pt; }
+.resume-preview.template-swiss .swiss-header h1 { font-size: 27pt; margin-bottom: 6pt; }
+.resume-preview.template-swiss .swiss-header .contact { font-size: 8.7pt; color: #56616d; }
+.resume-preview.template-swiss .swiss-row { display: grid; grid-template-columns: 1.05in 1fr; gap: 14pt; margin-top: 10pt; }
+.resume-preview.template-swiss .swiss-row h2 { font-weight: 700; font-size: 7.8pt; color: #cf312b; border: 0; padding: 0; margin: 1pt 0; }
+.resume-preview.template-swiss .swiss-row > div { border-bottom: 0.5pt solid #d7dce1; padding-bottom: 7pt; }
+
+/* ===== Scholar ===== */
+.resume-preview.template-scholar {
+  font-family: Garamond, Georgia, serif;
+  font-size: 10.3pt; line-height: 1.35; color: #25201c; padding: 0.55in 0.68in;
+}
+.resume-preview.template-scholar .scholar-header { text-align: center; border-bottom: 3pt double #762f38; padding-bottom: 9pt; margin-bottom: 12pt; }
+.resume-preview.template-scholar .scholar-kicker { font-family: Arial, sans-serif; font-weight: 700; font-size: 7.5pt; letter-spacing: 1.8pt; color: #762f38; }
+.resume-preview.template-scholar .scholar-header h1 { font-size: 23pt; color: #762f38; }
+.resume-preview.template-scholar .scholar-header .contact { font-family: Arial, sans-serif; font-size: 8.8pt; color: #655d56; }
+.resume-preview.template-scholar h2 { font-size: 10.8pt; color: #762f38; border-bottom: 0.7pt solid #c9b8b5; padding-bottom: 2pt; margin-bottom: 5pt; }
+.resume-preview.template-scholar section { margin-top: 9pt; }
+.resume-preview.template-scholar .entry { margin-bottom: 6pt; }
+
+/* ===== Timeline ===== */
+.resume-preview.template-timeline {
+  font-family: Arial, sans-serif;
+  font-size: 9.5pt; line-height: 1.35; color: #1b2935; padding: 0.5in 0.58in;
+}
+.resume-preview.template-timeline .timeline-header { border-left: 4pt solid #126b67; padding: 4pt 0 8pt 12pt; margin-bottom: 13pt; }
+.resume-preview.template-timeline .timeline-kicker { color: #126b67; font-size: 7.5pt; letter-spacing: 1.3pt; }
+.resume-preview.template-timeline .timeline-header h1 { font-size: 24pt; }
+.resume-preview.template-timeline h2 { font-size: 10pt; text-transform: uppercase; letter-spacing: 0.8pt; color: #126b67; border-bottom: 1pt solid #c7d7d5; padding-bottom: 3pt; margin-bottom: 8pt; }
+.resume-preview.template-timeline .timeline-entry {
+  display: grid; grid-template-columns: 0.95in 1fr; gap: 12pt;
+  position: relative; margin: 0 0 9pt 3pt; padding-left: 12pt; border-left: 1pt solid #9abbb8;
+}
+.resume-preview.template-timeline .timeline-entry::before {
+  content: ""; position: absolute; width: 5pt; height: 5pt; left: -3pt; top: 3pt;
+  border-radius: 50%; background: #126b67;
+}
+.resume-preview.template-timeline .timeline-content { min-width: 0; }
+.resume-preview.template-timeline .timeline-content h3 { font-size: 10pt; font-weight: 700; }
+.resume-preview.template-timeline .timeline-date { color: #126b67; font-size: 8.2pt; font-weight: bold; }
+.resume-preview.template-timeline .timeline-org { font-size: 8.8pt; color: #66757e; }
+
+/* ===== Mono ===== */
+.resume-preview.template-mono {
+  font-family: Arial, sans-serif;
+  font-size: 9.6pt; line-height: 1.34; color: #202020; padding: 0.52in 0.62in;
+  border-top: 5pt solid #202020;
+}
+.resume-preview.template-mono .mono-header { display: flex; justify-content: space-between; align-items: end; gap: 16pt; border-bottom: 1pt solid #333; padding-bottom: 7pt; margin-bottom: 10pt; }
+.resume-preview.template-mono .mono-header h1 { font-size: 23pt; }
+.resume-preview.template-mono .mono-header .contact { max-width: 3.4in; text-align: right; font-size: 8pt; color: #555; }
+.resume-preview.template-mono h2 { font-size: 9.2pt; letter-spacing: 1pt; text-transform: uppercase; border-bottom: 1pt solid #333; padding-bottom: 2pt; margin-bottom: 5pt; }
+.resume-preview.template-mono section { margin-top: 9pt; }
+
+/* ===== Atlas ===== */
+.resume-preview.template-atlas {
+  font-family: Arial, sans-serif;
+  font-size: 9.5pt; line-height: 1.32; color: #202b38; padding: 0.48in 0.56in;
+}
+.resume-preview.template-atlas .atlas-header { background: #153a5b; color: #fff; padding: 15pt 17pt 12pt; margin: -0.48in -0.56in 12pt; }
+.resume-preview.template-atlas .atlas-place { font-size: 7.5pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #a8c7dc; }
+.resume-preview.template-atlas .atlas-header h1 { font-size: 23pt; margin: 5pt 0; }
+.resume-preview.template-atlas .atlas-header .contact,
+.resume-preview.template-atlas .atlas-header a { color: #e0edf5; font-size: 8.5pt; }
+.resume-preview.template-atlas h2 { font-size: 10.3pt; color: #153a5b; border-bottom: 1pt solid #b6c9d5; padding-bottom: 2pt; margin-bottom: 5pt; }
+.resume-preview.template-atlas section { margin-top: 8pt; }
+.resume-preview.template-atlas .tag { color: #153a5b; border-color: #8aa9be; background: #eff5f8; }
+
+/* ===== Editorial ===== */
+.resume-preview.template-editorial {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10pt; line-height: 1.38; color: #26231f; padding: 0.58in 0.68in;
+}
+.resume-preview.template-editorial .editorial-header { border-block: 1pt solid #27231f; padding: 9pt 0 10pt; margin-bottom: 14pt; }
+.resume-preview.template-editorial .editorial-index { font-family: Arial, sans-serif; font-weight: bold; font-size: 7.5pt; letter-spacing: 1.5pt; color: #a14b36; margin-bottom: 8pt; }
+.resume-preview.template-editorial .editorial-header h1 { font-size: 29pt; line-height: 1; margin-bottom: 8pt; }
+.resume-preview.template-editorial .editorial-bottom { display: flex; justify-content: space-between; gap: 12pt; font-family: Arial, sans-serif; font-size: 8.1pt; color: #625d55; }
+.resume-preview.template-editorial .editorial-bottom .contact { text-align: right; }
+.resume-preview.template-editorial h2 { font-family: Georgia, serif; font-style: italic; font-weight: 600; font-size: 13pt; border-bottom: 0.5pt solid #c9c2b8; padding-bottom: 3pt; margin-bottom: 6pt; }
+.resume-preview.template-editorial section { margin-top: 11pt; }
+
+/* ===== Orbit ===== */
+.resume-preview.template-orbit {
+  font-family: Arial, sans-serif;
+  font-size: 9.7pt; line-height: 1.35; color: #232a3a; padding: 0.5in 0.6in;
+}
+.resume-preview.template-orbit .orbit-header { position: relative; overflow: hidden; border-bottom: 1pt solid #d3d7e1; padding-bottom: 10pt; margin-bottom: 11pt; }
+.resume-preview.template-orbit .orbit-orbit { position: absolute; width: 1.35in; height: 1.35in; right: 0.15in; top: -0.75in; border: 12pt solid #eee9f8; border-radius: 50%; }
+.resume-preview.template-orbit .orbit-label { position: relative; color: #6752a3; font-size: 7.5pt; letter-spacing: 1.6pt; }
+.resume-preview.template-orbit .orbit-header h1,
+.resume-preview.template-orbit .orbit-header .contact { position: relative; }
+.resume-preview.template-orbit .orbit-header h1 { font-size: 25pt; }
+.resume-preview.template-orbit .orbit-header .contact { font-size: 8.5pt; color: #62697a; }
+.resume-preview.template-orbit h2 { font-size: 10pt; color: #6752a3; letter-spacing: 0.7pt; text-transform: uppercase; border-bottom: 1pt solid #d8d1e8; padding-bottom: 3pt; margin-bottom: 6pt; }
+
+/* ===== Mono Grid ===== */
+.resume-preview.template-mono-grid {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 8.5pt; line-height: 1.4; color: #191919; padding: 0.52in 0.58in;
+}
+.resume-preview.template-mono-grid .monogrid-header { border-bottom: 2pt solid #111; padding-bottom: 8pt; margin-bottom: 12pt; }
+.resume-preview.template-mono-grid .monogrid-header h1 { font-size: 20pt; }
+.resume-preview.template-mono-grid .monogrid-header .contact { color: #555; font-size: 7.5pt; }
+.resume-preview.template-mono-grid .monogrid-row { display: grid; grid-template-columns: 1.1in 1fr; gap: 12pt; margin-top: 8pt; }
+.resume-preview.template-mono-grid .monogrid-row h2 { font-family: Consolas, monospace; font-weight: 700; font-size: 7pt; border: 0; padding: 0; margin: 1pt 0; }
+.resume-preview.template-mono-grid .monogrid-row > div { border-top: 0.5pt solid #aaa; padding-top: 3pt; }

@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { SAMPLE_CV } from "../src/lib/cv-data";
+import { PLAN_LIMITS, SAMPLE_CV } from "../src/lib/cv-data";
 import { renderResumeHtml, TEMPLATE_META } from "../src/lib/templates/render";
 import { getTemplateCss, wrapResumeDocument } from "../src/lib/templates/styles";
-import { ALL_TEMPLATES } from "../src/lib/types";
+import { ALL_TEMPLATES, type TemplateId } from "../src/lib/types";
 import { canUseTemplate } from "../src/lib/template-entitlement";
 
 const NEW_TEMPLATES = [
@@ -75,6 +75,110 @@ test("new template output escapes user-controlled text", () => {
     assert.ok(!html.includes('<svg onload="alert(2)">'), `${id} did not escape location`);
     assert.match(html, /&lt;script&gt;/);
     assert.match(html, /&lt;img/);
+  }
+});
+
+// Files whose copy advertises how many templates exist. Extend this list when a
+// new surface starts quoting the catalogue size, so the count cannot drift again.
+const TEMPLATE_COUNT_COPY_FILES = [
+  "src/app/page.tsx",
+  "src/app/pricing/page.tsx",
+  "src/app/dashboard/page.tsx",
+  "src/app/layout.tsx",
+  "src/app/opengraph-image.tsx",
+  "src/components/site-footer.tsx",
+  "src/components/editor/cv-editor.tsx",
+  "src/lib/plans.ts",
+];
+
+test("every advertised template count matches the live catalog", () => {
+  const proCount = Object.values(TEMPLATE_META).filter((meta) => meta.pro).length;
+  const allowed = new Set([String(ALL_TEMPLATES.length), String(proCount)]);
+  let claims = 0;
+  for (const file of TEMPLATE_COUNT_COPY_FILES) {
+    const source = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+    for (const match of source.matchAll(/\b(\d+)\s+(templates?|layouts?)\b/gi)) {
+      claims += 1;
+      assert.ok(
+        allowed.has(match[1]),
+        `${file} says ${match[0]} but the catalog has ${ALL_TEMPLATES.length} templates (${proCount} Pro)`,
+      );
+    }
+  }
+  assert.ok(claims >= 10, `copy audit only inspected ${claims} template-count claims`);
+});
+
+test("hero showcase offers every template added in the expansion", () => {
+  const showcase = readFileSync(
+    new URL("../src/components/template-showcase.tsx", import.meta.url),
+    "utf8",
+  );
+  const array = showcase.match(/const HERO_TABS: TemplateId\[\]\s*=\s*\[([^\]]*)\]/);
+  assert.ok(array, "HERO_TABS declaration not found in template-showcase.tsx");
+  const ids: string[] = array[1].match(/[a-z][a-z-]*/g) ?? [];
+  assert.equal(new Set(ids).size, ids.length, "HERO_TABS contains duplicate ids");
+  for (const id of ids) {
+    assert.ok(
+      (ALL_TEMPLATES as readonly string[]).includes(id),
+      `HERO_TABS lists unknown template ${id}`,
+    );
+  }
+  for (const id of NEW_TEMPLATES) {
+    assert.ok(ids.includes(id), `hero showcase is missing ${id}`);
+  }
+});
+
+test("exactly the two original templates stay free in code and entitlements", () => {
+  const free = Object.keys(TEMPLATE_META)
+    .filter((id) => !TEMPLATE_META[id as keyof typeof TEMPLATE_META].pro)
+    .sort();
+  assert.deepEqual(free, ["jake", "minimal"]);
+  assert.deepEqual([...PLAN_LIMITS.free.templates].sort(), ["jake", "minimal"]);
+  assert.equal(PLAN_LIMITS.pro.templates.length, ALL_TEMPLATES.length);
+  for (const id of NEW_TEMPLATES) {
+    assert.ok(!PLAN_LIMITS.free.templates.includes(id), `${id} must not be free`);
+    assert.ok(PLAN_LIMITS.pro.templates.includes(id), `${id} must be available on Pro`);
+  }
+});
+
+const previewCss = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+
+function classesRenderedFor(id: TemplateId): string[] {
+  const found = new Set<string>();
+  for (const match of renderResumeHtml(SAMPLE_CV, id).matchAll(/class="([^"]+)"/g)) {
+    for (const token of match[1].split(/\s+/)) {
+      if (token) found.add(token);
+    }
+  }
+  return [...found];
+}
+
+test("globals.css mirrors a preview block for every template in the catalog", () => {
+  for (const id of ALL_TEMPLATES) {
+    const selector = `.resume-preview.template-${id}`;
+    const occurrences = previewCss.split(`${selector} `).length - 1;
+    assert.ok(
+      occurrences >= 3,
+      `globals.css styles ${selector} only ${occurrences} time(s) — the preview mirror is behind styles.ts`,
+    );
+    const blockStart = previewCss.indexOf(`${selector} {`);
+    assert.ok(blockStart > -1, `globals.css has no ${selector} { ... } block`);
+    assert.match(
+      previewCss.slice(blockStart, blockStart + 200),
+      /font-family/,
+      `${id} preview block does not set its own typeface`,
+    );
+  }
+});
+
+test("every class the new templates render is styled in the preview stylesheet", () => {
+  const shared = new Set(classesRenderedFor("jake"));
+  for (const id of NEW_TEMPLATES) {
+    const own = classesRenderedFor(id).filter((cls) => !shared.has(cls));
+    assert.ok(own.length >= 1, `${id} renders no template-specific class`);
+    for (const cls of own) {
+      assert.ok(previewCss.includes(`.${cls}`), `globals.css never styles .${cls}, used by ${id}`);
+    }
   }
 });
 

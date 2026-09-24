@@ -282,11 +282,8 @@ create trigger enforce_cv_limit_trigger
   before insert on public.cvs
   for each row execute function public.enforce_cv_limit();
 
--- Migration helper if table already exists with old check:
--- alter table public.cvs drop constraint if exists cvs_template_check;
--- alter table public.cvs add constraint cvs_template_check check (template in (
---   'jake', 'modern', 'compact', 'elegant', 'sidebar', 'corporate', 'tech', 'minimal'
--- ));
+-- Existing databases: re-apply the template check with supabase/migrate-templates.sql,
+-- which drops and recreates cvs_template_check with the full template list.
 
 drop trigger if exists payments_updated_at on public.payments;
 create trigger payments_updated_at

@@ -76,7 +76,7 @@ export default function OgImage() {
               maxWidth: 820,
             }}
           >
-            12 template ATS · pratinjau langsung · ekspor PDF di server · simpan
+            20 template ATS · pratinjau langsung · ekspor PDF di server · simpan
             cloud
           </div>
         </div>

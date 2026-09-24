@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · Resumify",
   },
   description:
-    "Buat CV ATS-friendly dengan editor pratinjau langsung, 12 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro Rp 49.000 lewat QRIS.",
+    "Buat CV ATS-friendly dengan editor pratinjau langsung, 20 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro Rp 49.000 lewat QRIS.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },

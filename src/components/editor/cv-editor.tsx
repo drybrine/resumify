@@ -671,7 +671,7 @@ export function CvEditor({
                   Pilih template
                 </h2>
                 <p className="mt-1 text-[13px] text-ink-2">
-                  12 layout. Mengganti template tidak mengubah isi CV-mu — hanya
+                  20 layout. Mengganti template tidak mengubah isi CV-mu — hanya
                   tipografi dan susunannya.
                 </p>
               </div>

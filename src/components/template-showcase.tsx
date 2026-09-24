@@ -8,7 +8,7 @@ import { SheetPreview } from "@/components/sheet-preview";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 
-const HERO_TABS: TemplateId[] = ["jake", "harvard", "sidebar", "modern", "minimal", "swiss", "scholar", "timeline", "editorial", "mono-grid"];
+const HERO_TABS: TemplateId[] = ["jake", "harvard", "sidebar", "modern", "minimal", "swiss", "scholar", "timeline", "editorial", "mono", "atlas", "orbit", "mono-grid"];
 
 function useRendered(id: TemplateId) {
   return useMemo(() => renderResumeHtml(SAMPLE_CV, id), [id]);

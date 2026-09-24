@@ -69,7 +69,7 @@ export default async function DashboardPage() {
                 Slot paket {plan} sudah penuh ({limits.maxCvs} CV).
               </p>
               <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
-                Pro menambah sampai 50 CV, membuka 12 template, dan mengaktifkan
+                Pro menambah sampai 50 CV, membuka 18 template Pro, dan mengaktifkan
                 link share publik. Sekali bayar Rp 49.000 lewat QRIS untuk 30
                 hari.{" "}
                 <Link href="/pricing" className="link-rule text-ink">
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                 <ol className="mt-8 border-t border-rule">
                   {[
                     "Isi identitas, lalu tambahkan pengalaman dan pendidikan.",
-                    "Pilih satu dari 12 template — isi CV tidak ikut berubah.",
+                    "Pilih satu dari 20 template — isi CV tidak ikut berubah.",
                     "Unduh PDF-nya, atau aktifkan link publik kalau sudah Pro.",
                   ].map((step, i) => (
                     <li

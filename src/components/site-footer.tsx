@@ -6,7 +6,7 @@ const COLUMNS = [
   {
     title: "Produk",
     links: [
-      { href: "/#template", label: "12 template" },
+      { href: "/#template", label: "20 template" },
       { href: "/#cara-kerja", label: "Cara kerja" },
       { href: "/#faq", label: "Tanya jawab" },
       { href: "/pricing", label: "Harga & QRIS" },

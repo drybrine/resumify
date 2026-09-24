@@ -19,7 +19,7 @@ export const PLANS = {
     periodDays: 30,
     features: [
       "50 CV",
-      "12 template profesional",
+      "20 template profesional",
       "Export PDF HD",
       "Link share publik",
       "Sync cloud",
