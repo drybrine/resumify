@@ -189,4 +189,52 @@ test("database checks and template migration list every template id", () => {
   }
 });
 
+// The expansion shipped eight templates that differed only in typeface and accent
+// colour — the same single-column stack twenty times. Each new template must now
+// own a page structure, and the structure has to exist in BOTH stylesheets: the
+// PDF/share path (styles.ts) and the on-screen preview mirror (globals.css).
+const pdfCss = readFileSync(new URL("../src/lib/templates/styles.ts", import.meta.url), "utf8");
+
+const LAYOUT_ARCHETYPE: Record<string, { marker: string; rule: RegExp; what: string; expects?: number; kind?: "tracks" | "count" }> = {
+  swiss: { marker: "swiss-row", rule: /swiss-row[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "numeral/label/body grid", expects: 3 },
+  scholar: { marker: "scholar-entry", rule: /scholar-entry[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "date-in-the-margin entries", expects: 2 },
+  timeline: { marker: "timeline-entry", rule: /timeline-entry[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "dated rail", expects: 2 },
+  mono: { marker: "mono-gutter", rule: /mono-block[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "numbered monospace listing", expects: 2 },
+  atlas: { marker: "atlas-layout", rule: /atlas-layout[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "masthead + right rail", expects: 2 },
+  editorial: { marker: "editorial-spread", rule: /editorial-spread[^{}]*\{[^{}]*column-count:\s*(\d+)/, what: "two-column spread", expects: 2, kind: "count" },
+  orbit: { marker: "orbit-span", rule: /orbit-grid[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "centred two-block grid", expects: 2 },
+  "mono-grid": { marker: "monogrid-row", rule: /monogrid-row[^{}]*\{[^{}]*grid-template-columns:\s*([^;}]+)/, what: "label/content grid", expects: 2 },
+};
+
+test("every new template owns a page structure that is styled in both stylesheets", () => {
+  const markers = new Set<string>();
+  for (const [id, { marker, rule, what, expects, kind = "tracks" }] of Object.entries(LAYOUT_ARCHETYPE)) {
+    const html = renderResumeHtml(SAMPLE_CV, id as TemplateId);
+    // The marker may sit alongside other classes ("orbit-block orbit-span"), so
+    // match it as a whole class token inside a class attribute.
+    assert.ok(
+      new RegExp(`class="[^"]*\\b${marker}\\b`).test(html),
+      `${id} renders no ${what} element (${marker})`,
+    );
+    const inPreview = previewCss.match(rule);
+    const inPdf = pdfCss.match(rule);
+    assert.ok(inPreview, `globals.css gives ${id} no ${what} — the preview falls back to a plain stack`);
+    assert.ok(inPdf, `styles.ts gives ${id} no ${what} — the PDF would not match the preview`);
+    // A structure that merely exists is not enough: it needs the tracks it claims,
+    // otherwise a two-column stack passes for an asymmetric grid.
+    if (expects) {
+      for (const [file, match] of [["globals.css", inPreview], ["styles.ts", inPdf]] as const) {
+        const declared = match![1].trim();
+        const count = kind === "count" ? Number(declared) : declared.split(/\s+/).length;
+        assert.ok(
+          count >= expects,
+          `${file}: ${id} ${what} declares ${count} ("${declared}"), expected at least ${expects}`,
+        );
+      }
+    }
+    markers.add(marker);
+  }
+  assert.equal(markers.size, Object.keys(LAYOUT_ARCHETYPE).length, "two new templates share the same layout marker");
+});
+
 

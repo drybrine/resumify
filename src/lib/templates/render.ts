@@ -155,24 +155,72 @@ function renderJake(data: CvData): string {
 
 function renderSwiss(data: CvData): string {
   const p = data.personal || {};
-  const sections = [
-    ["01 / PROFILE", data.summary ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""],
-    ["02 / EXPERIENCE", expHtml(data, "role")],
-    ["03 / EDUCATION", eduHtml(data, "role-first")],
-    ["04 / SELECTED WORK", projHtml(data)],
-    ["05 / SKILLS", skillsRows(data)],
-    ["06 / PUBLICATIONS", pubHtml(data)],
-  ] as const;
-  return `<header class="swiss-header"><div class="swiss-kicker">CURRICULUM VITAE / ${esc(p.location || "PROFILE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${sections.map(([label, body]) => body.trim() ? `<section class="swiss-row"><h2>${label}</h2><div>${body}</div></section>` : "").join("")}`;
+  // Asymmetric three-column grid: numeral | label | body, with full-width rules
+  // spanning all three tracks — an International-Typographic page, not a stack.
+  const rows: Array<[string, string, string]> = [
+    ["01", "PROFILE", data.summary?.trim() ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""],
+    ["02", "EXPERIENCE", expHtml(data, "role")],
+    ["03", "EDUCATION", eduHtml(data, "role-first")],
+    ["04", "SELECTED WORK", projHtml(data)],
+    ["05", "SKILLS", skillsRows(data) ? `<div class="skills-block">${skillsRows(data)}</div>` : ""],
+    ["06", "PUBLICATIONS", pubHtml(data)],
+  ];
+  const body = rows
+    .filter(([, , html]) => Boolean(html && html.trim()))
+    .map(
+      ([num, label, html]) =>
+        `<section class="swiss-row"><div class="swiss-num">${num}</div><h2 class="swiss-label">${label}</h2><div class="swiss-body">${html}</div></section>`,
+    )
+    .join("");
+  return `<header class="swiss-header"><div class="swiss-kicker">CURRICULUM VITAE / ${esc(p.location || "PROFILE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="swiss-grid">${body}</div>`;
+}
+
+/** Academic CV: the date sits in the margin, entries hang off it. */
+function scholarRefs(data: CvData): string {
+  if (!(data.publications || []).length) return "";
+  return `<ol class="scholar-refs">${data.publications
+    .map((pub) => {
+      const safeUrl = pub.url ? ensureUrl(pub.url) : "";
+      const link = safeUrl
+        ? ` <a href="${esc(safeUrl)}" target="_blank" rel="noopener">${esc(safeUrl.replace(/^https?:\/\//, "").slice(0, 40))}${safeUrl.length > 48 ? "…" : ""}</a>`
+        : "";
+      return `<li class="pub-item">${esc(pub.text || "")}${link}</li>`;
+    })
+    .join("")}</ol>`;
 }
 
 function renderScholar(data: CvData): string {
   const p = data.personal || {};
-  const parts = [`<header class="scholar-header"><div class="scholar-kicker">ACADEMIC CURRICULUM VITAE</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
-  if (data.summary?.trim()) parts.push(section("Research Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
-  parts.push(section("Education", eduHtml(data, "role-first")));
-  parts.push(section("Research & Professional Experience", expHtml(data, "role")));
-  parts.push(section("Selected Publications", pubHtml(data)));
+  const entries = [
+    ...(data.education || []).map((e) => ({
+      heading: e.degree || e.school,
+      sub: [e.school, e.location].filter(Boolean).join(" · "),
+      period: e.period,
+      bullets: e.bullets,
+    })),
+    ...(data.experience || []).map((e) => ({
+      heading: e.role || e.company,
+      sub: [e.company, e.location].filter(Boolean).join(" · "),
+      period: e.period,
+      bullets: e.bullets,
+    })),
+  ];
+  // The date owns a real margin column, separated from the entry by a rule —
+  // the classic academic CV reading, not another full-width stack.
+  const list = `<div class="scholar-list">${entries
+    .map(
+      (e) =>
+        `<div class="scholar-entry"><div class="scholar-year">${esc(e.period)}</div><div class="scholar-body"><h3>${esc(e.heading)}</h3>${e.sub ? `<p class="scholar-sub">${esc(e.sub)}</p>` : ""}${bulletsHtml(e.bullets)}</div></div>`,
+    )
+    .join("")}</div>`;
+  const parts = [
+    `<header class="scholar-header"><div class="scholar-kicker">ACADEMIC CURRICULUM VITAE</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`,
+  ];
+  if (data.summary?.trim()) {
+    parts.push(section("Research Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  }
+  parts.push(section("Appointments & Education", list));
+  parts.push(section("Selected Publications", scholarRefs(data)));
   parts.push(section("Research Projects", projHtml(data)));
   const skills = skillsRows(data);
   if (skills) parts.push(section("Methods & Expertise", `<div class="skills-block">${skills}</div>`));
@@ -194,53 +242,89 @@ function renderTimeline(data: CvData): string {
   return parts.join("");
 }
 
+/** Typewriter: each section is a listing block ruled down its left edge. */
+/** Typewriter: the page is a monospace listing, every section ruled and numbered. */
 function renderMono(data: CvData): string {
   const p = data.personal || {};
-  const parts = [`<header class="mono-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
-  if (data.summary?.trim()) parts.push(section("Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
-  parts.push(section("Experience", expHtml(data, "role")));
-  parts.push(section("Education", eduHtml(data, "role-first")));
-  parts.push(section("Projects", projHtml(data)));
-  const skills = skillsRows(data);
-  if (skills) parts.push(section("Skills", `<div class="skills-block">${skills}</div>`));
-  parts.push(section("Publications", pubHtml(data)));
-  return parts.join("");
+  const blocks: Array<[string, string]> = [
+    ["profile", data.summary?.trim() ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""],
+    ["experience", expHtml(data, "role")],
+    ["education", eduHtml(data, "role-first")],
+    ["projects", projHtml(data)],
+    ["skills", skillsRows(data) ? `<div class="skills-block">${skillsRows(data)}</div>` : ""],
+    ["publications", pubHtml(data)],
+  ];
+  const body = blocks
+    .filter(([, html]) => Boolean(html && html.trim()))
+    .map(
+      ([fn, html], i) =>
+        `<div class="mono-block"><div class="mono-gutter">${String(i + 1).padStart(2, "0")}</div><div class="mono-body"><div class="mono-fn">${fn}</div><div class="mono-code">${html}</div></div></div>`,
+    )
+    .join("");
+  return `<header class="mono-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${body}`;
 }
 
 function renderAtlas(data: CvData): string {
   const p = data.personal || {};
-  const parts = [`<header class="atlas-header"><div class="atlas-place">${esc(p.location || "AVAILABLE WORLDWIDE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
-  if (data.summary?.trim()) parts.push(section("Overview", `<p class="summary">${esc(data.summary.trim())}</p>`));
-  parts.push(section("Experience", expHtml(data, "role")));
-  parts.push(section("Education", eduHtml(data, "role-first")));
-  parts.push(section("Selected Projects", projHtml(data)));
-  const skills = skillsTags(data);
-  if (skills) parts.push(section("Toolkit", skills));
-  return parts.join("");
+  const main: string[] = [];
+  if (data.summary?.trim()) main.push(section("Overview", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  main.push(section("Experience", expHtml(data, "role")));
+  main.push(section("Education", eduHtml(data, "role-first")));
+  main.push(section("Selected Projects", projHtml(data)));
+
+  const rail: string[] = [];
+  const tags = skillsTags(data);
+  if (tags) rail.push(`<div class="atlas-block"><h3>Toolkit</h3>${tags}</div>`);
+  const langs = langsLine(data, "<br/>");
+  if (langs) rail.push(`<div class="atlas-block"><h3>Languages</h3><div class="langs">${langs}</div></div>`);
+  const pubs = pubHtml(data);
+  if (pubs) rail.push(`<div class="atlas-block"><h3>Publications</h3>${pubs}</div>`);
+
+  const aside = rail.length ? `<aside class="atlas-rail">${rail.join("")}</aside>` : "";
+  return `<header class="atlas-header"><div class="atlas-place">${esc(p.location || "AVAILABLE WORLDWIDE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="atlas-layout"><div class="atlas-main">${main.join("")}</div>${aside}</div>`;
 }
 
+/** Magazine: a drop-cap lede and the short sections flow in two columns. */
 function renderEditorial(data: CvData): string {
   const p = data.personal || {};
-  const parts = [`<header class="editorial-header"><p class="editorial-index">PORTFOLIO / CV</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="editorial-bottom"><span>${esc(p.location || "")}</span><span class="contact">${contactBits(p)}</span></div></header>`];
-  if (data.summary?.trim()) parts.push(section("In brief", `<p class="summary">${esc(data.summary.trim())}</p>`));
-  parts.push(section("Selected experience", expHtml(data, "role")));
-  parts.push(section("Education", eduHtml(data, "role-first")));
-  parts.push(section("Selected work", projHtml(data)));
+  const spread: string[] = [];
+  if (data.summary?.trim()) spread.push(`<p class="editorial-lede">${esc(data.summary.trim())}</p>`);
+  const edu = eduHtml(data, "role-first");
+  if (edu) spread.push(section("Education", edu));
   const skills = skillsRows(data);
-  if (skills) parts.push(section("Capabilities", `<div class="skills-block">${skills}</div>`));
-  return parts.join("");
+  if (skills) spread.push(section("Capabilities", `<div class="skills-block">${skills}</div>`));
+  const langs = langsLine(data);
+  if (langs) spread.push(section("Languages", `<div class="langs">${langs}</div>`));
+
+  const wide: string[] = [];
+  wide.push(section("Selected experience", expHtml(data, "role")));
+  wide.push(section("Selected work", projHtml(data)));
+  wide.push(section("Publications", pubHtml(data)));
+
+  return `<header class="editorial-header"><p class="editorial-index">PORTFOLIO / CV</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="editorial-bottom"><span>${esc(p.location || "")}</span><span class="contact">${contactBits(p)}</span></div></header><div class="editorial-spread">${spread.join("")}</div><div class="editorial-wide">${wide.join("")}</div>`;
 }
 
+/** Orbit: a centred narrow measure under the ring — the page reads as a column. */
+/** Orbit: centred ring header, then the page opens into a two-block grid. */
 function renderOrbit(data: CvData): string {
   const p = data.personal || {};
-  const parts = [`<header class="orbit-header"><div class="orbit-orbit" aria-hidden="true"></div><p class="orbit-label">CAREER PROFILE</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
-  if (data.summary?.trim()) parts.push(section("Summary", `<p class="summary">${esc(data.summary.trim())}</p>`));
-  parts.push(section("Experience", expHtml(data, "role")));
-  parts.push(section("Education", eduHtml(data, "role-first")));
-  parts.push(section("Projects", projHtml(data)));
+  const blk = (title: string, body: string, span = false) =>
+    body && body.trim()
+      ? `<section class="orbit-block${span ? " orbit-span" : ""}"><h2>${title}</h2>${body}</section>`
+      : "";
+  const top: string[] = [];
+  if (data.summary?.trim()) top.push(blk("Summary", `<p class="summary">${esc(data.summary.trim())}</p>`, true));
+  top.push(blk("Experience", expHtml(data, "role"), true));
+
+  const grid: string[] = [];
+  grid.push(blk("Education", eduHtml(data, "role-first")));
+  grid.push(blk("Projects", projHtml(data)));
   const skills = skillsRows(data);
-  if (skills) parts.push(section("Skills", `<div class="skills-block">${skills}</div>`));
-  return parts.join("");
+  if (skills) grid.push(blk("Skills", `<div class="skills-block">${skills}</div>`));
+  const langs = langsLine(data);
+  if (langs) grid.push(blk("Languages", `<div class="langs">${langs}</div>`));
+
+  return `<header class="orbit-header"><div class="orbit-orbit" aria-hidden="true"></div><p class="orbit-label">CAREER PROFILE</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="orbit-body">${top.join("")}</div><div class="orbit-grid">${grid.join("")}</div>`;
 }
 
 function renderMonoGrid(data: CvData): string {
@@ -613,12 +697,12 @@ export const TEMPLATE_META: Record<
     pro: true,
     category: "Tech",
   },
-  swiss: { name: "Swiss", description: "Presisi grid editorial dengan aksen merah", pro: true, category: "ATS / Editorial" },
-  scholar: { name: "Scholar", description: "CV akademik dengan pendidikan dan publikasi utama", pro: true, category: "Academic" },
+  swiss: { name: "Swiss", description: "Grid asimetris: nomor, label, dan isi dalam tiga kolom", pro: true, category: "ATS / Editorial" },
+  scholar: { name: "Scholar", description: "CV akademik: tahun di margin kiri, publikasi bernomor", pro: true, category: "Academic" },
   timeline: { name: "Timeline", description: "Perjalanan karier dengan tanggal dalam satu garis", pro: true, category: "Professional" },
-  mono: { name: "Mono", description: "Monokrom rapi dengan hierarki tipografi", pro: true, category: "Professional" },
-  atlas: { name: "Atlas", description: "Masthead biru dan lokasi yang menonjol", pro: true, category: "Professional" },
-  editorial: { name: "Editorial", description: "Serif dan hierarki ala tata letak majalah", pro: true, category: "Creative" },
-  orbit: { name: "Orbit", description: "Aksen geometris halus dengan alur profesional", pro: true, category: "Creative" },
+  mono: { name: "Mono", description: "Typewriter: tiap seksi blok bergaris kiri, ala listing kode", pro: true, category: "Professional" },
+  atlas: { name: "Atlas", description: "Masthead penuh dengan body dua kolom dan rail kanan", pro: true, category: "Professional" },
+  editorial: { name: "Editorial", description: "Majalah: nama display, ringkasan dua kolom ber-drop cap", pro: true, category: "Creative" },
+  orbit: { name: "Orbit", description: "Kolom terpusat di bawah ring dengan marker kiri", pro: true, category: "Creative" },
   "mono-grid": { name: "Mono Grid", description: "Grid label teknis dalam palet hitam-putih", pro: true, category: "Tech" },
 };
