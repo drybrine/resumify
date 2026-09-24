@@ -48,7 +48,8 @@ create table if not exists public.cvs (
   title text not null default 'Untitled CV',
   template text not null default 'jake' check (template in (
     'jake', 'modern', 'compact', 'elegant', 'sidebar', 'corporate', 'tech', 'minimal',
-    'harvard', 'executive', 'creative', 'terminal'
+    'harvard', 'executive', 'creative', 'terminal',
+    'swiss', 'scholar', 'timeline', 'mono', 'atlas', 'editorial', 'orbit', 'mono-grid'
   )),
   data jsonb not null default '{}'::jsonb,
   share_slug text unique,
@@ -64,7 +65,7 @@ create index if not exists cvs_share_slug_idx on public.cvs(share_slug) where sh
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
   insert into public.profiles (id, email, full_name, avatar_url)
@@ -77,6 +78,9 @@ begin
   return new;
 end;
 $$;
+
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to supabase_auth_admin;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -104,6 +108,9 @@ create trigger cvs_updated_at
   before update on public.cvs
   for each row execute function public.set_updated_at();
 
+-- Trigger-only helper; it is not part of the client-facing RPC API.
+revoke all on function public.set_updated_at() from public, anon, authenticated;
+
 -- RLS
 alter table public.profiles enable row level security;
 alter table public.cvs enable row level security;
@@ -114,12 +121,18 @@ returns boolean
 language sql
 security definer
 stable
+set search_path = ''
 as $$
   select coalesce(
-    (select is_admin from public.profiles where id = auth.uid()),
+    (select p.is_admin from public.profiles as p where p.id = (select auth.uid())),
     false
   );
 $$;
+
+revoke all on function public.is_admin() from public, anon, authenticated;
+-- Safe for public share RLS evaluation: anonymous callers have no auth.uid(),
+-- so this helper returns false and does not expose profile data.
+grant execute on function public.is_admin() to anon, authenticated, service_role;
 
 -- Profiles policies
 drop policy if exists "Users read own profile" on public.profiles;
@@ -140,9 +153,97 @@ create policy "Users manage own cvs"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- Public CV reads are served by a server-only share route that checks the
+-- unguessable slug and current subscription. Do not grant table-wide anon RLS.
+drop policy if exists "Public can read shared cvs" on public.cvs;
 create policy "Public can read shared cvs"
   on public.cvs for select
-  using (is_public = true and share_slug is not null);
+  using (false);
+
+create or replace function public.enforce_cv_share_entitlement()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  owner_plan text;
+  owner_admin boolean;
+  owner_expires timestamptz;
+  needs_pro boolean;
+begin
+  if tg_op = 'INSERT' then
+    needs_pro := new.template not in ('jake', 'minimal')
+      or (new.is_public and new.share_slug is not null);
+  else
+    needs_pro := (
+      new.template not in ('jake', 'minimal')
+      and old.template is distinct from new.template
+    ) or (
+      new.is_public and new.share_slug is not null
+      and (old.is_public is distinct from new.is_public
+        or old.share_slug is distinct from new.share_slug)
+    );
+  end if;
+
+  if not needs_pro then
+    return new;
+  end if;
+
+  select p.plan, p.is_admin, p.plan_expires_at
+    into owner_plan, owner_admin, owner_expires
+    from public.profiles as p
+    where p.id = new.user_id;
+
+  if not coalesce(owner_admin, false)
+    and coalesce(owner_plan, '') <> 'admin'
+    and not (owner_plan = 'pro' and owner_expires > now()) then
+    raise exception 'Pro plan required for this template or public sharing';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.enforce_cv_share_entitlement() from public, anon, authenticated;
+
+drop trigger if exists enforce_cv_share_entitlement_trigger on public.cvs;
+create trigger enforce_cv_share_entitlement_trigger
+  before insert or update on public.cvs
+  for each row execute function public.enforce_cv_share_entitlement();
+
+create or replace function public.enforce_cv_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  user_plan text;
+  is_owner_admin boolean;
+  expires_at timestamptz;
+  cv_count int;
+  max_allowed int;
+begin
+  select p.plan, p.is_admin, p.plan_expires_at
+    into user_plan, is_owner_admin, expires_at
+    from public.profiles as p
+    where p.id = new.user_id;
+
+  select count(*) into cv_count from public.cvs as c where c.user_id = new.user_id;
+
+  max_allowed := case
+    when coalesce(is_owner_admin, false) or user_plan = 'admin' then 999
+    when user_plan = 'pro' and expires_at > now() then 50
+    else 1
+  end;
+
+  if tg_op = 'INSERT' and cv_count >= max_allowed then
+    raise exception 'CV limit reached for plan %', user_plan;
+  end if;
+  return new;
+end;
+$$;
 
 drop policy if exists "Admins read all cvs" on public.cvs;
 create policy "Admins read all cvs"
@@ -153,11 +254,16 @@ create policy "Admins read all cvs"
 create or replace function public.protect_profile_fields()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
   if (new.plan is distinct from old.plan or new.is_admin is distinct from old.is_admin or new.plan_expires_at is distinct from old.plan_expires_at) then
-    if not public.is_admin() then
+    -- Authenticated admins may update their own plan, and trusted server-side
+    -- service-role jobs must update customer plans after a verified payment.
+    -- The database owner can also bootstrap the first admin from the SQL editor.
+    if not public.is_admin()
+      and coalesce(auth.role(), '') <> 'service_role'
+      and session_user not in ('postgres', 'supabase_admin') then
       raise exception 'Forbidden: Only admins can alter plan or admin rights';
     end if;
   end if;
@@ -169,32 +275,7 @@ drop trigger if exists protect_profile_fields_trigger on public.profiles;
 create trigger protect_profile_fields_trigger
   before update on public.profiles
   for each row execute function public.protect_profile_fields();
-create or replace function public.enforce_cv_limit()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-declare
-  user_plan text;
-  cv_count int;
-  max_allowed int;
-begin
-  select plan into user_plan from public.profiles where id = new.user_id;
-  select count(*) into cv_count from public.cvs where user_id = new.user_id;
 
-  max_allowed := case
-    when user_plan = 'free' then 1
-    when user_plan = 'pro' then 50
-    else 999
-  end;
-
-  if tg_op = 'INSERT' and cv_count >= max_allowed then
-    raise exception 'CV limit reached for plan %', user_plan;
-  end if;
-
-  return new;
-end;
-$$;
 
 drop trigger if exists enforce_cv_limit_trigger on public.cvs;
 create trigger enforce_cv_limit_trigger
@@ -221,7 +302,7 @@ create or replace function public.confirm_payment_and_upgrade(
 )
 returns void
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 declare
   v_user_id uuid;
@@ -266,7 +347,7 @@ create or replace function public.auto_confirm_payment_by_amount(
 )
 returns uuid
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 declare
   v_payment_id uuid;
@@ -309,6 +390,18 @@ begin
   return v_payment_id;
 end;
 $$;
+
+-- These SECURITY DEFINER RPCs must only be callable by trusted server code.
+-- PostgreSQL grants EXECUTE to PUBLIC by default unless it is revoked.
+revoke all on function public.confirm_payment_and_upgrade(uuid, uuid, timestamptz)
+  from public, anon, authenticated;
+grant execute on function public.confirm_payment_and_upgrade(uuid, uuid, timestamptz)
+  to service_role;
+revoke all on function public.auto_confirm_payment_by_amount(integer, timestamptz, text)
+  from public, anon, authenticated;
+grant execute on function public.auto_confirm_payment_by_amount(integer, timestamptz, text)
+  to service_role;
+
 -- Plan pricing (single-row settings, editable by admin)
 create table if not exists public.plan_settings (
   id text primary key default 'default' check (id = 'default'),

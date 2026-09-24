@@ -8,7 +8,7 @@ import { SheetPreview } from "@/components/sheet-preview";
 import { Reveal } from "@/components/reveal";
 import { cn } from "@/lib/utils";
 
-const HERO_TABS: TemplateId[] = ["jake", "harvard", "sidebar", "modern", "minimal"];
+const HERO_TABS: TemplateId[] = ["jake", "harvard", "sidebar", "modern", "minimal", "swiss", "scholar", "timeline", "editorial", "mono-grid"];
 
 function useRendered(id: TemplateId) {
   return useMemo(() => renderResumeHtml(SAMPLE_CV, id), [id]);
@@ -59,7 +59,7 @@ export function HeroShowcase() {
         <span>{meta.description}</span>
         <span aria-hidden>·</span>
         <span>contoh isi, layout asli</span>
-        <span className="text-ink-3">(5 dari 12 template, bagian atas halaman)</span>
+        <span className="text-ink-3">({HERO_TABS.length} dari {ALL_TEMPLATES.length} template)</span>
       </figcaption>
     </figure>
   );

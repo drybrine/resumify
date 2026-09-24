@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPublicCv } from "@/lib/actions/cvs";
+import { getPublicCv } from "@/lib/server/public-share";
 import { renderResumeHtml } from "@/lib/templates/render";
 import type { CvData, TemplateId } from "@/lib/types";
 import { Logo } from "@/components/logo";
@@ -16,6 +16,7 @@ export async function generateMetadata({
   return {
     title: cv?.title || "CV yang dibagikan",
     description: "CV yang dibagikan lewat Resumify",
+    robots: { index: false, follow: false },
   };
 }
 

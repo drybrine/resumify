@@ -14,8 +14,27 @@ export function esc(s: unknown): string {
 }
 
 export function ensureUrl(href: string): string {
-  if (!href) return "";
-  return href.startsWith("http") ? href : `https://${href.replace(/^\/\//, "")}`;
+  const input = href.trim();
+  if (!input) return "";
+
+  const explicitHttpUrl = /^https?:\/\//i.test(input);
+  const protocolRelativeUrl = input.startsWith("//");
+  const schemeLikeUrl = /^[a-z][a-z\d+.-]*:/i.test(input);
+  const hasPort = /^[^/:?#]+:\d+(?:[/?#]|$)/.test(input);
+  const candidate = protocolRelativeUrl
+    ? `https:${input}`
+    : explicitHttpUrl || (schemeLikeUrl && !hasPort)
+      ? input
+      : `https://${input}`;
+
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? url.href
+      : "";
+  } catch {
+    return "";
+  }
 }
 
 export function formatDate(iso: string): string {

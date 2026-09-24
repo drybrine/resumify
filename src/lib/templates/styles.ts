@@ -1,4 +1,5 @@
 import type { TemplateId } from "@/lib/types";
+import { esc } from "@/lib/utils";
 
 const BASE = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -258,6 +259,15 @@ const TERMINAL = `
   .resume a { color: #38bdf8; }
 `;
 
+const SWISS = `.resume{font:9.6pt/1.34 Arial,sans-serif;color:#17202b;padding:.55in .58in}.swiss-header{border-bottom:2pt solid #cf312b;padding-bottom:12pt;margin-bottom:13pt}.swiss-kicker{font-size:7.5pt;letter-spacing:1.7pt;color:#cf312b;margin-bottom:8pt}.swiss-header h1{font-size:27pt;margin-bottom:6pt}.swiss-header .contact{font-size:8.7pt;color:#56616d}.resume .swiss-row{display:grid;grid-template-columns:1.05in 1fr;gap:14pt;margin-top:10pt}.swiss-row h2{font:700 7.8pt Arial;color:#cf312b;border:0;padding:0;margin:1pt 0}.swiss-row>div{border-bottom:.5pt solid #d7dce1;padding-bottom:7pt}`;
+const SCHOLAR = `.resume{font:10.3pt/1.35 Garamond,Georgia,serif;color:#25201c;padding:.55in .68in}.scholar-header{text-align:center;border-bottom:3pt double #762f38;padding-bottom:9pt;margin-bottom:12pt}.scholar-kicker{font:700 7.5pt Arial;letter-spacing:1.8pt;color:#762f38}.scholar-header h1{font-size:23pt;color:#762f38}.scholar-header .contact{font:8.8pt Arial;color:#655d56}.resume h2{font-size:10.8pt;color:#762f38;border-bottom:.7pt solid #c9b8b5;padding-bottom:2pt;margin-bottom:5pt}.resume section{margin-top:9pt}.resume .entry{margin-bottom:6pt}`;
+const TIMELINE = `.resume{font:9.5pt/1.35 Arial,sans-serif;color:#1b2935;padding:.5in .58in}.timeline-header{border-left:4pt solid #126b67;padding:4pt 0 8pt 12pt;margin-bottom:13pt}.timeline-kicker{color:#126b67;font-size:7.5pt;letter-spacing:1.3pt}.timeline-header h1{font-size:24pt}.resume h2{font-size:10pt;text-transform:uppercase;letter-spacing:.8pt;color:#126b67;border-bottom:1pt solid #c7d7d5;padding-bottom:3pt;margin-bottom:8pt}.timeline-entry{display:grid;grid-template-columns:.95in 1fr;gap:12pt;position:relative;margin:0 0 9pt 3pt;padding-left:12pt;border-left:1pt solid #9abbb8}.timeline-entry:before{content:'';position:absolute;width:5pt;height:5pt;border-radius:50%;background:#126b67;left:-3pt;top:3pt}.timeline-date{color:#126b67;font-size:8.2pt;font-weight:bold}.timeline-org{font-size:8.8pt;color:#66757e}`;
+const MONO = `.resume{font:9.6pt/1.34 Arial,sans-serif;color:#202020;padding:.52in .62in;border-top:5pt solid #202020}.mono-header{display:flex;justify-content:space-between;gap:16pt;align-items:end;border-bottom:1pt solid #333;padding-bottom:7pt;margin-bottom:10pt}.mono-header h1{font-size:23pt}.mono-header .contact{max-width:3.4in;text-align:right;font-size:8pt;color:#555}.resume h2{font-size:9.2pt;letter-spacing:1pt;text-transform:uppercase;border-bottom:1pt solid #333;padding-bottom:2pt;margin-bottom:5pt}.resume section{margin-top:9pt}`;
+const ATLAS = `.resume{font:9.5pt/1.32 Arial,sans-serif;color:#202b38;padding:.48in .56in}.atlas-header{background:#153a5b;color:white;padding:15pt 17pt 12pt;margin:-.48in -.56in 12pt}.atlas-place{font-size:7.5pt;letter-spacing:1.2pt;text-transform:uppercase;color:#a8c7dc}.atlas-header h1{font-size:23pt;margin:5pt 0}.atlas-header .contact,.atlas-header a{color:#e0edf5;font-size:8.5pt}.resume h2{font-size:10.3pt;color:#153a5b;border-bottom:1pt solid #b6c9d5;padding-bottom:2pt;margin-bottom:5pt}.resume section{margin-top:8pt}.tag{color:#153a5b;border-color:#8aa9be;background:#eff5f8}`;
+const EDITORIAL = `.resume{font:10pt/1.38 Georgia,'Times New Roman',serif;color:#26231f;padding:.58in .68in}.editorial-header{border-block:1pt solid #27231f;padding:9pt 0 10pt;margin-bottom:14pt}.editorial-index{font:bold 7.5pt Arial;letter-spacing:1.5pt;color:#a14b36;margin-bottom:8pt}.editorial-header h1{font-size:29pt;line-height:1;margin-bottom:8pt}.editorial-bottom{display:flex;justify-content:space-between;gap:12pt;font:8.1pt Arial;color:#625d55}.editorial-bottom .contact{text-align:right}.resume h2{font:italic 600 13pt Georgia,serif;border-bottom:.5pt solid #c9c2b8;padding-bottom:3pt;margin-bottom:6pt}.resume section{margin-top:11pt}`;
+const ORBIT = `.resume{font:9.7pt/1.35 Arial,sans-serif;color:#232a3a;padding:.5in .6in}.orbit-header{position:relative;overflow:hidden;border-bottom:1pt solid #d3d7e1;padding-bottom:10pt;margin-bottom:11pt}.orbit-orbit{position:absolute;width:1.35in;height:1.35in;right:.15in;top:-.75in;border:12pt solid #eee9f8;border-radius:50%}.orbit-label{position:relative;color:#6752a3;font-size:7.5pt;letter-spacing:1.6pt}.orbit-header h1,.orbit-header .contact{position:relative}.orbit-header h1{font-size:25pt}.orbit-header .contact{font-size:8.5pt;color:#62697a}.resume h2{font-size:10pt;color:#6752a3;letter-spacing:.7pt;text-transform:uppercase;border-bottom:1pt solid #d8d1e8;padding-bottom:3pt;margin-bottom:6pt}`;
+const MONO_GRID = `.resume{font:8.5pt/1.4 'SFMono-Regular',Consolas,monospace;color:#191919;padding:.52in .58in}.monogrid-header{border-bottom:2pt solid #111;padding-bottom:8pt;margin-bottom:12pt}.monogrid-header h1{font-size:20pt}.monogrid-header .contact{color:#555;font-size:7.5pt}.resume .monogrid-row{display:grid;grid-template-columns:1.1in 1fr;gap:12pt;margin-top:8pt}.monogrid-row h2{font:700 7pt Consolas,monospace;border:0;padding:0;margin:1pt 0}.monogrid-row>div{border-top:.5pt solid #aaa;padding-top:3pt}`;
+
 const CSS_MAP: Record<TemplateId, string> = {
   jake: JAKE,
   modern: MODERN,
@@ -271,6 +281,14 @@ const CSS_MAP: Record<TemplateId, string> = {
   executive: EXECUTIVE,
   creative: CREATIVE,
   terminal: TERMINAL,
+  swiss: SWISS,
+  scholar: SCHOLAR,
+  timeline: TIMELINE,
+  mono: MONO,
+  atlas: ATLAS,
+  editorial: EDITORIAL,
+  orbit: ORBIT,
+  "mono-grid": MONO_GRID,
 };
 
 export function getTemplateCss(template: TemplateId): string {
@@ -286,7 +304,7 @@ export function wrapResumeDocument(
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>${title}</title>
+  <title>${esc(title)}</title>
   <style>${getTemplateCss(template)}</style>
 </head>
 <body>

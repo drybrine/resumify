@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { safeInternalPath } from "@/lib/auth-redirect";
 
 async function getOrigin() {
   const headersList = await headers();
@@ -55,23 +56,24 @@ export async function signIn(
   const next = String(formData.get("next") || "/dashboard");
 
   if (!email || !password) return { error: "Email and password required." };
+  const nextPath = safeInternalPath(next);
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) return { error: error.message };
-  const isValidNext = next.startsWith("/") && !next.startsWith("//");
-  redirect(isValidNext ? next : "/dashboard");
+  redirect(nextPath);
 }
 
 export async function signInWithGoogle(next = "/dashboard") {
+  const nextPath = safeInternalPath(next);
   const supabase = await createClient();
   const origin = await getOrigin();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
     },
   });
 

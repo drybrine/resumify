@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { safeInternalPath } from "@/lib/auth-redirect";
+
+function callbackRedirect(next: string, origin: string): URL {
+  const path = safeInternalPath(next, origin);
+  return new URL(path, origin);
+}
+
+export { callbackRedirect };
+
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -10,8 +19,7 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const isValidNext = next.startsWith("/") && !next.startsWith("//");
-      return NextResponse.redirect(`${origin}${isValidNext ? next : "/dashboard"}`);
+      return NextResponse.redirect(callbackRedirect(next, origin));
     }
   }
 

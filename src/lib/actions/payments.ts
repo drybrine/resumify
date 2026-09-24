@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getProPricing, getProPricingService } from "@/lib/plan-pricing";
+import { getProPricing } from "@/lib/plan-pricing";
+
 import {
   buildDynamicQris,
   makeUniqueAmount,
@@ -47,6 +48,7 @@ async function expireStalePayments() {
  */
 export async function createProPayment() {
   const { supabase, user } = await requireUser();
+  const paymentAdmin = await createServiceClient();
   await expireStalePayments();
 
   const { data: profile } = await supabase
@@ -68,7 +70,7 @@ export async function createProPayment() {
   }
 
   // Cancel pending lama milik user
-  await supabase
+  await paymentAdmin
     .from("payments")
     .update({ status: "cancelled" })
     .eq("user_id", user.id)
@@ -93,9 +95,9 @@ export async function createProPayment() {
         Date.now() + PAYMENT_TTL_MINUTES * 60 * 1000
       ).toISOString();
 
-      const { data, error } = await supabase
-        .from("payments")
-        .insert({
+      const { data, error } = await paymentAdmin
+            .from("payments")
+            .insert({
           user_id: user.id,
           plan: "pro",
           amount_idr: amount,
@@ -225,70 +227,7 @@ export async function confirmPayment(paymentId: string) {
  * Auto-confirm by unique amount (mutasi match).
  * Called from webhook / cron — no user session.
  */
-export async function autoConfirmByAmount(
-  amountIdr: number,
-  source = "webhook"
-): Promise<{
-  success?: boolean;
-  paymentId?: string;
-  error?: string;
-  matched?: boolean;
-}> {
-  if (!Number.isInteger(amountIdr) || amountIdr < 1) {
-    return { error: "Invalid amount" };
-  }
 
-  await expireStalePayments();
-
-  const admin = await createServiceClient();
-  const { periodDays } = await getProPricingService();
-  const expires = new Date();
-  expires.setDate(expires.getDate() + periodDays);
-
-  const { data: paymentId, error: rpcErr } = await admin.rpc(
-    "auto_confirm_payment_by_amount",
-    {
-      p_amount_idr: amountIdr,
-      p_expires_at: expires.toISOString(),
-      p_source: source.slice(0, 40),
-    }
-  );
-
-  if (rpcErr) {
-    // Fallback: match + update manually
-    const { data: payment } = await admin
-      .from("payments")
-      .select("id, user_id, status, expires_at")
-      .eq("amount_idr", amountIdr)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (!payment) return { matched: false, error: "No pending match" };
-
-    if (new Date(payment.expires_at) < new Date()) {
-      await admin
-        .from("payments")
-        .update({ status: "expired" })
-        .eq("id", payment.id);
-      return { matched: false, error: "Payment expired" };
-    }
-
-    const result = await finalizePayment(payment.id, null, source);
-    if (result.error) return { matched: true, error: result.error };
-    return { success: true, matched: true, paymentId: payment.id };
-  }
-
-  if (!paymentId) {
-    return { matched: false, error: "No pending match" };
-  }
-
-  revalidatePath("/admin");
-  revalidatePath("/dashboard");
-  revalidatePath("/pricing");
-  return { success: true, matched: true, paymentId: String(paymentId) };
-}
 
 async function finalizePayment(
   paymentId: string,
@@ -308,7 +247,7 @@ async function finalizePayment(
     return { error: `Status sudah ${payment.status}` };
   }
 
-  const { periodDays } = await getProPricingService();
+  const { periodDays } = await getProPricing();
   const expires = new Date();
   expires.setDate(expires.getDate() + periodDays);
 

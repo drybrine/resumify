@@ -24,6 +24,7 @@ async function requireAdminUser() {
 }
 
 export async function setUserPlan(userId: string, plan: Plan) {
+  await requireAdminUser();
   if (plan !== "free" && plan !== "pro") {
     throw new Error("Invalid plan target. Only free or pro allowed.");
   }

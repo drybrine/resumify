@@ -92,8 +92,9 @@ function pubHtml(data: CvData): string {
   if (!(data.publications || []).length) return "";
   return `<ul>${data.publications
     .map((pub) => {
-      const link = pub.url
-        ? ` <a href="${esc(pub.url)}" target="_blank" rel="noopener">${esc(pub.url.replace(/^https?:\/\//, "").slice(0, 40))}${pub.url.length > 48 ? "…" : ""}</a>`
+      const safeUrl = pub.url ? ensureUrl(pub.url) : "";
+      const link = safeUrl
+        ? ` <a href="${esc(safeUrl)}" target="_blank" rel="noopener">${esc(safeUrl.replace(/^https?:\/\//, "").slice(0, 40))}${safeUrl.length > 48 ? "…" : ""}</a>`
         : "";
       return `<li class="pub-item">${esc(pub.text || "")}${link}</li>`;
     })
@@ -150,6 +151,102 @@ function renderJake(data: CvData): string {
   const lg = langsLine(data, "&nbsp;&nbsp;&nbsp;");
   if (lg) parts.push(section("Languages", `<div class="langs">${lg}</div>`));
   return parts.join("");
+}
+
+function renderSwiss(data: CvData): string {
+  const p = data.personal || {};
+  const sections = [
+    ["01 / PROFILE", data.summary ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""],
+    ["02 / EXPERIENCE", expHtml(data, "role")],
+    ["03 / EDUCATION", eduHtml(data, "role-first")],
+    ["04 / SELECTED WORK", projHtml(data)],
+    ["05 / SKILLS", skillsRows(data)],
+    ["06 / PUBLICATIONS", pubHtml(data)],
+  ] as const;
+  return `<header class="swiss-header"><div class="swiss-kicker">CURRICULUM VITAE / ${esc(p.location || "PROFILE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${sections.map(([label, body]) => body.trim() ? `<section class="swiss-row"><h2>${label}</h2><div>${body}</div></section>` : "").join("")}`;
+}
+
+function renderScholar(data: CvData): string {
+  const p = data.personal || {};
+  const parts = [`<header class="scholar-header"><div class="scholar-kicker">ACADEMIC CURRICULUM VITAE</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  if (data.summary?.trim()) parts.push(section("Research Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Education", eduHtml(data, "role-first")));
+  parts.push(section("Research & Professional Experience", expHtml(data, "role")));
+  parts.push(section("Selected Publications", pubHtml(data)));
+  parts.push(section("Research Projects", projHtml(data)));
+  const skills = skillsRows(data);
+  if (skills) parts.push(section("Methods & Expertise", `<div class="skills-block">${skills}</div>`));
+  const langs = langsLine(data);
+  if (langs) parts.push(section("Languages", `<div class="langs">${langs}</div>`));
+  return parts.join("");
+}
+
+function renderTimeline(data: CvData): string {
+  const p = data.personal || {};
+  const entries = [...(data.experience || []).map((e) => ({ heading: e.role || e.company, org: e.company, location: e.location, period: e.period, bullets: e.bullets })), ...(data.education || []).map((e) => ({ heading: e.degree || e.school, org: e.school, location: e.location, period: e.period, bullets: e.bullets }))];
+  const timeline = entries.map((item) => `<div class="timeline-entry"><div class="timeline-date">${esc(item.period)}</div><div class="timeline-content"><h3>${esc(item.heading)}</h3><p class="timeline-org">${esc(item.org)}${item.location ? ` · ${esc(item.location)}` : ""}</p>${bulletsHtml(item.bullets)}</div></div>`).join("");
+  const parts = [`<header class="timeline-header"><p class="timeline-kicker">EXPERIENCE / EDUCATION</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  if (data.summary?.trim()) parts.push(section("Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Career timeline", `<div class="timeline">${timeline}</div>`));
+  parts.push(section("Selected Projects", projHtml(data)));
+  const skills = skillsRows(data);
+  if (skills) parts.push(section("Skills", `<div class="skills-block">${skills}</div>`));
+  return parts.join("");
+}
+
+function renderMono(data: CvData): string {
+  const p = data.personal || {};
+  const parts = [`<header class="mono-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  if (data.summary?.trim()) parts.push(section("Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Experience", expHtml(data, "role")));
+  parts.push(section("Education", eduHtml(data, "role-first")));
+  parts.push(section("Projects", projHtml(data)));
+  const skills = skillsRows(data);
+  if (skills) parts.push(section("Skills", `<div class="skills-block">${skills}</div>`));
+  parts.push(section("Publications", pubHtml(data)));
+  return parts.join("");
+}
+
+function renderAtlas(data: CvData): string {
+  const p = data.personal || {};
+  const parts = [`<header class="atlas-header"><div class="atlas-place">${esc(p.location || "AVAILABLE WORLDWIDE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  if (data.summary?.trim()) parts.push(section("Overview", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Experience", expHtml(data, "role")));
+  parts.push(section("Education", eduHtml(data, "role-first")));
+  parts.push(section("Selected Projects", projHtml(data)));
+  const skills = skillsTags(data);
+  if (skills) parts.push(section("Toolkit", skills));
+  return parts.join("");
+}
+
+function renderEditorial(data: CvData): string {
+  const p = data.personal || {};
+  const parts = [`<header class="editorial-header"><p class="editorial-index">PORTFOLIO / CV</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="editorial-bottom"><span>${esc(p.location || "")}</span><span class="contact">${contactBits(p)}</span></div></header>`];
+  if (data.summary?.trim()) parts.push(section("In brief", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Selected experience", expHtml(data, "role")));
+  parts.push(section("Education", eduHtml(data, "role-first")));
+  parts.push(section("Selected work", projHtml(data)));
+  const skills = skillsRows(data);
+  if (skills) parts.push(section("Capabilities", `<div class="skills-block">${skills}</div>`));
+  return parts.join("");
+}
+
+function renderOrbit(data: CvData): string {
+  const p = data.personal || {};
+  const parts = [`<header class="orbit-header"><div class="orbit-orbit" aria-hidden="true"></div><p class="orbit-label">CAREER PROFILE</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  if (data.summary?.trim()) parts.push(section("Summary", `<p class="summary">${esc(data.summary.trim())}</p>`));
+  parts.push(section("Experience", expHtml(data, "role")));
+  parts.push(section("Education", eduHtml(data, "role-first")));
+  parts.push(section("Projects", projHtml(data)));
+  const skills = skillsRows(data);
+  if (skills) parts.push(section("Skills", `<div class="skills-block">${skills}</div>`));
+  return parts.join("");
+}
+
+function renderMonoGrid(data: CvData): string {
+  const p = data.personal || {};
+  const rows = [["PROFILE", data.summary?.trim() ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""], ["EXPERIENCE", expHtml(data, "role")], ["EDUCATION", eduHtml(data, "role-first")], ["PROJECTS", projHtml(data)], ["SKILLS", skillsRows(data)], ["PUBLICATIONS", pubHtml(data)]] as const;
+  return `<header class="monogrid-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${rows.map(([label, body]) => body.trim() ? `<section class="monogrid-row"><h2>${label}</h2><div>${body}</div></section>` : "").join("")}`;
 }
 
 function renderModern(data: CvData): string {
@@ -418,6 +515,22 @@ export function renderResumeHtml(data: CvData, template: TemplateId = "jake"): s
       return renderCreative(data);
     case "terminal":
       return renderTerminal(data);
+    case "swiss":
+      return renderSwiss(data);
+    case "scholar":
+      return renderScholar(data);
+    case "timeline":
+      return renderTimeline(data);
+    case "mono":
+      return renderMono(data);
+    case "atlas":
+      return renderAtlas(data);
+    case "editorial":
+      return renderEditorial(data);
+    case "orbit":
+      return renderOrbit(data);
+    case "mono-grid":
+      return renderMonoGrid(data);
     case "jake":
     default:
       return renderJake(data);
@@ -500,4 +613,12 @@ export const TEMPLATE_META: Record<
     pro: true,
     category: "Tech",
   },
+  swiss: { name: "Swiss", description: "Presisi grid editorial dengan aksen merah", pro: true, category: "ATS / Editorial" },
+  scholar: { name: "Scholar", description: "CV akademik dengan pendidikan dan publikasi utama", pro: true, category: "Academic" },
+  timeline: { name: "Timeline", description: "Perjalanan karier dengan tanggal dalam satu garis", pro: true, category: "Professional" },
+  mono: { name: "Mono", description: "Monokrom rapi dengan hierarki tipografi", pro: true, category: "Professional" },
+  atlas: { name: "Atlas", description: "Masthead biru dan lokasi yang menonjol", pro: true, category: "Professional" },
+  editorial: { name: "Editorial", description: "Serif dan hierarki ala tata letak majalah", pro: true, category: "Creative" },
+  orbit: { name: "Orbit", description: "Aksen geometris halus dengan alur profesional", pro: true, category: "Creative" },
+  "mono-grid": { name: "Mono Grid", description: "Grid label teknis dalam palet hitam-putih", pro: true, category: "Tech" },
 };

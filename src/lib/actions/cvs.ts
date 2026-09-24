@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV } from "@/lib/cv-data";
-import type { CvData, Plan, TemplateId } from "@/lib/types";
+import { effectivePlan } from "@/lib/plan-access";
+import { isTemplateId, type CvData, type Plan, type TemplateId } from "@/lib/types";
+import { canUseTemplate } from "@/lib/template-entitlement";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -16,15 +18,24 @@ async function requireUser() {
   return { supabase, user };
 }
 
-async function getPlan(userId: string): Promise<Plan> {
+async function getProfilePlan(userId: string): Promise<{
+  plan: Plan;
+  expiresAt: string | null;
+}> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("plan, is_admin")
+    .select("plan, is_admin, plan_expires_at")
     .eq("id", userId)
     .single();
-  if (data?.is_admin) return "admin";
-  return (data?.plan as Plan) || "free";
+  return {
+    plan: effectivePlan(
+      data?.plan as Plan | undefined,
+      data?.is_admin ?? false,
+      data?.plan_expires_at,
+    ),
+    expiresAt: data?.plan_expires_at ?? null,
+  };
 }
 
 export async function listCvs() {
@@ -50,25 +61,13 @@ export async function getCv(id: string) {
   return data;
 }
 
-export async function getPublicCv(slug: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("cvs")
-    .select("id, title, template, data, share_slug, updated_at")
-    .eq("share_slug", slug)
-    .eq("is_public", true)
-    .single();
-  if (error || !data) return null;
-  return data;
-}
-
 export async function createCv(opts?: {
   title?: string;
   sample?: boolean;
   template?: TemplateId;
 }) {
   const { supabase, user } = await requireUser();
-  const plan = await getPlan(user.id);
+  const { plan, expiresAt } = await getProfilePlan(user.id);
   const limits = PLAN_LIMITS[plan];
 
   const { count } = await supabase
@@ -80,8 +79,12 @@ export async function createCv(opts?: {
     throw new Error(`Limit ${limits.maxCvs} CV for plan ${plan}. Upgrade to Pro.`);
   }
 
-  const template = opts?.template || "jake";
-  if (!limits.templates.includes(template)) {
+  const requestedTemplate = opts?.template ?? "jake";
+  if (!isTemplateId(requestedTemplate)) {
+    throw new Error("Unknown CV template.");
+  }
+  const template = requestedTemplate;
+  if (!limits.templates.includes(template) || !canUseTemplate(template, plan, expiresAt)) {
     throw new Error("Template requires Pro plan.");
   }
 
@@ -107,13 +110,20 @@ export async function updateCv(
     title?: string;
     template?: TemplateId;
     data?: CvData;
-  }
+  },
 ) {
   const { supabase, user } = await requireUser();
-  const plan = await getPlan(user.id);
+  const { plan, expiresAt } = await getProfilePlan(user.id);
   const limits = PLAN_LIMITS[plan];
 
-  if (payload.template && !limits.templates.includes(payload.template)) {
+  if (payload.template !== undefined && !isTemplateId(payload.template)) {
+    return { error: "Unknown CV template." };
+  }
+  if (
+    payload.template !== undefined &&
+    (!limits.templates.includes(payload.template) ||
+      !canUseTemplate(payload.template, plan, expiresAt))
+  ) {
     return { error: "Template requires Pro plan." };
   }
 
@@ -147,7 +157,7 @@ export async function deleteCv(id: string) {
 
 export async function toggleShare(id: string, enable: boolean) {
   const { supabase, user } = await requireUser();
-  const plan = await getPlan(user.id);
+  const { plan } = await getProfilePlan(user.id);
   const limits = PLAN_LIMITS[plan];
 
   if (enable && !limits.share) {

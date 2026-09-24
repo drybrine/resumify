@@ -14,7 +14,7 @@ Next.js 16 + Supabase + **QRIS (Indonesia)**. ATS resume builder with multi-CV c
 | Feature | Free | Pro (Rp 49.000 / 30 hari) |
 |--------|------|-----|
 | CVs | 1 | 50 |
-| Templates | Jake | Jake, Modern, Compact |
+| Templates | Jake, Minimal | Jake, Modern, Compact, Elegant, Sidebar, Corporate, Tech, Harvard, Executive, Creative, Terminal, Swiss, Scholar, Timeline, Mono, Atlas, Editorial, Orbit, Mono Grid |
 | PDF export | ✓ | ✓ |
 | Share link | — | ✓ |
 | Cloud save | ✓ | ✓ |

@@ -12,7 +12,15 @@ export type TemplateId =
   | "harvard"
   | "executive"
   | "creative"
-  | "terminal";
+  | "terminal"
+  | "swiss"
+  | "scholar"
+  | "timeline"
+  | "mono"
+  | "atlas"
+  | "editorial"
+  | "orbit"
+  | "mono-grid";
 
 export const ALL_TEMPLATES: TemplateId[] = [
   "jake",
@@ -27,7 +35,19 @@ export const ALL_TEMPLATES: TemplateId[] = [
   "executive",
   "creative",
   "terminal",
+  "swiss",
+  "scholar",
+  "timeline",
+  "mono",
+  "atlas",
+  "editorial",
+  "orbit",
+  "mono-grid",
 ];
+
+export function isTemplateId(value: unknown): value is TemplateId {
+  return typeof value === "string" && (ALL_TEMPLATES as readonly string[]).includes(value);
+}
 
 export interface PersonalInfo {
   fullName: string;

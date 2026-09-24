@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { autoConfirmByAmount } from "@/lib/actions/payments";
+import { autoConfirmByAmount } from "@/lib/server/payment-confirmation";
 
 /**
  * Auto-confirm webhook — match credit by unique amount_idr.
