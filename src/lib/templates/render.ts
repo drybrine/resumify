@@ -1,4 +1,6 @@
 import type { CvData, TemplateId } from "@/lib/types";
+import { isTemplateId } from "@/lib/types";
+import { normalizeCvData } from "@/lib/cv-data";
 import { esc, ensureUrl } from "@/lib/utils";
 
 function linkify(text: string, href?: string): string {
@@ -576,48 +578,55 @@ function renderTerminal(data: CvData): string {
 }
 
 export function renderResumeHtml(data: CvData, template: TemplateId = "jake"): string {
-  switch (template) {
+  // Every renderer below reads `data.personal.x` and `item.y` directly. Normalise
+  // once here so a null column or an unsaved client draft cannot reach them.
+  const cv = normalizeCvData(data);
+  // Same for the id: a value stored before an allow-list change must fall back to
+  // a real template instead of rendering an unstyled page.
+  const id: TemplateId = isTemplateId(template) ? template : "jake";
+
+  switch (id) {
     case "modern":
-      return renderModern(data);
+      return renderModern(cv);
     case "compact":
-      return renderCompact(data);
+      return renderCompact(cv);
     case "elegant":
-      return renderElegant(data);
+      return renderElegant(cv);
     case "sidebar":
-      return renderSidebar(data);
+      return renderSidebar(cv);
     case "corporate":
-      return renderCorporate(data);
+      return renderCorporate(cv);
     case "tech":
-      return renderTech(data);
+      return renderTech(cv);
     case "minimal":
-      return renderMinimal(data);
+      return renderMinimal(cv);
     case "harvard":
-      return renderHarvard(data);
+      return renderHarvard(cv);
     case "executive":
-      return renderExecutive(data);
+      return renderExecutive(cv);
     case "creative":
-      return renderCreative(data);
+      return renderCreative(cv);
     case "terminal":
-      return renderTerminal(data);
+      return renderTerminal(cv);
     case "swiss":
-      return renderSwiss(data);
+      return renderSwiss(cv);
     case "scholar":
-      return renderScholar(data);
+      return renderScholar(cv);
     case "timeline":
-      return renderTimeline(data);
+      return renderTimeline(cv);
     case "mono":
-      return renderMono(data);
+      return renderMono(cv);
     case "atlas":
-      return renderAtlas(data);
+      return renderAtlas(cv);
     case "editorial":
-      return renderEditorial(data);
+      return renderEditorial(cv);
     case "orbit":
-      return renderOrbit(data);
+      return renderOrbit(cv);
     case "mono-grid":
-      return renderMonoGrid(data);
+      return renderMonoGrid(cv);
     case "jake":
     default:
-      return renderJake(data);
+      return renderJake(cv);
   }
 }
 

@@ -1,4 +1,5 @@
 import type { TemplateId } from "@/lib/types";
+import { isTemplateId } from "@/lib/types";
 import { esc } from "@/lib/utils";
 
 const BASE = `
@@ -295,20 +296,30 @@ export function getTemplateCss(template: TemplateId): string {
   return BASE + (CSS_MAP[template] || JAKE);
 }
 
+/**
+ * The template id ends up in a class attribute, and `CSS_MAP[unknown]` silently
+ * falls back — but an unvalidated value from the database would be interpolated
+ * into the document markup. Resolve it through the allow-list instead.
+ */
+function safeTemplate(template: unknown): TemplateId {
+  return isTemplateId(template) ? template : "jake";
+}
+
 export function wrapResumeDocument(
   bodyHtml: string,
   template: TemplateId,
   title = "Resume"
 ): string {
+  const id = safeTemplate(template);
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
   <title>${esc(title)}</title>
-  <style>${getTemplateCss(template)}</style>
+  <style>${getTemplateCss(id)}</style>
 </head>
 <body>
-  <article class="resume template-${template}">${bodyHtml}</article>
+  <article class="resume template-${id}">${bodyHtml}</article>
 </body>
 </html>`;
 }

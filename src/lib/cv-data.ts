@@ -1,4 +1,4 @@
-import type { CvData, TemplateId } from "./types";
+import type { CvData, PersonalInfo, TemplateId } from "./types";
 import { ALL_TEMPLATES } from "./types";
 
 export const EMPTY_CV: CvData = {
@@ -19,6 +19,85 @@ export const EMPTY_CV: CvData = {
   skills: [],
   languages: [],
 };
+
+const PERSONAL_KEYS: (keyof PersonalInfo)[] = [
+  "fullName",
+  "location",
+  "email",
+  "phone",
+  "github",
+  "website",
+  "linkedin",
+];
+
+const LIST_KEYS: (keyof CvData)[] = [
+  "education",
+  "experience",
+  "projects",
+  "publications",
+  "skills",
+  "languages",
+];
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return "";
+}
+
+function asStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(asString).filter((s) => s.length > 0) : [];
+}
+
+/**
+ * Coerce whatever is in the database (or in an unsaved client draft) into a shape
+ * the renderers can walk without guarding. A CV row written by an older schema,
+ * a partially loaded draft, or a null `data` column would otherwise blow up deep
+ * inside a template with "Cannot read properties of undefined" — a blank 500 with
+ * no message for the user, and no clue in the log about which field was missing.
+ */
+export function normalizeCvData(input: unknown): CvData {
+  const raw = asRecord(input);
+  const personal = asRecord(raw.personal);
+
+  const out: CvData = {
+    personal: PERSONAL_KEYS.reduce(
+      (acc, key) => ({ ...acc, [key]: asString(personal[key]) }),
+      {} as PersonalInfo,
+    ),
+    summary: asString(raw.summary),
+    education: [],
+    experience: [],
+    projects: [],
+    publications: [],
+    skills: [],
+    languages: [],
+  };
+
+  for (const key of LIST_KEYS) {
+    const items = Array.isArray(raw[key]) ? (raw[key] as unknown[]) : [];
+    // Drop non-object entries: a stray null/string in the array would crash the
+    // per-item field reads just as hard as a missing array would.
+    (out[key] as unknown[]) = items
+      .filter((item) => item && typeof item === "object")
+      .map((item) => {
+        const rec = asRecord(item);
+        const shaped: Record<string, unknown> = {};
+        for (const [field, value] of Object.entries(rec)) {
+          shaped[field] = Array.isArray(value) ? asStringList(value) : asString(value);
+        }
+        return shaped;
+      });
+  }
+
+  return out;
+}
 
 export const SAMPLE_CV: CvData = {
   personal: {

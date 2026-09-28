@@ -225,21 +225,39 @@ export function CvEditor({
   async function onPdf() {
     setPdfLoading(true);
     try {
-      await updateCv(cv.id, { title, template, data });
-      const res = await fetch(`/api/cvs/${cv.id}/pdf`, { method: "POST" });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        notice(err.error || "Gagal membuat PDF", true);
+      // The PDF is rendered from the SAVED row, so a failed save would silently
+      // hand the user a PDF of the previous version — surface the error instead.
+      const saved = await updateCv(cv.id, { title, template, data });
+      if (saved?.error) {
+        notice(saved.error, true);
         return;
       }
+
+      const res = await fetch(`/api/cvs/${cv.id}/pdf`, { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        notice(err?.error || `Gagal membuat PDF (${res.status})`, true);
+        return;
+      }
+
       const blob = await res.blob();
+      if (!blob.size) {
+        notice("PDF kosong — coba lagi", true);
+        return;
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${title || "cv"}.pdf`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      // Revoking straight away can cancel the download in some browsers.
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
       notice("PDF terunduh");
+    } catch (e) {
+      notice(e instanceof Error ? e.message : "Gagal mengunduh PDF", true);
     } finally {
       setPdfLoading(false);
     }

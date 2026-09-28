@@ -57,8 +57,11 @@ export async function getCv(id: string) {
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
-  if (error || !data) return null;
-  return data;
+  // Same defence as the PDF route: an empty array from a proxy/mock is "not found",
+  // not a CV — returning it would hand the editor page a row with no fields.
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row) return null;
+  return row;
 }
 
 export async function createCv(opts?: {
@@ -174,8 +177,12 @@ export async function toggleShare(id: string, enable: boolean) {
     .single();
 
   if (error) return { error: error.message };
+  // An update that matched nothing can come back without an error; reporting
+  // success there would tell the user a link exists when it does not.
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { error: "CV tidak ditemukan." };
   revalidatePath(`/editor/${id}`);
-  return { success: true, share_slug: data.share_slug, is_public: data.is_public };
+  return { success: true, share_slug: row.share_slug, is_public: row.is_public };
 }
 
 export async function getProfile() {
