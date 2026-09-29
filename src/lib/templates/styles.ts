@@ -12,6 +12,32 @@ const BASE = `
     padding: 0.45in 0.55in;
   }
   .resume a { color: inherit; text-decoration: none; }
+  /* Optional profile photo. Floated so it sits beside the header text in the
+     block-layout templates; the side-rail and flex-header cases are overridden
+     below, because a float is ignored inside a flex container. */
+  .resume .cv-photo {
+    float: right;
+    width: 0.85in;
+    height: 0.85in;
+    object-fit: cover;
+    border-radius: 3pt;
+    margin: 0 0 6pt 10pt;
+  }
+  .resume .side .cv-photo {
+    float: none;
+    display: block;
+    width: 0.95in;
+    height: 0.95in;
+    margin: 0 0 8pt;
+  }
+  .resume .exec-header .cv-photo,
+  .resume .mono-header .cv-photo,
+  .resume .modern-header .cv-photo {
+    float: none;
+    flex: 0 0 auto;
+    order: 3;
+    margin: 0;
+  }
   .resume .sep { margin: 0 4pt; }
   .resume section { margin-top: 8pt; }
   .resume .entry { margin-bottom: 5pt; }

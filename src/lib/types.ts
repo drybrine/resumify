@@ -57,6 +57,11 @@ export interface PersonalInfo {
   github: string;
   website: string;
   linkedin: string;
+  /**
+   * Optional profile photo as a `data:image/...;base64,...` URL. Absent or empty
+   * means "no photo"; `safePhoto()` in `lib/photo.ts` decides what is acceptable.
+   */
+  photo?: string;
 }
 
 export interface EducationItem {

@@ -1,51 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { inflateRawSync } from "node:zlib";
+import { readZipEntry } from "./helpers/zip";
 import { SAMPLE_CV } from "../src/lib/cv-data";
 import { DOCX_PROFILES, docxFilename, generateDocx } from "../src/lib/server/docx";
 import { ALL_TEMPLATES, type CvData, type TemplateId } from "../src/lib/types";
-
-/**
- * Minimal ZIP reader: a .docx is a ZIP of OOXML parts, and Node ships no zip
- * reader, so this walks the central directory and inflates the entry asked for.
- * Only what the assertions need — no dependency added for a test.
- */
-function readZipEntry(zip: Buffer, want: string): string | null {
-  // End of central directory: scan back for its signature.
-  let eocd = -1;
-  for (let i = zip.length - 22; i >= 0; i--) {
-    if (zip.readUInt32LE(i) === 0x06054b50) {
-      eocd = i;
-      break;
-    }
-  }
-  if (eocd < 0) return null;
-  const count = zip.readUInt16LE(eocd + 10);
-  let p = zip.readUInt32LE(eocd + 16);
-
-  for (let n = 0; n < count; n++) {
-    if (zip.readUInt32LE(p) !== 0x02014b50) return null;
-    const method = zip.readUInt16LE(p + 10);
-    const compressedSize = zip.readUInt32LE(p + 20);
-    const nameLen = zip.readUInt16LE(p + 28);
-    const extraLen = zip.readUInt16LE(p + 30);
-    const commentLen = zip.readUInt16LE(p + 32);
-    const localOffset = zip.readUInt32LE(p + 42);
-    const name = zip.subarray(p + 46, p + 46 + nameLen).toString("utf8");
-
-    if (name === want) {
-      // Local header repeats name/extra lengths, which may differ from the
-      // central directory — read them from the local header.
-      const lNameLen = zip.readUInt16LE(localOffset + 26);
-      const lExtraLen = zip.readUInt16LE(localOffset + 28);
-      const start = localOffset + 30 + lNameLen + lExtraLen;
-      const data = zip.subarray(start, start + compressedSize);
-      return (method === 0 ? data : inflateRawSync(data)).toString("utf8");
-    }
-    p += 46 + nameLen + extraLen + commentLen;
-  }
-  return null;
-}
 
 const isZip = (b: Buffer) => b.subarray(0, 2).toString("latin1") === "PK";
 

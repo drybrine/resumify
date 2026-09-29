@@ -5,6 +5,7 @@ import {
   BorderStyle,
   Document,
   ExternalHyperlink,
+  ImageRun,
   Packer,
   Paragraph,
   TabStopType,
@@ -15,6 +16,7 @@ import { normalizeCvData } from "@/lib/cv-data";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
 import { isTemplateId, type CvData, type TemplateId } from "@/lib/types";
 import { ensureUrl } from "@/lib/utils";
+import { safePhoto } from "@/lib/photo";
 
 /**
  * Word (.docx) export.
@@ -210,6 +212,42 @@ function contactChildren(
   return out;
 }
 
+/** Word has no webp decoder, so only these can be embedded. */
+const PHOTO_TYPES: Record<string, "jpg" | "png" | "gif" | "bmp"> = {
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/bmp": "bmp",
+};
+
+/**
+ * The profile photo as its own right-aligned paragraph above the name. DOCX has no
+ * float, so this is the closest honest equivalent to the floated photo in the HTML:
+ * the picture lands top-right of the header text.
+ */
+function photoParagraph(photo: unknown): Paragraph | null {
+  const src = safePhoto(photo);
+  if (!src) return null;
+  const mime = src.slice("data:".length, src.indexOf(";"));
+  const type = PHOTO_TYPES[mime];
+  // e.g. webp: valid in the app and in the PDF, but Word cannot render it, so it is
+  // left out of the .docx rather than embedded as something Word will show broken.
+  if (!type) return null;
+  const px = Math.round(0.85 * 96); // 0.85in, matching .cv-photo in the stylesheets
+  return new Paragraph({
+    alignment: AlignmentType.RIGHT,
+    spacing: { after: 100 },
+    children: [
+      new ImageRun({
+        type,
+        data: src,
+        transformation: { width: px, height: px },
+      }),
+    ],
+  });
+}
+
 /** Build the Word document. Kept separate from packing so tests can inspect it. */
 export function buildDocxDocument(
   data: CvData,
@@ -225,6 +263,9 @@ export function buildDocxDocument(
     profile.headerAlign === "center" ? AlignmentType.CENTER : AlignmentType.LEFT;
 
   const children: Paragraph[] = [];
+
+  const photo = photoParagraph(cv.personal.photo);
+  if (photo) children.push(photo);
 
   children.push(
     new Paragraph({

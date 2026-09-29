@@ -444,6 +444,32 @@ a {
 }
 
 .resume-preview a { color: inherit; text-decoration: none; }
+  /* Optional profile photo. Floated so it sits beside the header text in the
+     block-layout templates; the side-rail and flex-header cases are overridden
+     below, because a float is ignored inside a flex container. */
+  .resume-preview .cv-photo {
+    float: right;
+    width: 0.85in;
+    height: 0.85in;
+    object-fit: cover;
+    border-radius: 3pt;
+    margin: 0 0 6pt 10pt;
+  }
+  .resume-preview .side .cv-photo {
+    float: none;
+    display: block;
+    width: 0.95in;
+    height: 0.95in;
+    margin: 0 0 8pt;
+  }
+  .resume-preview .exec-header .cv-photo,
+  .resume-preview .mono-header .cv-photo,
+  .resume-preview .modern-header .cv-photo {
+    float: none;
+    flex: 0 0 auto;
+    order: 3;
+    margin: 0;
+  }
 .resume-preview .sep { margin: 0 4pt; }
 .resume-preview section { margin-top: 8pt; }
 .resume-preview .entry { margin-bottom: 5pt; }

@@ -1,5 +1,6 @@
 import type { CvData, PersonalInfo, TemplateId } from "./types";
 import { ALL_TEMPLATES } from "./types";
+import { safePhoto } from "./photo";
 
 export const EMPTY_CV: CvData = {
   personal: {
@@ -10,6 +11,9 @@ export const EMPTY_CV: CvData = {
     github: "",
     website: "",
     linkedin: "",
+    // Present-but-empty rather than absent: normalizeCvData() always returns this
+    // exact shape, and a CV with no photo is the normal case.
+    photo: "",
   },
   summary: "",
   education: [],
@@ -79,6 +83,10 @@ export function normalizeCvData(input: unknown): CvData {
     skills: [],
     languages: [],
   };
+
+  // The photo is a data URL, not free text: validate it instead of running it
+  // through asString, and drop anything that is not a small raster image.
+  out.personal.photo = safePhoto(personal.photo);
 
   for (const key of LIST_KEYS) {
     const items = Array.isArray(raw[key]) ? (raw[key] as unknown[]) : [];

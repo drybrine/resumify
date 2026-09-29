@@ -12,6 +12,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { SheetPreview } from "@/components/sheet-preview";
 import { SectionRail, SectionTabs, SECTIONS, type SectionId } from "./section-nav";
 import { ListSection } from "./list-section";
+import { PhotoField } from "./photo-field";
 import { cn } from "@/lib/utils";
 
 const PAPER_W = 8.5 * 96;
@@ -471,6 +472,13 @@ export function CvEditor({
                       />
                     </div>
                   ))}
+                </div>
+
+                <div className="mt-4 border-t border-rule pt-4">
+                  <PhotoField
+                    value={data.personal.photo}
+                    onChange={(photo) => setPersonal("photo", photo)}
+                  />
                 </div>
               </div>
             )}

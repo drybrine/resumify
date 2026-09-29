@@ -1,6 +1,7 @@
 import type { CvData, TemplateId } from "@/lib/types";
 import { isTemplateId } from "@/lib/types";
 import { normalizeCvData } from "@/lib/cv-data";
+import { safePhoto } from "@/lib/photo";
 import { esc, ensureUrl } from "@/lib/utils";
 
 function linkify(text: string, href?: string): string {
@@ -137,10 +138,23 @@ function section(title: string, body: string): string {
 
 /* ---------- Templates ---------- */
 
+/**
+ * Optional profile photo. Rendered as the first thing inside the header so all 20
+ * templates get it without each growing its own markup for it; final placement is
+ * finished in CSS (float for block headers, flex order for the flex ones). The data
+ * URL is allow-listed by safePhoto(), so it cannot carry quotes or angle brackets
+ * and is safe to inline here.
+ */
+function photoHtml(p: CvData["personal"]): string {
+  const src = safePhoto(p.photo);
+  if (!src) return "";
+  return `<img class="cv-photo" src="${src}" alt="" />`;
+}
+
 function renderJake(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p) || "Add contact info"}</div></header>`);
+  parts.push(`<header>${photoHtml(p)}<h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p) || "Add contact info"}</div></header>`);
   if ((data.summary || "").trim()) {
     parts.push(section("Professional Summary", `<p class="summary">${esc(data.summary.trim())}</p>`));
   }
@@ -174,7 +188,7 @@ function renderSwiss(data: CvData): string {
         `<section class="swiss-row"><div class="swiss-num">${num}</div><h2 class="swiss-label">${label}</h2><div class="swiss-body">${html}</div></section>`,
     )
     .join("");
-  return `<header class="swiss-header"><div class="swiss-kicker">CURRICULUM VITAE / ${esc(p.location || "PROFILE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="swiss-grid">${body}</div>`;
+  return `<header class="swiss-header">${photoHtml(p)}<div class="swiss-kicker">CURRICULUM VITAE / ${esc(p.location || "PROFILE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="swiss-grid">${body}</div>`;
 }
 
 /** Academic CV: the date sits in the margin, entries hang off it. */
@@ -216,7 +230,7 @@ function renderScholar(data: CvData): string {
     )
     .join("")}</div>`;
   const parts = [
-    `<header class="scholar-header"><div class="scholar-kicker">ACADEMIC CURRICULUM VITAE</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`,
+    `<header class="scholar-header">${photoHtml(p)}<div class="scholar-kicker">ACADEMIC CURRICULUM VITAE</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`,
   ];
   if (data.summary?.trim()) {
     parts.push(section("Research Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
@@ -235,7 +249,7 @@ function renderTimeline(data: CvData): string {
   const p = data.personal || {};
   const entries = [...(data.experience || []).map((e) => ({ heading: e.role || e.company, org: e.company, location: e.location, period: e.period, bullets: e.bullets })), ...(data.education || []).map((e) => ({ heading: e.degree || e.school, org: e.school, location: e.location, period: e.period, bullets: e.bullets }))];
   const timeline = entries.map((item) => `<div class="timeline-entry"><div class="timeline-date">${esc(item.period)}</div><div class="timeline-content"><h3>${esc(item.heading)}</h3><p class="timeline-org">${esc(item.org)}${item.location ? ` · ${esc(item.location)}` : ""}</p>${bulletsHtml(item.bullets)}</div></div>`).join("");
-  const parts = [`<header class="timeline-header"><p class="timeline-kicker">EXPERIENCE / EDUCATION</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
+  const parts = [`<header class="timeline-header">${photoHtml(p)}<p class="timeline-kicker">EXPERIENCE / EDUCATION</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>`];
   if (data.summary?.trim()) parts.push(section("Profile", `<p class="summary">${esc(data.summary.trim())}</p>`));
   parts.push(section("Career timeline", `<div class="timeline">${timeline}</div>`));
   parts.push(section("Selected Projects", projHtml(data)));
@@ -263,7 +277,7 @@ function renderMono(data: CvData): string {
         `<div class="mono-block"><div class="mono-gutter">${String(i + 1).padStart(2, "0")}</div><div class="mono-body"><div class="mono-fn">${fn}</div><div class="mono-code">${html}</div></div></div>`,
     )
     .join("");
-  return `<header class="mono-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${body}`;
+  return `<header class="mono-header">${photoHtml(p)}<h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${body}`;
 }
 
 function renderAtlas(data: CvData): string {
@@ -283,7 +297,7 @@ function renderAtlas(data: CvData): string {
   if (pubs) rail.push(`<div class="atlas-block"><h3>Publications</h3>${pubs}</div>`);
 
   const aside = rail.length ? `<aside class="atlas-rail">${rail.join("")}</aside>` : "";
-  return `<header class="atlas-header"><div class="atlas-place">${esc(p.location || "AVAILABLE WORLDWIDE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="atlas-layout"><div class="atlas-main">${main.join("")}</div>${aside}</div>`;
+  return `<header class="atlas-header">${photoHtml(p)}<div class="atlas-place">${esc(p.location || "AVAILABLE WORLDWIDE")}</div><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="atlas-layout"><div class="atlas-main">${main.join("")}</div>${aside}</div>`;
 }
 
 /** Magazine: a drop-cap lede and the short sections flow in two columns. */
@@ -303,7 +317,7 @@ function renderEditorial(data: CvData): string {
   wide.push(section("Selected work", projHtml(data)));
   wide.push(section("Publications", pubHtml(data)));
 
-  return `<header class="editorial-header"><p class="editorial-index">PORTFOLIO / CV</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="editorial-bottom"><span>${esc(p.location || "")}</span><span class="contact">${contactBits(p)}</span></div></header><div class="editorial-spread">${spread.join("")}</div><div class="editorial-wide">${wide.join("")}</div>`;
+  return `<header class="editorial-header">${photoHtml(p)}<p class="editorial-index">PORTFOLIO / CV</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="editorial-bottom"><span>${esc(p.location || "")}</span><span class="contact">${contactBits(p)}</span></div></header><div class="editorial-spread">${spread.join("")}</div><div class="editorial-wide">${wide.join("")}</div>`;
 }
 
 /** Orbit: a centred narrow measure under the ring — the page reads as a column. */
@@ -326,19 +340,19 @@ function renderOrbit(data: CvData): string {
   const langs = langsLine(data);
   if (langs) grid.push(blk("Languages", `<div class="langs">${langs}</div>`));
 
-  return `<header class="orbit-header"><div class="orbit-orbit" aria-hidden="true"></div><p class="orbit-label">CAREER PROFILE</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="orbit-body">${top.join("")}</div><div class="orbit-grid">${grid.join("")}</div>`;
+  return `<header class="orbit-header">${photoHtml(p)}<div class="orbit-orbit" aria-hidden="true"></div><p class="orbit-label">CAREER PROFILE</p><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header><div class="orbit-body">${top.join("")}</div><div class="orbit-grid">${grid.join("")}</div>`;
 }
 
 function renderMonoGrid(data: CvData): string {
   const p = data.personal || {};
   const rows = [["PROFILE", data.summary?.trim() ? `<p class="summary">${esc(data.summary.trim())}</p>` : ""], ["EXPERIENCE", expHtml(data, "role")], ["EDUCATION", eduHtml(data, "role-first")], ["PROJECTS", projHtml(data)], ["SKILLS", skillsRows(data)], ["PUBLICATIONS", pubHtml(data)]] as const;
-  return `<header class="monogrid-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${rows.map(([label, body]) => body.trim() ? `<section class="monogrid-row"><h2>${label}</h2><div>${body}</div></section>` : "").join("")}`;
+  return `<header class="monogrid-header">${photoHtml(p)}<h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p)}</div></header>${rows.map(([label, body]) => body.trim() ? `<section class="monogrid-row"><h2>${label}</h2><div>${body}</div></section>` : "").join("")}`;
 }
 
 function renderModern(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="modern-header"><div><h1>${esc(p.fullName || "Your Name")}</h1>${
+  parts.push(`<header class="modern-header">${photoHtml(p)}<div><h1>${esc(p.fullName || "Your Name")}</h1>${
     data.summary ? `<p class="tagline">${esc(data.summary.trim().slice(0, 160))}</p>` : ""
   }</div><div class="modern-contact">${contactBits(p, "<br/>")}</div></header>`);
   parts.push(section("Experience", expHtml(data, "role")));
@@ -358,7 +372,7 @@ function renderModern(data: CvData): string {
 function renderCompact(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="compact-header"><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p, " · ")}</div></header>`);
+  parts.push(`<header class="compact-header">${photoHtml(p)}<h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p, " · ")}</div></header>`);
   if ((data.summary || "").trim()) {
     parts.push(`<section><p class="summary">${esc(data.summary.trim())}</p></section>`);
   }
@@ -374,7 +388,7 @@ function renderCompact(data: CvData): string {
 function renderElegant(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="elegant-header">
+  parts.push(`<header class="elegant-header">${photoHtml(p)}
     <h1>${esc(p.fullName || "Your Name")}</h1>
     <div class="gold-line"></div>
     <div class="contact">${contactBits(p, "  ·  ")}</div>
@@ -413,7 +427,7 @@ function renderSidebar(data: CvData): string {
   main.push(section("Publications", pubHtml(data)));
 
   return `<div class="sidebar-layout">
-    <aside class="side">
+    <aside class="side">${photoHtml(p)}
       <div class="side-name">${esc(p.fullName || "Your Name")}</div>
       ${side.join("")}
     </aside>
@@ -425,7 +439,7 @@ function renderSidebar(data: CvData): string {
 function renderCorporate(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="corp-header">
+  parts.push(`<header class="corp-header">${photoHtml(p)}
     <div class="corp-bar"></div>
     <h1>${esc(p.fullName || "Your Name")}</h1>
     <div class="contact">${contactBits(p)}</div>
@@ -448,7 +462,7 @@ function renderCorporate(data: CvData): string {
 function renderTech(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="tech-header">
+  parts.push(`<header class="tech-header">${photoHtml(p)}
     <div class="tech-prompt">~/resume</div>
     <h1>${esc(p.fullName || "developer")}</h1>
     <div class="contact">${contactBits(p, "  ·  ")}</div>
@@ -475,7 +489,7 @@ function renderTech(data: CvData): string {
 function renderMinimal(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="min-header">
+  parts.push(`<header class="min-header">${photoHtml(p)}
     <h1>${esc(p.fullName || "Your Name")}</h1>
     <div class="contact">${contactBits(p, "  /  ")}</div>
   </header>`);
@@ -497,7 +511,7 @@ function renderMinimal(data: CvData): string {
 function renderHarvard(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header><h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p, "  ·  ")}</div></header>`);
+  parts.push(`<header>${photoHtml(p)}<h1>${esc(p.fullName || "Your Name")}</h1><div class="contact">${contactBits(p, "  ·  ")}</div></header>`);
   if ((data.summary || "").trim()) {
     parts.push(section("Summary", `<p class="summary">${esc(data.summary.trim())}</p>`));
   }
@@ -516,7 +530,7 @@ function renderHarvard(data: CvData): string {
 function renderExecutive(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header class="exec-header">
+  parts.push(`<header class="exec-header">${photoHtml(p)}
     <div><h1>${esc(p.fullName || "Your Name")}</h1></div>
     <div class="contact" style="text-align: right;">${contactBits(p, "<br/>")}</div>
   </header>`);
@@ -550,7 +564,7 @@ function renderCreative(data: CvData): string {
   main.push(section("Featured Projects", projHtml(data)));
 
   return `<div class="creative-layout">
-    <aside class="side">
+    <aside class="side">${photoHtml(p)}
       <h1>${esc(p.fullName || "Your Name")}</h1>
       ${side.join("")}
     </aside>
@@ -562,7 +576,7 @@ function renderCreative(data: CvData): string {
 function renderTerminal(data: CvData): string {
   const p = data.personal || {};
   const parts: string[] = [];
-  parts.push(`<header>
+  parts.push(`<header>${photoHtml(p)}
     <h1>> ${esc(p.fullName || "sysadmin")}</h1>
     <div class="contact">${contactBits(p, " | ")}</div>
   </header>`);
