@@ -17,7 +17,7 @@ test("normalizeCvData turns anything into a walkable CV", () => {
 
   // Non-object entries inside a list are dropped, not rendered as blanks.
   const messy = normalizeCvData({
-    education: [{ school: "UNIKOM", bullets: ["a", null, 7] }, null, "oops", 5],
+    education: [{ school: "Acme University", bullets: ["a", null, 7] }, null, "oops", 5],
   });
   assert.equal(messy.education.length, 1);
   assert.deepEqual(messy.education[0].bullets, ["a", "7"]);
@@ -58,12 +58,12 @@ test("a template id that is not a string still resolves", () => {
 
 test("every template survives a partially filled draft", () => {
   const draft = {
-    personal: { fullName: "Surya" },
-    experience: [{ company: "UNIKOM" }],
+    personal: { fullName: "John Doe" },
+    experience: [{ company: "Acme Corp" }],
   } as unknown as CvData;
   for (const id of ALL_TEMPLATES) {
     const html = renderResumeHtml(draft, id as TemplateId);
-    assert.ok(html.includes("Surya"), `${id} dropped the name`);
+    assert.ok(html.includes("John Doe"), `${id} dropped the name`);
     assert.ok(!html.includes("undefined"), `${id} leaked "undefined"`);
   }
 });

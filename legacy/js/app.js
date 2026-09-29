@@ -548,7 +548,7 @@
 
   // Toolbar
   $("#btnLoadSample").addEventListener("click", () => {
-    if (!confirm("Load sample data (profil Surya)? Data saat ini akan diganti.")) return;
+    if (!confirm("Load sample data (John Doe)? Data saat ini akan diganti.")) return;
     state = clone(window.DEFAULT_CV);
     refresh();
     setStatus("Sample data loaded", "ok");

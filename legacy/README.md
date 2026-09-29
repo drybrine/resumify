@@ -9,7 +9,7 @@ Website statis untuk membuat CV/resume **ATS-friendly** (Jake-style, 1 kolom).
 - Auto-save ke `localStorage`
 - Export / Import JSON
 - Export PDF via Print dialog browser (`Ctrl+P` / tombol Export PDF)
-- Sample data profil Surya (default)
+- Sample data contoh (John Doe) sebagai default
 
 ## Jalankan
 

@@ -101,29 +101,29 @@ export function normalizeCvData(input: unknown): CvData {
 
 export const SAMPLE_CV: CvData = {
   personal: {
-    fullName: "Surya Alamsyah Putera Pratama",
-    location: "Bandung, Indonesia",
-    email: "aasurya.app@gmail.com",
+    fullName: "John Doe",
+    location: "Springfield, USA",
+    email: "john.doe@example.com",
     phone: "",
-    github: "github.com/drybrine",
-    website: "stokmanager.app",
+    github: "github.com/johndoe",
+    website: "johndoe.dev",
     linkedin: "",
   },
   summary: "",
   education: [
     {
-      school: "Universitas Komputer Indonesia (UNIKOM)",
-      location: "Bandung, Indonesia",
-      degree: "Sarjana (S1), Sistem Komputer",
+      school: "Springfield State University",
+      location: "Springfield, USA",
+      degree: "Bachelor of Science in Computer Science",
       period: "Expected 2026",
       bullets: [
-        "Thesis: Sistem Pencatatan dan Prediksi Inventory Produk Berbasis IoT dan Machine Learning. Advisor: Assoc. Prof. Hidayat, S.Kom., M.T.",
-        "Faculty of Engineering and Computer Science (Fakultas Teknik dan Ilmu Komputer)",
+        "Thesis: Placeholder topic combining embedded systems and applied machine learning. Advisor: Prof. Jane Example.",
+        "Faculty of Engineering and Computer Science",
       ],
     },
     {
-      school: "SMK Negeri 13 Bandung",
-      location: "Bandung, Indonesia",
+      school: "Springfield Vocational High School",
+      location: "Springfield, USA",
       degree: "Vocational High School Diploma in Computer and Network Engineering",
       period: "2018 – 2021",
       bullets: [
@@ -134,9 +134,9 @@ export const SAMPLE_CV: CvData = {
   ],
   experience: [
     {
-      company: "PT Tristek Media Kreasindo",
-      location: "Bandung, Indonesia",
-      role: "Teknisi (Internship / PKL)",
+      company: "Acme Media Productions",
+      location: "Springfield, USA",
+      role: "Technician (Internship)",
       period: "2020 – 2021",
       bullets: [
         "Supported media production operations through hardware maintenance and troubleshooting.",
@@ -146,20 +146,20 @@ export const SAMPLE_CV: CvData = {
   ],
   projects: [
     {
-      name: "StokManager — IoT Inventory & Stock Prediction",
-      link: "github.com/drybrine/webinvesp32",
+      name: "Inventory Tracker — IoT Stock Recording & Forecasting",
+      link: "github.com/johndoe/inventory-tracker",
       period: "2025 – 2026",
       bullets: [
-        "Built end-to-end warehouse inventory platform (ESP32 + Next.js + ML forecast); live at stokmanager.app.",
-        "Implemented Next.js dashboard with Firebase RTDB realtime subscriptions and role-based admin.",
-        "Shipped production on Vercel + Firebase Auth with signed OTA firmware pipeline.",
+        "Built an end-to-end inventory platform (microcontroller scanner + web dashboard + forecasting model).",
+        "Implemented a dashboard with realtime subscriptions and role-based admin access.",
+        "Shipped to production with hosted deployment and a signed over-the-air firmware pipeline.",
       ],
     },
   ],
   publications: [
     {
-      text: 'S. A. P. Pratama et al., "IoT-Based Barcode Scanning System Implementation Using ESP32 for Enhancing Warehouse Stock Opname Efficiency," INJURATECH, vol. 5, no. 1, pp. 268–276, 2025.',
-      url: "https://ojs.unikom.ac.id/index.php/injuratech/article/view/19200",
+      text: 'J. Doe et al., "A Placeholder Study on Automated Inventory Recording," Journal of Example Studies, vol. 5, no. 1, pp. 268–276, 2025.',
+      url: "https://example.com/publication",
     },
   ],
   skills: [

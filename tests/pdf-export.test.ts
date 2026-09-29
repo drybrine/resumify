@@ -20,7 +20,7 @@ after(async () => {
 const pageCount = (pdf: Buffer) =>
   (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
 
-function documentFor(id: TemplateId, title = "Surya CV"): string {
+function documentFor(id: TemplateId, title = "John Doe CV"): string {
   return wrapResumeDocument(renderResumeHtml(SAMPLE_CV, id), id, title);
 }
 
@@ -34,7 +34,7 @@ test("pdfFilename keeps the header on one line and encodes non-ASCII titles", ()
   assert.match(injected, /filename="[^"]*\.pdf"/);
   assert.ok(!injected.includes('evil"'), "quotes must be replaced in the ASCII fallback");
 
-  const unicode = pdfFilename("CV Résumé — Surya");
+  const unicode = pdfFilename("CV Résumé — John Doe");
   assert.match(unicode, /filename\*=UTF-8''/);
   assert.match(unicode, /%C3%A9/); // é survives for the browser that honours filename*
   assert.match(unicode, /filename="[\x20-\x7e]+\.pdf"/);
@@ -99,8 +99,8 @@ test(
 );
 
 test("the exported PDF carries the CV content, not a blank page", { timeout: 120_000 }, async () => {
-  await generatePdf(documentFor("swiss", "Surya"));
-  const pdf = await generatePdf(documentFor("swiss", "Surya"));
+  await generatePdf(documentFor("swiss", "John Doe"));
+  const pdf = await generatePdf(documentFor("swiss", "John Doe"));
   const raw = pdf.toString("latin1");
   assert.ok(pageCount(pdf) >= 1);
   // Chromium compresses content streams; a page with no text at all would be a
