@@ -6,7 +6,8 @@ import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV } from "@/lib/cv-data";
 import { effectivePlan } from "@/lib/plan-access";
-import { isTemplateId, type CvData, type Plan, type TemplateId } from "@/lib/types";
+import { normalizeApplicationKit } from "@/lib/apply/kit";
+import { isTemplateId, type ApplicationKit, type CvData, type Plan, type TemplateId } from "@/lib/types";
 import { canUseTemplate } from "@/lib/template-entitlement";
 
 async function requireUser() {
@@ -183,6 +184,38 @@ export async function toggleShare(id: string, enable: boolean) {
   if (!row) return { error: "CV tidak ditemukan." };
   revalidatePath(`/editor/${id}`);
   return { success: true, share_slug: row.share_slug, is_public: row.is_public };
+}
+
+/**
+ * Save the per-application workspace (job info + cover letter) onto the CV.
+ *
+ * Merged into the stored `data` rather than replacing it: the CV editor autosaves
+ * the whole `data` object, so a blind overwrite here would race with it and could
+ * drop whichever side wrote last.
+ */
+export async function saveApplication(id: string, kit: ApplicationKit) {
+  const { supabase, user } = await requireUser();
+
+  const { data, error: readError } = await supabase
+    .from("cvs")
+    .select("data")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+  if (readError) return { error: readError.message };
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { error: "CV tidak ditemukan." };
+
+  const current = (row.data ?? {}) as Record<string, unknown>;
+  const next = {
+    ...current,
+    apply: { ...normalizeApplicationKit(kit), updatedAt: new Date().toISOString() },
+  };
+
+  const { error } = await supabase.from("cvs").update({ data: next }).eq("id", id).eq("user_id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath(`/lamar/${id}`);
+  return { success: true };
 }
 
 export async function getProfile() {

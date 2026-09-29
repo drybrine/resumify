@@ -156,6 +156,11 @@ export function CvList({ cvs, now }: { cvs: CvRow[]; now: string }) {
                         Buka editor
                       </Button>
                     </Link>
+                    <Link href={`/lamar/${cv.id}`}>
+                      <Button size="sm" variant="ghost" title="Siapkan surat lamaran & cek kecocokan dengan iklan lowongan">
+                        Lamar kerja
+                      </Button>
+                    </Link>
                     <Button
                       size="sm"
                       variant="ghost"

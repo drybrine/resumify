@@ -1,6 +1,7 @@
 import type { CvData, PersonalInfo, TemplateId } from "./types";
 import { ALL_TEMPLATES } from "./types";
 import { safePhoto } from "./photo";
+import { EMPTY_KIT, normalizeApplicationKit } from "./apply/kit";
 
 export const EMPTY_CV: CvData = {
   personal: {
@@ -22,6 +23,9 @@ export const EMPTY_CV: CvData = {
   publications: [],
   skills: [],
   languages: [],
+  // Like photo: normalizeCvData() always returns this shape, so the seed has to
+  // match it exactly.
+  apply: EMPTY_KIT,
 };
 
 const PERSONAL_KEYS: (keyof PersonalInfo)[] = [
@@ -103,6 +107,10 @@ export function normalizeCvData(input: unknown): CvData {
         return shaped;
       });
   }
+
+  // The per-application workspace rides along in the same JSON, so editing a CV
+  // never silently drops the cover letter attached to it.
+  out.apply = normalizeApplicationKit(raw.apply);
 
   return out;
 }

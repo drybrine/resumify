@@ -381,6 +381,16 @@ export function CvEditor({
               : "Bagikan link"}
           </Button>
 
+          <Link href={`/lamar/${cv.id}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Siapkan surat lamaran & cek kecocokan dengan iklan lowongan"
+            >
+              Lamar kerja
+            </Button>
+          </Link>
+
           <Button
             variant="secondary"
             size="sm"

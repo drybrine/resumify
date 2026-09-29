@@ -102,6 +102,24 @@ export interface LanguageItem {
   level: string;
 }
 
+/**
+ * Per-application workspace attached to a CV: who you are applying to, the ad you
+ * are answering, and the cover letter drafted from both. Stored inside the CV's
+ * `data` JSON, so it needs no migration and travels with the document.
+ */
+export interface ApplicationKit {
+  company: string;
+  role: string;
+  /** Where the posting was found, e.g. LinkedIn or Glints. */
+  source: string;
+  /** The pasted job ad, used for the keyword match. */
+  jobAd: string;
+  /** The cover letter text, editable by the user. */
+  letter: string;
+  language: "id" | "en";
+  updatedAt: string;
+}
+
 export interface CvData {
   personal: PersonalInfo;
   summary: string;
@@ -111,6 +129,8 @@ export interface CvData {
   publications: PublicationItem[];
   skills: SkillItem[];
   languages: LanguageItem[];
+  /** Optional job-application workspace; renderers ignore it. */
+  apply?: ApplicationKit;
 }
 
 export interface Profile {
