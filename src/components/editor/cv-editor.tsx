@@ -698,7 +698,7 @@ export function CvEditor({
               </Button>
             </div>
 
-            <div className="grid gap-5 px-5 py-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 px-5 py-5 sm:grid-cols-2 lg:grid-cols-3">
               {(Object.keys(TEMPLATE_META) as TemplateId[]).map((id) => {
                 const meta = TEMPLATE_META[id];
                 const locked = !limits.templates.includes(id) && meta.pro;

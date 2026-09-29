@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Newsreader, Instrument_Sans } from "next/font/google";
+import { formatIdr } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 import "./globals.css";
 
 const display = Newsreader({
@@ -17,25 +19,32 @@ const sans = Instrument_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Resumify — CV ATS-friendly, bayar pakai QRIS",
-    template: "%s · Resumify",
-  },
-  description:
-    "Buat CV ATS-friendly dengan editor pratinjau langsung, 20 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro Rp 49.000 lewat QRIS.",
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/icon", type: "image/png", sizes: "32x32" },
-    ],
-    shortcut: "/favicon.svg",
-    apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
-  },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://resumify-weld.vercel.app"
-  ),
-};
+/**
+ * The Pro price is admin-editable, so the description that Google and social
+ * cards show has to come from the same place as the checkout amount.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { priceIdr } = await getProPricing();
+
+  return {
+    title: {
+      default: "Resumify — CV ATS-friendly, bayar pakai QRIS",
+      template: "%s · Resumify",
+    },
+    description: `Buat CV ATS-friendly dengan editor pratinjau langsung, 20 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro ${formatIdr(priceIdr)} lewat QRIS.`,
+    icons: {
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+        { url: "/icon", type: "image/png", sizes: "32x32" },
+      ],
+      shortcut: "/favicon.svg",
+      apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
+    },
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_APP_URL || "https://resumify-weld.vercel.app"
+    ),
+  };
+}
 
 /**
  * Flips on the scroll-reveal hidden state. Runs as the first thing in <body>,

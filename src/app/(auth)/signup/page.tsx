@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { SignupForm } from "./signup-form";
+import { formatIdr } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 
 export const metadata = { title: "Daftar" };
 
@@ -10,7 +12,9 @@ const PERKS = [
   "Tersimpan di cloud — bisa dilanjutkan dari perangkat lain",
 ];
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const proPricing = await getProPricing();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-rule">
@@ -58,9 +62,10 @@ export default function SignupPage() {
             </ul>
 
             <p className="mt-8 max-w-md text-[12px] leading-relaxed text-ink-3">
-              Tombol di bawah hanya membuat akun paket gratis. Pro (Rp 49.000 per
-              30 hari) dibayar belakangan lewat QRIS, dan hanya kalau kamu butuh
-              lebih dari 1 CV.
+              Tombol di bawah hanya membuat akun paket gratis. Pro (
+              {formatIdr(proPricing.priceIdr)} per {proPricing.periodDays} hari)
+              dibayar belakangan lewat QRIS, dan hanya kalau kamu butuh lebih dari
+              1 CV.
             </p>
           </div>
 

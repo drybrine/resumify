@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/reveal";
 import { HeroShowcase, TemplateGallery } from "@/components/template-showcase";
+import { formatIdr, type ProPricing } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 
 const SPECS = [
   { k: "Template", v: "20 layout, 2 bisa dipakai di paket gratis" },
@@ -36,7 +38,7 @@ const ATS_POINTS = [
   "Teks bisa diseleksi dan disalin; tidak ada teks yang jadi gambar.",
 ];
 
-const FAQS = [
+const faqsFor = (pro: ProPricing) => [
   {
     q: "Benarkah CV dari sini lolos ATS?",
     a: "Template kategori ATS memakai satu kolom, heading standar, dan teks asli — struktur yang paling aman untuk parser. Yang menentukan hasil akhir tetap isi CV-mu: kata kunci lowongan, angka pencapaian, dan penulisan yang jelas.",
@@ -47,7 +49,7 @@ const FAQS = [
   },
   {
     q: "Bagaimana cara bayar Pro?",
-    a: "QRIS dinamis: klik bayar, nominal unik muncul (Rp 49.000 + kode), lalu scan dari GoPay, OVO, DANA, ShopeePay, atau m-banking. Setelah terkonfirmasi, Pro aktif 30 hari. Tidak ada penagihan otomatis.",
+    a: `QRIS dinamis: klik bayar, nominal unik muncul (${formatIdr(pro.priceIdr)} + kode), lalu scan dari GoPay, OVO, DANA, ShopeePay, atau m-banking. Setelah terkonfirmasi, Pro aktif ${pro.periodDays} hari. Tidak ada penagihan otomatis.`,
   },
   {
     q: "Data CV saya aman?",
@@ -62,7 +64,13 @@ const FAQS = [
 /** Stagger offset for the CSS-driven `.enter-*` classes. */
 const at = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
 
-export default function HomePage() {
+export default async function HomePage() {
+  // The Pro price and period are admin-editable (plan_settings), so read them
+  // instead of hardcoding: a stale literal here contradicts what the checkout
+  // actually charges.
+  const proPricing = await getProPricing();
+  const faqs = faqsFor(proPricing);
+
   return (
     <>
       <SiteHeader />
@@ -112,8 +120,9 @@ export default function HomePage() {
                   className="enter mt-6 max-w-xl text-[12px] leading-relaxed text-ink-3"
                   style={at(290)}
                 >
-                  Gratis untuk 1 CV · tanpa kartu kredit · Pro Rp 49.000 sekali
-                  bayar lewat QRIS, tanpa langganan otomatis.
+                  Gratis untuk 1 CV · tanpa kartu kredit · Pro{" "}
+                  {formatIdr(proPricing.priceIdr)} sekali bayar lewat QRIS, tanpa
+                  langganan otomatis.
                 </p>
               </div>
 
@@ -278,9 +287,9 @@ export default function HomePage() {
 
                 <Reveal delay={180} rise="8px">
                   <div className="border-t-2 border-accent pt-5">
-                    <p className="micro text-accent">Pro · 30 hari</p>
+                    <p className="micro text-accent">Pro · {proPricing.periodDays} hari</p>
                     <p className="font-display num mt-3 text-[32px] text-ink">
-                      Rp 49.000
+                      {formatIdr(proPricing.priceIdr)}
                     </p>
                     <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
                       <li>50 CV</li>
@@ -312,7 +321,7 @@ export default function HomePage() {
               </Reveal>
 
               <div className="border-t border-rule">
-                {FAQS.map((item, i) => (
+                {faqs.map((item, i) => (
                   <Reveal
                     key={item.q}
                     delay={i * 80}

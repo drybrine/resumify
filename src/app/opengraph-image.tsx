@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og";
+import { formatIdr } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 
 export const alt = "Resumify — CV ATS-friendly, bayar pakai QRIS";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export default async function OgImage() {
+  // Same source as the checkout amount — the Pro price is admin-editable.
+  const { priceIdr, periodDays } = await getProPricing();
+
   return new ImageResponse(
     (
       <div
@@ -92,7 +97,7 @@ export default function OgImage() {
             fontSize: 20,
           }}
         >
-          <span>Gratis 1 CV · Pro Rp 49.000 / 30 hari</span>
+          <span>{`Gratis 1 CV · Pro ${formatIdr(priceIdr)} / ${periodDays} hari`}</span>
           <span>Bayar lewat QRIS</span>
         </div>
       </div>

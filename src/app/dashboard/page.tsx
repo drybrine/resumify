@@ -2,6 +2,8 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { listCvs, getProfile, createCv } from "@/lib/actions/cvs";
 import { PLAN_LIMITS } from "@/lib/cv-data";
+import { formatIdr } from "@/lib/plans";
+import { getProPricing } from "@/lib/plan-pricing";
 import { Button } from "@/components/ui/button";
 import { CvList } from "./cv-list";
 import type { Plan } from "@/lib/types";
@@ -10,6 +12,7 @@ export const metadata = { title: "Dasbor" };
 
 export default async function DashboardPage() {
   const [cvs, profile] = await Promise.all([listCvs(), getProfile()]);
+  const proPricing = await getProPricing();
   const plan = (profile?.is_admin ? "admin" : profile?.plan || "free") as Plan;
   const limits = PLAN_LIMITS[plan];
   const atLimit = cvs.length >= limits.maxCvs;
@@ -70,8 +73,8 @@ export default async function DashboardPage() {
               </p>
               <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
                 Pro menambah sampai 50 CV, membuka 18 template Pro, dan mengaktifkan
-                link share publik. Sekali bayar Rp 49.000 lewat QRIS untuk 30
-                hari.{" "}
+                link share publik. Sekali bayar {formatIdr(proPricing.priceIdr)}{" "}
+                lewat QRIS untuk {proPricing.periodDays} hari.{" "}
                 <Link href="/pricing" className="link-rule text-ink">
                   Lihat paket Pro
                 </Link>
