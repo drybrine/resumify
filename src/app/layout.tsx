@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: "Resumify — CV ATS-friendly, bayar pakai QRIS",
       template: "%s · Resumify",
     },
-    description: `Buat CV ATS-friendly dengan editor pratinjau langsung, 20 template siap pakai, dan ekspor PDF server-side. Gratis 1 CV, Pro ${formatIdr(priceIdr)} lewat QRIS.`,
+    description: `Buat CV ATS-friendly dengan editor pratinjau langsung, 20 template siap pakai, dan ekspor PDF & Word server-side. Gratis 1 CV, Pro ${formatIdr(priceIdr)} lewat QRIS.`,
     icons: {
       icon: [
         { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },

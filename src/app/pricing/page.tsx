@@ -14,6 +14,7 @@ const ROWS: { label: string; free: string; pro: string }[] = [
   { label: "Jumlah CV", free: "1", pro: "50" },
   { label: "Template", free: "Jake, Minimal", pro: "20 template (18 Pro)" },
   { label: "Ekspor PDF", free: "Termasuk", pro: "Termasuk" },
+  { label: "Ekspor Word (.docx)", free: "Termasuk", pro: "Termasuk" },
   { label: "Simpan otomatis ke cloud", free: "Termasuk", pro: "Termasuk" },
   { label: "Link share publik", free: "Tidak ada", pro: "Termasuk" },
   { label: "Dukungan", free: "Email biasa", pro: "Diprioritaskan" },

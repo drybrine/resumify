@@ -7,7 +7,7 @@ export const PLANS = {
     features: [
       "1 CV",
       "Template Jake + Minimal",
-      "Export PDF",
+      "Export PDF & Word",
       "Simpan cloud",
     ],
   },
@@ -20,7 +20,7 @@ export const PLANS = {
     features: [
       "50 CV",
       "20 template profesional",
-      "Export PDF HD",
+      "Export PDF & Word HD",
       "Link share publik",
       "Sync cloud",
       "Prioritas support",

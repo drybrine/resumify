@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                   {[
                     "Isi identitas, lalu tambahkan pengalaman dan pendidikan.",
                     "Pilih satu dari 20 template — isi CV tidak ikut berubah.",
-                    "Unduh PDF-nya, atau aktifkan link publik kalau sudah Pro.",
+                    "Unduh PDF atau Word-nya, atau aktifkan link publik kalau sudah Pro.",
                   ].map((step, i) => (
                     <li
                       key={step}

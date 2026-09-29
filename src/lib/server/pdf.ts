@@ -1,6 +1,7 @@
 import "server-only";
 import { existsSync } from "node:fs";
 import type { Browser } from "puppeteer-core";
+import { attachmentFilename } from "@/lib/server/attachment-filename";
 
 /**
  * Server-side PDF generation for CV export.
@@ -209,17 +210,5 @@ export async function __resetPdfBrowserForTests() {
 
 /** Build a `Content-Disposition` header that survives odd CV titles. */
 export function pdfFilename(title: string | null | undefined): string {
-  const base = (title || "resume")
-    // control characters (including CR/LF, which would split the header)
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
-    .replace(/[/\\?%*:|"<>]/g, "-")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 80)
-    .replace(/^\.+/, "")
-    .trim();
-  const name = base || "resume";
-  const ascii = name.replace(/[^\x20-\x7e]/g, "_").replace(/["]/g, "_");
-  const encoded = encodeURIComponent(`${name}.pdf`);
-  return `attachment; filename="${ascii}.pdf"; filename*=UTF-8''${encoded}`;
+  return attachmentFilename(title, "pdf");
 }

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { renderResumeHtml } from "@/lib/templates/render";
 import { wrapResumeDocument } from "@/lib/templates/styles";
 import {
@@ -7,6 +6,7 @@ import {
   pdfFilename,
   PdfBrowserUnavailableError,
 } from "@/lib/server/pdf";
+import { loadCvForExport } from "@/lib/server/export-cv";
 import type { CvData, TemplateId } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -20,40 +20,10 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  let cv: { title: string | null; template: string | null; data: unknown };
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { data, error } = await supabase
-      .from("cvs")
-      .select("*")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single();
-
-    // `.single()` normally answers 406 + PGRST116 when nothing matches, but a
-    // proxy or a mocked client can hand back an empty array instead — treat both
-    // as "not yours / not there" rather than letting an undefined row reach the
-    // renderer and surface as a bare 500.
-    const row = Array.isArray(data) ? data[0] : data;
-    if (error || !row) {
-      return NextResponse.json({ error: "CV not found" }, { status: 404 });
-    }
-    cv = row;
-  } catch (cause) {
-    console.error("[pdf] auth/lookup failed", cause);
-    return NextResponse.json(
-      { error: "Tidak bisa memuat CV ini.", code: "lookup_failed" },
-      { status: 500 }
-    );
-  }
+  // Auth + ownership lookup is shared with the DOCX route so the two cannot drift.
+  const loaded = await loadCvForExport(id);
+  if (!loaded.ok) return loaded.response;
+  const cv = loaded.cv;
 
   const template = (cv.template as TemplateId) || "jake";
   const body = renderResumeHtml(cv.data as CvData, template);

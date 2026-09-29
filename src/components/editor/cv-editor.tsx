@@ -17,6 +17,31 @@ import { cn } from "@/lib/utils";
 const PAPER_W = 8.5 * 96;
 const ZOOM_STEPS = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2];
 
+/**
+ * The two download formats. Both go through the same flow (save first, then fetch),
+ * so they are described here rather than duplicated into two near-identical handlers.
+ */
+const EXPORTS = {
+  pdf: {
+    path: "pdf",
+    label: "PDF",
+    ext: "pdf",
+    verb: "membuat PDF",
+    empty: "PDF kosong — coba lagi",
+    done: "PDF terunduh",
+  },
+  docx: {
+    path: "docx",
+    label: "Word",
+    ext: "docx",
+    verb: "membuat file Word",
+    empty: "File Word kosong — coba lagi",
+    done: "Word terunduh",
+  },
+} as const;
+
+type ExportFormat = keyof typeof EXPORTS;
+
 export function CvEditor({
   cv,
   plan,
@@ -41,7 +66,7 @@ export function CvEditor({
   const [mobilePane, setMobilePane] = useState<"form" | "preview">("form");
   const [confirmShareOff, setConfirmShareOff] = useState(false);
   const [pending, startTransition] = useTransition();
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -222,44 +247,45 @@ export function CvEditor({
     });
   }
 
-  async function onPdf() {
-    setPdfLoading(true);
+  async function onDownload(format: ExportFormat) {
+    const spec = EXPORTS[format];
+    setExporting(format);
     try {
-      // The PDF is rendered from the SAVED row, so a failed save would silently
-      // hand the user a PDF of the previous version — surface the error instead.
+      // Both files are rendered from the SAVED row, so a failed save would silently
+      // hand the user a document of the previous version — surface the error instead.
       const saved = await updateCv(cv.id, { title, template, data });
       if (saved?.error) {
         notice(saved.error, true);
         return;
       }
 
-      const res = await fetch(`/api/cvs/${cv.id}/pdf`, { method: "POST" });
+      const res = await fetch(`/api/cvs/${cv.id}/${spec.path}`, { method: "POST" });
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        notice(err?.error || `Gagal membuat PDF (${res.status})`, true);
+        notice(err?.error || `Gagal ${spec.verb} (${res.status})`, true);
         return;
       }
 
       const blob = await res.blob();
       if (!blob.size) {
-        notice("PDF kosong — coba lagi", true);
+        notice(spec.empty, true);
         return;
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${title || "cv"}.pdf`;
+      a.download = `${title || "cv"}.${spec.ext}`;
       a.rel = "noopener";
       document.body.appendChild(a);
       a.click();
       a.remove();
       // Revoking straight away can cancel the download in some browsers.
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
-      notice("PDF terunduh");
+      notice(spec.done);
     } catch (e) {
-      notice(e instanceof Error ? e.message : "Gagal mengunduh PDF", true);
+      notice(e instanceof Error ? e.message : `Gagal mengunduh ${spec.label}`, true);
     } finally {
-      setPdfLoading(false);
+      setExporting(null);
     }
   }
 
@@ -296,7 +322,7 @@ export function CvEditor({
               className={cn(
                 "px-1 text-[11px] transition-colors duration-300 ease-ink",
                 alert ? "text-accent" : "text-ink-3",
-                (pending || pdfLoading) && "pulse"
+                (pending || exporting !== null) && "pulse"
               )}
               role="status"
               title="Tersimpan otomatis setiap perubahan · Ctrl/Cmd + S untuk menyimpan sekarang"
@@ -354,8 +380,23 @@ export function CvEditor({
               : "Bagikan link"}
           </Button>
 
-          <Button size="sm" onClick={onPdf} disabled={pdfLoading}>
-            {pdfLoading ? "Menyiapkan…" : "Unduh PDF"}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onDownload("docx")}
+            disabled={exporting !== null}
+            title="Unduh sebagai Word (.docx) — satu kolom, siap diedit di Word"
+          >
+            {exporting === "docx" ? "Menyiapkan…" : "Unduh Word"}
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => onDownload("pdf")}
+            disabled={exporting !== null}
+            title="Unduh sebagai PDF — tampilan persis seperti pratinjau"
+          >
+            {exporting === "pdf" ? "Menyiapkan…" : "Unduh PDF"}
           </Button>
         </div>
       </header>

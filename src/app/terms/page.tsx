@@ -1,8 +1,13 @@
 import { LegalPage } from "@/components/legal-page";
+import { getProPricing } from "@/lib/plan-pricing";
 
 export const metadata = { title: "Syarat penggunaan" };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  // The Pro period is admin-editable; a literal here would contradict the
+  // checkout the same way a hardcoded price would.
+  const { periodDays } = await getProPricing();
+
   return (
     <LegalPage
       eyebrow="Legal"
@@ -17,8 +22,9 @@ export default function TermsPage() {
         <h2>1. Layanan</h2>
         <p>
           Resumify adalah alat bantu penyusunan CV: editor dengan pratinjau
-          langsung, kumpulan template, ekspor PDF, dan penyimpanan cloud. Dengan
-          membuat akun, kamu setuju memakai layanan ini untuk keperluan yang sah.
+          langsung, kumpulan template, ekspor PDF &amp; Word, dan penyimpanan
+          cloud. Dengan membuat akun, kamu setuju memakai layanan ini untuk
+          keperluan yang sah.
         </p>
       </section>
 
@@ -26,12 +32,12 @@ export default function TermsPage() {
         <h2>2. Paket dan batas pemakaian</h2>
         <ul>
           <li>
-            <strong>Free:</strong> 1 CV, template Jake dan Minimal, ekspor PDF,
-            dan penyimpanan cloud.
+            <strong>Free:</strong> 1 CV, template Jake dan Minimal, ekspor PDF
+            &amp; Word, dan penyimpanan cloud.
           </li>
           <li>
             <strong>Pro:</strong> sampai 50 CV, seluruh template, dan link share
-            publik, aktif selama 30 hari sejak pembayaran dikonfirmasi.
+            publik, aktif selama {periodDays} hari sejak pembayaran dikonfirmasi.
           </li>
         </ul>
         <p>

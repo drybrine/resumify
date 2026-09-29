@@ -7,7 +7,7 @@ import { getProPricing } from "@/lib/plan-pricing";
 export const metadata = { title: "Daftar" };
 
 const PERKS = [
-  "1 CV gratis, dengan ekspor PDF",
+  "1 CV gratis, dengan ekspor PDF & Word",
   "Template Jake & Minimal langsung tersedia",
   "Tersimpan di cloud — bisa dilanjutkan dari perangkat lain",
 ];
@@ -82,7 +82,7 @@ export default async function SignupPage() {
                 className="enter mt-3 text-[14px] text-ink-2"
                 style={{ "--d": "140ms" } as React.CSSProperties}
               >
-                1 CV + ekspor PDF, tanpa kartu kredit.
+                1 CV + ekspor PDF &amp; Word, tanpa kartu kredit.
               </p>
             </div>
 

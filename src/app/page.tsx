@@ -9,7 +9,7 @@ import { getProPricing } from "@/lib/plan-pricing";
 
 const SPECS = [
   { k: "Template", v: "20 layout, 2 bisa dipakai di paket gratis" },
-  { k: "Ekspor", v: "PDF Letter & A4, dirender di server" },
+  { k: "Ekspor", v: "PDF Letter & A4 + Word (.docx)" },
   { k: "Simpan", v: "Cloud otomatis tiap perubahan" },
   { k: "Bayar", v: "QRIS sekali bayar, tanpa auto-renew" },
 ];
@@ -27,8 +27,8 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Unduh PDF, atau bagikan link",
-    body: "PDF dibuat server-side sehingga jarak, font, dan margin konsisten di setiap perangkat. Pengguna Pro bisa mengaktifkan link publik untuk recruiter.",
+    title: "Unduh PDF atau Word, atau bagikan link",
+    body: "PDF dibuat server-side sehingga jarak, font, dan margin konsisten di setiap perangkat. Word (.docx) satu kolom untuk portal lamaran yang mewajibkan format itu. Pengguna Pro bisa mengaktifkan link publik untuk recruiter.",
   },
 ];
 
@@ -45,7 +45,7 @@ const faqsFor = (pro: ProPricing) => [
   },
   {
     q: "Gratisnya sampai mana?",
-    a: "Paket gratis: 1 CV, template Jake dan Minimal, ekspor PDF, dan penyimpanan cloud. Pro membuka 50 CV, 18 template Pro, dan link share publik.",
+    a: "Paket gratis: 1 CV, template Jake dan Minimal, ekspor PDF & Word, dan penyimpanan cloud. Pro membuka 50 CV, 18 template Pro, dan link share publik.",
   },
   {
     q: "Bagaimana cara bayar Pro?",
@@ -99,7 +99,8 @@ export default async function HomePage() {
                 >
                   Isi di kiri, kertasnya tampil di kanan — dengan tipografi yang
                   sama persis seperti PDF-nya. Ada 20 template siap pakai, isi
-                  tersimpan otomatis, dan PDF-nya dirender di server.
+                  tersimpan otomatis, dan hasilnya bisa diunduh sebagai PDF atau
+                  Word.
                 </p>
 
                 <div
@@ -279,7 +280,7 @@ export default async function HomePage() {
                     <ul className="mt-4 space-y-2 text-[13px] text-ink-2">
                       <li>1 CV</li>
                       <li>Template Jake &amp; Minimal</li>
-                      <li>Ekspor PDF</li>
+                      <li>Ekspor PDF &amp; Word</li>
                       <li>Simpan cloud</li>
                     </ul>
                   </div>
@@ -355,7 +356,7 @@ export default async function HomePage() {
             <Reveal className="max-w-2xl">
               <p className="micro text-rule-strong">Mulai sekarang</p>
               <h2 className="mt-4 text-[32px] leading-[1.08] text-sheet sm:text-[44px]">
-                Mulai dari CV kosong, keluar dengan PDF yang layak dikirim.
+                Mulai dari CV kosong, keluar dengan PDF atau Word yang layak dikirim.
               </h2>
               <p className="mt-4 text-[14px] leading-relaxed text-[color:var(--color-rule-strong)]">
                 Butuh sekitar sepuluh menit untuk CV pertamamu. Tidak ada
