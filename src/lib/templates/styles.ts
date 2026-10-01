@@ -50,7 +50,10 @@ const BASE = `
   }
   .resume .entry-head .right,
   .resume .entry-sub .right { white-space: nowrap; }
-  .resume ul { margin: 1pt 0 0 14pt; padding: 0; }
+  /* Stated rather than inherited from the UA stylesheet: the preview path loses
+     its markers to Tailwind's preflight, and spelling it out here keeps the two
+     stylesheets honest about the one thing they must agree on. */
+  .resume ul { margin: 1pt 0 0 14pt; padding: 0; list-style: disc outside; }
   .resume li { margin-bottom: 1.5pt; line-height: 1.28; }
   .resume .summary { text-align: justify; margin-bottom: 2pt; }
   .resume .pub-item { margin-bottom: 3pt; }

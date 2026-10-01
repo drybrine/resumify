@@ -482,7 +482,11 @@ a {
 }
 .resume-preview .entry-head .right,
 .resume-preview .entry-sub .right { white-space: nowrap; }
-.resume-preview ul { margin: 1pt 0 0 14pt; padding: 0; }
+/* Tailwind's preflight sets `list-style: none` on ul/ol, so the bullets have to be
+   restored by hand. Without this line the preview renders plain paragraphs while
+   the exported PDF — which has no preflight — still draws its discs, and the two
+   disagree. Keep this in step with `.resume ul` in lib/templates/styles.ts. */
+.resume-preview ul { margin: 1pt 0 0 14pt; padding: 0; list-style: disc outside; }
 .resume-preview li { margin-bottom: 1.5pt; line-height: 1.28; }
 .resume-preview .summary { text-align: justify; margin-bottom: 2pt; }
 .resume-preview .skills-block .row { margin-bottom: 1pt; }
