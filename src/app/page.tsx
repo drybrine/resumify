@@ -9,7 +9,7 @@ import { getProPricing } from "@/lib/plan-pricing";
 
 const SPECS = [
   { k: "Template", v: "20 layout, 2 bisa dipakai di paket gratis" },
-  { k: "Ekspor", v: "PDF Letter & A4 + Word (.docx)" },
+  { k: "Ekspor", v: "PDF A4 + Word (.docx)" },
   { k: "Simpan", v: "Cloud otomatis tiap perubahan" },
   { k: "Bayar", v: "QRIS sekali bayar, tanpa auto-renew" },
 ];

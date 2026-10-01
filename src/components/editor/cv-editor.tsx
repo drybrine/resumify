@@ -14,9 +14,33 @@ import { SectionRail, SectionTabs, SECTIONS, type SectionId } from "./section-na
 import { ListSection } from "./list-section";
 import { PhotoField } from "./photo-field";
 import { cn } from "@/lib/utils";
+import { PAPER } from "@/lib/paper";
 
-const PAPER_W = 8.5 * 96;
+const PAPER_W = PAPER.widthPx;
 const ZOOM_STEPS = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2];
+
+/**
+ * Per-field input wiring for the identity block.
+ *
+ * Without it every field is `type="text"`, so a phone number gets the alphabetic
+ * keyboard on mobile, an address gets a full email keyboard, and the browser has
+ * nothing to match autofill against. `type="url"` is deliberately avoided: the
+ * handle fields are stored without a scheme ("github.com/username"), which the
+ * browser would flag as invalid — `inputMode="url"` gives the right keyboard with
+ * no validation attached.
+ */
+const PERSONAL_WIRING: Record<
+  string,
+  { type?: "tel" | "email"; inputMode?: "tel" | "email" | "url"; autoComplete?: string }
+> = {
+  fullName: { autoComplete: "name" },
+  location: { autoComplete: "address-level2" },
+  phone: { type: "tel", inputMode: "tel", autoComplete: "tel" },
+  email: { type: "email", inputMode: "email", autoComplete: "email" },
+  linkedin: { inputMode: "url" },
+  github: { inputMode: "url" },
+  website: { inputMode: "url" },
+};
 
 /**
  * The two download formats. Both go through the same flow (save first, then fetch),
@@ -461,7 +485,7 @@ export function CvEditor({
                 <p className="mt-1 border-b border-rule-strong pb-2 text-[12px] text-ink-3">
                   Nama dan kontak yang muncul di bagian paling atas CV.
                 </p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
                   {(
                     [
                       ["fullName", "Nama lengkap", true, "Nama sesuai KTP atau ijazah"],
@@ -472,16 +496,21 @@ export function CvEditor({
                       ["github", "GitHub", false, "github.com/username"],
                       ["website", "Situs / portofolio", false, "namadomain.com"],
                     ] as const
-                  ).map(([field, label, full, hint]) => (
-                    <div key={field} className={full ? "col-span-2" : ""}>
-                      <Label>{label}</Label>
-                      <Input
-                        value={data.personal[field] || ""}
-                        onChange={(e) => setPersonal(field, e.target.value)}
-                        placeholder={hint}
-                      />
-                    </div>
-                  ))}
+                  ).map(([field, label, full, hint]) => {
+                    const fieldId = `cv-personal-${field}`;
+                    return (
+                      <div key={field} className={full ? "col-span-2" : ""}>
+                        <Label htmlFor={fieldId}>{label}</Label>
+                        <Input
+                          id={fieldId}
+                          value={data.personal[field] || ""}
+                          onChange={(e) => setPersonal(field, e.target.value)}
+                          placeholder={hint}
+                          {...PERSONAL_WIRING[field]}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-4 border-t border-rule pt-4">
@@ -495,7 +524,7 @@ export function CvEditor({
 
             {section === "summary" && (
               <div>
-                <h2 className="font-display text-[19px] leading-tight text-ink">
+                <h2 id="cv-summary-heading" className="font-display text-[19px] leading-tight text-ink">
                   Ringkasan
                 </h2>
                 <p className="mt-1 border-b border-rule-strong pb-2 text-[12px] text-ink-3">
@@ -508,6 +537,9 @@ export function CvEditor({
                   value={data.summary || ""}
                   onChange={(e) => setData((d) => ({ ...d, summary: e.target.value }))}
                   placeholder="Contoh: Lulusan Sistem Komputer dengan pengalaman magang di bidang jaringan dan perangkat IoT…"
+                  // The visible heading is this field's label; point at it instead of
+                  // leaving the textarea unnamed.
+                  aria-labelledby="cv-summary-heading"
                 />
               </div>
             )}
@@ -515,6 +547,7 @@ export function CvEditor({
             {section === "education" && (
               <ListSection
                 title="Pendidikan"
+                idPrefix="cv-education"
                 hint="Urutkan dari yang terbaru."
                 items={data.education}
                 fields={[
@@ -538,6 +571,7 @@ export function CvEditor({
             {section === "experience" && (
               <ListSection
                 title="Pengalaman"
+                idPrefix="cv-experience"
                 hint="Kerja, magang, atau organisasi — semua boleh."
                 items={data.experience}
                 fields={[
@@ -561,6 +595,7 @@ export function CvEditor({
             {section === "projects" && (
               <ListSection
                 title="Proyek"
+                idPrefix="cv-projects"
                 hint="Tulis hasilnya, bukan hanya teknologinya."
                 items={data.projects}
                 fields={[
@@ -577,6 +612,7 @@ export function CvEditor({
             {section === "publications" && (
               <ListSection
                 title="Publikasi"
+                idPrefix="cv-publications"
                 hint="Paper, artikel, atau penelitian."
                 items={data.publications}
                 fields={[
@@ -591,6 +627,7 @@ export function CvEditor({
             {section === "skills" && (
               <ListSection
                 title="Keahlian"
+                idPrefix="cv-skills"
                 hint="Pisahkan per kategori, item dipisah koma."
                 items={data.skills}
                 fields={[
@@ -605,6 +642,7 @@ export function CvEditor({
             {section === "languages" && (
               <ListSection
                 title="Bahasa"
+                idPrefix="cv-languages"
                 items={data.languages}
                 fields={[
                   { key: "name", label: "Bahasa" },
@@ -685,7 +723,7 @@ export function CvEditor({
                 <div
                   ref={sheetRef}
                   style={{
-                    width: "8.5in",
+                    width: PAPER.widthCss,
                     transform: `scale(${scale})`,
                     transformOrigin: "top left",
                     visibility: sheetHeight ? "visible" : "hidden",

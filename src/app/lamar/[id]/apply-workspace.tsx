@@ -104,26 +104,31 @@ export function ApplyWorkspace({ cvId, cv }: { cvId: string; cv: Cv; isPro: bool
           ke pihak lain.
         </p>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid items-end gap-3 sm:grid-cols-2">
           <div>
-            <Label>Perusahaan</Label>
+            <Label htmlFor="apply-company">Perusahaan</Label>
             <Input
+              id="apply-company"
               value={kit.company}
               onChange={(e) => set("company", e.target.value)}
               placeholder="PT Contoh Sejahtera"
+              autoComplete="organization"
             />
           </div>
           <div>
-            <Label>Posisi</Label>
+            <Label htmlFor="apply-role">Posisi</Label>
             <Input
+              id="apply-role"
               value={kit.role}
               onChange={(e) => set("role", e.target.value)}
               placeholder="Backend Engineer"
+              autoComplete="organization-title"
             />
           </div>
           <div>
-            <Label>Dari mana tahu lowongannya</Label>
+            <Label htmlFor="apply-source">Dari mana tahu lowongannya</Label>
             <Input
+              id="apply-source"
               value={kit.source}
               onChange={(e) => set("source", e.target.value)}
               placeholder="LinkedIn"
@@ -136,14 +141,17 @@ export function ApplyWorkspace({ cvId, cv }: { cvId: string; cv: Cv; isPro: bool
             </datalist>
           </div>
           <div>
-            <Label>Bahasa surat</Label>
-            <div className="flex gap-2">
+            {/* Not a <label>: the control is a pair of buttons, so the text names a
+                group and each button reports its own pressed state. */}
+            <p className="micro mb-1.5">Bahasa surat</p>
+            <div className="flex gap-2" role="group" aria-label="Bahasa surat">
               {(["id", "en"] as const).map((lang) => (
                 <Button
                   key={lang}
                   type="button"
                   size="sm"
                   variant={kit.language === lang ? "primary" : "secondary"}
+                  aria-pressed={kit.language === lang}
                   onClick={() => set("language", lang)}
                 >
                   {lang === "id" ? "Indonesia" : "English"}
@@ -154,8 +162,9 @@ export function ApplyWorkspace({ cvId, cv }: { cvId: string; cv: Cv; isPro: bool
         </div>
 
         <div className="mt-4">
-          <Label>Teks iklan lowongan (opsional)</Label>
+          <Label htmlFor="apply-jobad">Teks iklan lowongan (opsional)</Label>
           <Textarea
+            id="apply-jobad"
             rows={10}
             value={kit.jobAd}
             onChange={(e) => set("jobAd", e.target.value)}
@@ -228,7 +237,7 @@ export function ApplyWorkspace({ cvId, cv }: { cvId: string; cv: Cv; isPro: bool
       {/* ---------------- kanan: surat ---------------- */}
       <section className="min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-[19px] text-ink">Surat lamaran</h2>
+          <h2 id="apply-letter-heading" className="font-display text-[19px] text-ink">Surat lamaran</h2>
           <Button size="sm" variant="secondary" onClick={onDraft} disabled={!data.personal.fullName}>
             Buat draf dari CV
           </Button>
@@ -239,11 +248,15 @@ export function ApplyWorkspace({ cvId, cv }: { cvId: string; cv: Cv; isPro: bool
         </p>
 
         <Textarea
+          id="apply-letter"
           rows={22}
-          className="mt-4 font-[inherit] text-[13px]"
+          // Was 13px while every other field on the page is 14px; same component,
+          // so it reads as a different control rather than a different purpose.
+          className="mt-4"
           value={kit.letter}
           onChange={(e) => set("letter", e.target.value)}
           placeholder="Klik “Buat draf dari CV” untuk mulai, atau tulis sendiri di sini."
+          aria-labelledby="apply-letter-heading"
         />
 
         <div className="mt-4 flex flex-wrap items-center gap-2">

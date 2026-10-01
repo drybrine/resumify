@@ -19,6 +19,7 @@ export function ListSection<T extends Record<string, any>>({
   hasBullets,
   emptyItem,
   onChange,
+  idPrefix,
 }: {
   title: string;
   hint?: string;
@@ -27,6 +28,8 @@ export function ListSection<T extends Record<string, any>>({
   hasBullets?: boolean;
   emptyItem: () => T;
   onChange: (items: T[]) => void;
+  /** Stable prefix for field ids, so each label points at its own input. */
+  idPrefix: string;
 }) {
   function update(i: number, key: string, value: unknown) {
     onChange(items.map((item, idx) => (idx === i ? { ...item, [key]: value } : item)));
@@ -132,29 +135,39 @@ export function ListSection<T extends Record<string, any>>({
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {fields.map((f) => (
-                <div key={f.key} className={f.full ? "col-span-2" : ""}>
-                  <Label>{f.label}</Label>
-                  {f.textarea ? (
-                    <Textarea
-                      rows={3}
-                      value={String(item[f.key] ?? "")}
-                      onChange={(e) => update(i, f.key, e.target.value)}
-                    />
-                  ) : (
-                    <Input
-                      value={String(item[f.key] ?? "")}
-                      onChange={(e) => update(i, f.key, e.target.value)}
-                    />
-                  )}
-                </div>
-              ))}
+            <div className="mt-3 grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+              {fields.map((f) => {
+                // A label that is not tied to its field does nothing when clicked
+                // and is invisible to a screen reader, so every field gets a real
+                // id and every label points at it.
+                const fieldId = `${idPrefix}-${i}-${f.key}`;
+                return (
+                  <div key={f.key} className={f.full ? "col-span-2" : ""}>
+                    <Label htmlFor={fieldId}>{f.label}</Label>
+                    {f.textarea ? (
+                      <Textarea
+                        id={fieldId}
+                        rows={3}
+                        value={String(item[f.key] ?? "")}
+                        onChange={(e) => update(i, f.key, e.target.value)}
+                      />
+                    ) : (
+                      <Input
+                        id={fieldId}
+                        value={String(item[f.key] ?? "")}
+                        onChange={(e) => update(i, f.key, e.target.value)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {hasBullets && (
               <div className="mt-4 border-t border-rule pt-3">
-                <Label>Poin pencapaian</Label>
+                {/* Not a <label>: it names a whole group of textareas, and one label
+                    can only ever point at one control. Each bullet names itself. */}
+                <p className="micro mb-1.5">Poin pencapaian</p>
                 <div className="space-y-2">
                   {(item.bullets || [""]).map((b: string, bi: number) => (
                     <div key={bi} className="flex items-start gap-2">
@@ -164,6 +177,7 @@ export function ListSection<T extends Record<string, any>>({
                         value={b}
                         onChange={(e) => setBullet(i, bi, e.target.value)}
                         placeholder="Tulis hasil atau tanggung jawab, sebaiknya dengan angka…"
+                        aria-label={`${title} ${i + 1}, poin ${bi + 1}`}
                       />
                       <Button
                         type="button"

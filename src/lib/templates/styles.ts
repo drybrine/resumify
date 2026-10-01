@@ -1,12 +1,13 @@
 import type { TemplateId } from "@/lib/types";
 import { isTemplateId } from "@/lib/types";
 import { esc } from "@/lib/utils";
+import { PAPER } from "@/lib/paper";
 
 const BASE = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   .resume {
-    width: 8.5in;
-    min-height: 11in;
+    width: ${PAPER.widthCss};
+    min-height: ${PAPER.heightCss};
     background: #fff;
     color: #000;
     padding: 0.45in 0.55in;
@@ -152,7 +153,7 @@ const SIDEBAR = `
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 9.5pt; line-height: 1.35; padding: 0; color: #1e293b;
   }
-  .sidebar-layout { display: flex; min-height: 11in; }
+  .sidebar-layout { display: flex; min-height: ${PAPER.heightCss}; }
   .side {
     width: 2.45in; background: #1e293b; color: #e2e8f0;
     padding: 0.4in 0.3in; flex-shrink: 0;
@@ -272,7 +273,7 @@ const EXECUTIVE = `
 
 const CREATIVE = `
   .resume { font-family: "Inter", system-ui, sans-serif; font-size: 9.5pt; line-height: 1.35; padding: 0; color: #0f172a; }
-  .creative-layout { display: flex; min-height: 11in; }
+  .creative-layout { display: flex; min-height: ${PAPER.heightCss}; }
   .creative-layout .side { width: 2.6in; background: #6366f1; color: #fff; padding: 0.45in 0.35in; flex-shrink: 0; }
   .creative-layout .side h1 { font-size: 18pt; font-weight: 800; line-height: 1.15; margin-bottom: 12pt; color: #fff; }
   .creative-layout .side h3 { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1pt; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 3pt; margin-bottom: 6pt; color: #fff; }

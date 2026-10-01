@@ -436,8 +436,11 @@ a {
 
 /* ===== Shared resume paper (mirrors src/lib/templates/styles.ts — keep in sync) ===== */
 .resume-preview {
-  width: 8.5in;
-  min-height: 11in;
+  /* A4, mirroring PAPER in lib/paper.ts. Tailwind cannot read that module and
+     this sheet is hand-mirrored from lib/templates/styles.ts, so the two sizes
+     are pinned together by tests/paper-size.test.ts. */
+  width: 210mm;
+  min-height: 297mm;
   background: #fff;
   color: #000;
   box-shadow: 0 1px 2px rgba(25, 23, 18, 0.16), 0 18px 40px -18px rgba(25, 23, 18, 0.4);
@@ -595,7 +598,7 @@ a {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 9.5pt; line-height: 1.35; padding: 0; color: #1e293b;
 }
-.resume-preview.template-sidebar .sidebar-layout { display: flex; min-height: 11in; }
+.resume-preview.template-sidebar .sidebar-layout { display: flex; min-height: 297mm; }
 .resume-preview.template-sidebar .side {
   width: 2.45in; background: #1e293b; color: #e2e8f0;
   padding: 0.4in 0.3in; flex-shrink: 0;
@@ -724,7 +727,7 @@ a {
 .resume-preview.template-creative {
   font-family: "Inter", system-ui, sans-serif; font-size: 9.5pt; line-height: 1.35; padding: 0; color: #0f172a;
 }
-.resume-preview.template-creative .creative-layout { display: flex; min-height: 11in; }
+.resume-preview.template-creative .creative-layout { display: flex; min-height: 297mm; }
 .resume-preview.template-creative .side { width: 2.6in; background: #6366f1; color: #fff; padding: 0.45in 0.35in; flex-shrink: 0; }
 .resume-preview.template-creative .side h1 { font-size: 18pt; font-weight: 800; line-height: 1.15; margin-bottom: 12pt; }
 .resume-preview.template-creative .side h3 { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1pt; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 3pt; margin-bottom: 6pt; }

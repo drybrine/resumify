@@ -1,4 +1,5 @@
 import { esc } from "@/lib/utils";
+import { PAPER } from "@/lib/paper";
 
 /**
  * A cover letter as a standalone document, for the PDF export.
@@ -18,8 +19,8 @@ const LETTER_CSS = `
     background: #fff;
   }
   .letter {
-    width: 8.5in;
-    min-height: 11in;
+    width: ${PAPER.widthCss};
+    min-height: ${PAPER.heightCss};
     padding: 0.9in 1in;
   }
   .letter p { margin-bottom: 10pt; text-align: justify; }

@@ -17,6 +17,7 @@ import { attachmentFilename } from "@/lib/server/attachment-filename";
 import { isTemplateId, type CvData, type TemplateId } from "@/lib/types";
 import { ensureUrl } from "@/lib/utils";
 import { safePhoto } from "@/lib/photo";
+import { PAPER } from "@/lib/paper";
 
 /**
  * Word (.docx) export.
@@ -78,10 +79,11 @@ export const DOCX_PROFILES: Record<TemplateId, DocxProfile> = {
   "mono-grid": { font: "Courier New", accent: "191919", headerAlign: "left", headingRule: true, nameSize: 36 },
 };
 
-// Letter, matching the PDF's 8.5in × 11in sheet.
-const PAGE = { widthIn: 8.5, heightIn: 11 };
+// A4, matching the PDF and the on-screen sheet (see lib/paper.ts).
+const PAGE = { widthTwip: PAPER.widthTwip, heightTwip: PAPER.heightTwip };
 const MARGIN = { topIn: 0.45, bottomIn: 0.45, leftIn: 0.55, rightIn: 0.55 };
-const CONTENT_RIGHT_TAB = convertInchesToTwip(PAGE.widthIn - MARGIN.leftIn - MARGIN.rightIn);
+const CONTENT_RIGHT_TAB =
+  PAGE.widthTwip - convertInchesToTwip(MARGIN.leftIn) - convertInchesToTwip(MARGIN.rightIn);
 
 const BODY_SIZE = 20; // 10pt
 const META_SIZE = 18; // 9pt
@@ -428,8 +430,8 @@ export function buildDocxDocument(
         properties: {
           page: {
             size: {
-              width: convertInchesToTwip(PAGE.widthIn),
-              height: convertInchesToTwip(PAGE.heightIn),
+              width: PAGE.widthTwip,
+              height: PAGE.heightTwip,
             },
             margin: {
               top: convertInchesToTwip(MARGIN.topIn),

@@ -79,8 +79,11 @@ export function PhotoField({
   }
 
   return (
-    <div>
-      <Label>Foto profil (opsional)</Label>
+    <div className="relative">
+      {/* Clicking the heading now opens the picker too, because the label finally
+          points at the file input instead of at nothing. `relative` holds the
+          sr-only input inside this box rather than letting it escape to the page. */}
+      <Label htmlFor="cv-photo-input">Foto profil (opsional)</Label>
       <div className="flex items-center gap-3">
         <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-print border border-rule-strong bg-sheet">
           {value ? (
@@ -117,9 +120,10 @@ export function PhotoField({
 
       <input
         ref={inputRef}
+        id="cv-photo-input"
         type="file"
         accept="image/png,image/jpeg,image/webp"
-        className="hidden"
+        className="sr-only"
         onChange={(e) => onPick(e.target.files?.[0])}
       />
 

@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { TemplateId } from "@/lib/types";
+import { PAPER } from "@/lib/paper";
 
-const ROOT_PX = 8.5 * 96; // 8.5in of resume paper at 96dpi
+const ROOT_PX = PAPER.widthPx; // the sheet width in CSS pixels at 96dpi
 
 /**
- * Scales a real 8.5in × 11in resume page down to fill its container width.
+ * Scales a real A4 resume page down to fill its container width.
  * Used for the landing-page showcase and the template gallery, so what people
  * see is the actual rendered document rather than a drawn mock.
  */
@@ -58,7 +59,7 @@ export function SheetPreview({
       <div
         ref={innerRef}
         style={{
-          width: "8.5in",
+          width: PAPER.widthCss,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
           visibility: scale ? "visible" : "hidden",

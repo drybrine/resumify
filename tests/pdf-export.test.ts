@@ -85,7 +85,7 @@ test(
     assert.equal(classic.subarray(0, 5).toString("latin1"), "%PDF-", "output is not a PDF");
     assert.ok(classic.byteLength > 5_000, `suspiciously small PDF: ${classic.byteLength} bytes`);
     assert.match(classic.toString("latin1").slice(-1024), /%%EOF/);
-    assert.equal(pageCount(classic), 1, "sample CV should fit on a single Letter page");
+    assert.equal(pageCount(classic), 1, "sample CV should fit on a single page");
 
     // A structurally different template goes through the same path.
     const grid = await generatePdf(documentFor("mono-grid", "CV Grid"));

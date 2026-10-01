@@ -2,6 +2,7 @@ import "server-only";
 import { existsSync } from "node:fs";
 import type { Browser } from "puppeteer-core";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
+import { PAPER } from "@/lib/paper";
 
 /**
  * Server-side PDF generation for CV export.
@@ -181,7 +182,7 @@ export async function generatePdf(html: string): Promise<Buffer> {
         new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS)),
       ]);
       const pdf = await page.pdf({
-        format: "Letter",
+        format: PAPER.printFormat,
         printBackground: true,
         margin: { top: "0", right: "0", bottom: "0", left: "0" },
       });

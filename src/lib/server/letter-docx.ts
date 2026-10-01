@@ -2,6 +2,7 @@ import "server-only";
 
 import { AlignmentType, Document, Packer, Paragraph, TextRun } from "docx";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
+import { PAPER } from "@/lib/paper";
 
 /**
  * The cover letter as .docx.
@@ -51,6 +52,12 @@ export function buildLetterDocument(letter: string, title?: string | null): Docu
       {
         properties: {
           page: {
+            // Stated explicitly: without it `docx` falls back to its own Letter
+            // default while the PDF of the same letter is A4.
+            size: {
+              width: PAPER.widthTwip,
+              height: PAPER.heightTwip,
+            },
             margin: {
               top: 1296, // 0.9in in twips
               bottom: 1296,
