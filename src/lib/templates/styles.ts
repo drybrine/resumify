@@ -55,6 +55,14 @@ const BASE = `
      its markers to Tailwind's preflight, and spelling it out here keeps the two
      stylesheets honest about the one thing they must agree on. */
   .resume ul { margin: 1pt 0 0 14pt; padding: 0; list-style: disc outside; }
+  /* A CV that genuinely runs to two pages should still look composed: no bullet
+     split across the fold, no entry cut in half, and no section heading stranded
+     at the bottom of a page with its content overleaf. */
+  .resume .entry,
+  .resume li,
+  .resume .pub-item { break-inside: avoid; }
+  .resume h2 { break-after: avoid; }
+
   .resume li { margin-bottom: 1.5pt; line-height: 1.28; }
   .resume .summary { text-align: justify; margin-bottom: 2pt; }
   .resume .pub-item { margin-bottom: 3pt; }

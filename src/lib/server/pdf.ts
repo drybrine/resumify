@@ -1,6 +1,6 @@
 import "server-only";
 import { existsSync } from "node:fs";
-import type { Browser } from "puppeteer-core";
+import type { Browser, Page } from "puppeteer-core";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
 import { PAPER } from "@/lib/paper";
 
@@ -89,7 +89,7 @@ let launchCount = 0;
 
 /** Test/diagnostic hook: how many browsers this process has launched. */
 export function pdfDiagnostics() {
-  return { launchCount, hasCachedBrowser: Boolean(cached) };
+  return { launchCount, hasCachedBrowser: Boolean(cached), lastFitScale };
 }
 
 async function loadPuppeteer() {
@@ -140,6 +140,120 @@ async function launchBrowser(): Promise<Browser> {
   }
 }
 
+/* ------------------------------------------------------------ fit to page */
+
+/** The sheet, as the document's stylesheets define it. */
+const SHEET_SELECTOR = ".resume";
+
+/**
+ * Never shrink below this. A CV that needs more than a fifth off its type is not
+ * a one-pager — the honest answer there is a second page, not 7pt text.
+ */
+export const FIT_FLOOR = 0.8;
+
+/** Re-measurements allowed after applying a scale, since scaling reflows the text. */
+const FIT_STEPS = 3;
+
+/**
+ * Sub-pixel tolerance around the page box.
+ *
+ * Deliberately tight. A sheet 0.68px taller than the page box (1123.2px against
+ * 1122.5px) really does print as two pages, so a looser tolerance reports "fits"
+ * while Chrome disagrees and the fit loop stops one step early — which is exactly
+ * how a 0.95 scale produced a two-page PDF.
+ */
+const FIT_TOLERANCE_PX = 0.25;
+
+/**
+ * Land strictly inside the page rather than on its boundary.
+ *
+ * Scaling widens the measure, which reflows the text, so the height that comes
+ * back after applying a scale is never quite the one that was predicted. Half a
+ * percent of headroom (about 5.6px, or 1.5mm, on an A4 sheet) absorbs that drift
+ * and the printer's own rounding; the type loses 0.05pt, which is invisible.
+ */
+const FIT_HEADROOM = 0.995;
+
+/**
+ * The scale to print at, given the sheet's measured height.
+ *
+ * A CV that runs a few lines past the page box used to arrive as two pages whose
+ * second one held three lines — which reads as "the export cut off my CV". Word
+ * never does this: a .docx reflows and the same content lands on one page. So the
+ * PDF does the same thing, by shrinking just enough to fit, and only while that
+ * stays above FIT_FLOOR.
+ *
+ * Pure so the rule can be tested without a browser; `fitToPage` applies it.
+ */
+export function fitScale(currentScale: number, sheetHeightPx: number, pageHeightPx: number): number {
+  if (!(sheetHeightPx > pageHeightPx + FIT_TOLERANCE_PX)) return currentScale;
+  // Cumulative: the sheet is measured *after* the current scale is in effect, and
+  // shrinking widens the measure, which reflows the text and changes the height.
+  const needed = (currentScale * pageHeightPx * FIT_HEADROOM) / sheetHeightPx;
+  return needed >= FIT_FLOOR ? needed : 1;
+}
+
+/**
+ * Height of the sheet as the page box sees it, in CSS pixels.
+ *
+ * `zoom` scales what the printer lays out, and `getBoundingClientRect` reports
+ * that scaled height — it is the number that decides pagination. `scrollHeight`
+ * would report the pre-zoom layout height instead, which would shrink the sheet
+ * twice.
+ */
+function sheetHeightPx(page: Page): Promise<number> {
+  return page.evaluate((selector) => {
+    const el = document.querySelector(selector);
+    return el ? el.getBoundingClientRect().height : 0;
+  }, SHEET_SELECTOR);
+}
+
+/**
+ * Apply a fit factor by scaling the sheet and widening its box to compensate.
+ *
+ * `zoom` alone would shrink the sheet *and* leave a band of unused paper on the
+ * right; pairing it with `width: pageWidth / zoom` keeps the printed width at
+ * exactly one page while the type comes down. Verified: 1 page and 80-84% of the
+ * width inked, against 55-73% for `page.pdf({ scale })`.
+ */
+async function applyFit(page: Page, scale: number, width: string, height: string): Promise<void> {
+  await page.evaluate(
+    (s, w, h) => {
+      const ID = "paper-fit";
+      let style = document.getElementById(ID) as HTMLStyleElement | null;
+      if (!style) {
+        style = document.createElement("style");
+        style.id = ID;
+        document.head.appendChild(style);
+      }
+      style.textContent =
+        s === 1 ? "" : `.resume{zoom:${s};width:calc(${w} / ${s});min-height:calc(${h} / ${s})}`;
+    },
+    scale,
+    width,
+    height,
+  );
+}
+
+/** Shrink the sheet until it fits one page, or give up (leaving it at 100%). */
+async function fitToPage(page: Page): Promise<number> {
+  const pageHeightPx = PAPER.heightPx;
+  let scale = 1;
+
+  for (let step = 0; step < FIT_STEPS; step++) {
+    const height = await sheetHeightPx(page);
+    if (!height) return scale;
+    const next = fitScale(scale, height, pageHeightPx);
+    if (next === scale) return scale;
+    scale = next;
+    await applyFit(page, scale, PAPER.widthCss, PAPER.heightCss);
+  }
+  return scale;
+}
+
+/** The scale the last export printed at — 1 when the sheet fitted or was left alone. */
+let lastFitScale = 1;
+
 /** Launching Chromium costs ~1s, so a warm browser is reused for consecutive exports. */
 async function acquireBrowser(): Promise<Browser> {
   if (cached?.timer) {
@@ -181,6 +295,9 @@ export async function generatePdf(html: string): Promise<Buffer> {
         page.evaluate(() => (globalThis as { document?: Document }).document?.fonts?.ready),
         new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS)),
       ]);
+      // Measured after the fonts settle: a fallback typeface is wider than the one
+      // the CV asks for, and that changes whether the content still fits a page.
+      lastFitScale = await fitToPage(page);
       const pdf = await page.pdf({
         format: PAPER.printFormat,
         printBackground: true,

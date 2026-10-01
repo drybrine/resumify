@@ -491,6 +491,14 @@ a {
    disagree. Keep this in step with `.resume ul` in lib/templates/styles.ts. */
 .resume-preview ul { margin: 1pt 0 0 14pt; padding: 0; list-style: disc outside; }
 .resume-preview li { margin-bottom: 1.5pt; line-height: 1.28; }
+/* A CV that genuinely runs to two pages should still look composed: no bullet
+   split across the fold, no entry cut in half, and no section heading stranded
+   at the bottom of a page with its content overleaf. */
+.resume-preview .entry,
+.resume-preview li,
+.resume-preview .pub-item { break-inside: avoid; }
+.resume-preview h2 { break-after: avoid; }
+
 .resume-preview .summary { text-align: justify; margin-bottom: 2pt; }
 .resume-preview .skills-block .row { margin-bottom: 1pt; }
 .resume-preview .pub-item { margin-bottom: 3pt; }
