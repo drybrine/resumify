@@ -2,11 +2,14 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { listCvs, getProfile, createCv } from "@/lib/actions/cvs";
 import { PLAN_LIMITS } from "@/lib/cv-data";
+import { effectivePlan } from "@/lib/plan-access";
+import { canUseTemplate } from "@/lib/template-entitlement";
 import { formatIdr } from "@/lib/plans";
 import { getProPricing } from "@/lib/plan-pricing";
 import { Button } from "@/components/ui/button";
 import { CvList } from "./cv-list";
-import type { Plan } from "@/lib/types";
+import { ImportCv } from "@/components/dashboard/import-cv";
+import { ALL_TEMPLATES, type Plan, type TemplateId } from "@/lib/types";
 
 export const metadata = { title: "Dasbor" };
 
@@ -17,6 +20,21 @@ export default async function DashboardPage() {
   const limits = PLAN_LIMITS[plan];
   const atLimit = cvs.length >= limits.maxCvs;
   const remaining = Math.max(0, limits.maxCvs - cvs.length);
+
+  // What the create action will actually accept: it re-derives the plan with
+  // `effectivePlan`, which drops an expired Pro back to free. Offering a template
+  // here that the action then refuses is a dead end, so the same check runs here.
+  const effective = effectivePlan(
+    profile?.plan as Plan | undefined,
+    profile?.is_admin ?? false,
+    profile?.plan_expires_at ?? null,
+  );
+  const allowedTemplates: TemplateId[] = ALL_TEMPLATES.filter(
+    (id) =>
+      PLAN_LIMITS[effective].templates.includes(id) &&
+      canUseTemplate(id, effective, profile?.plan_expires_at ?? null),
+  );
+  const importAtLimit = cvs.length >= PLAN_LIMITS[effective].maxCvs;
 
   return (
     <>
@@ -81,6 +99,8 @@ export default async function DashboardPage() {
               </p>
             </div>
           )}
+
+          <ImportCv allowed={allowedTemplates} atLimit={importAtLimit} />
 
           <section className="mt-10">
             {cvs.length === 0 ? (

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readZipEntry } from "./helpers/zip";
+import { readZipEntry } from "../src/lib/zip";
 import { SAMPLE_CV } from "../src/lib/cv-data";
 import { DOCX_PROFILES, docxFilename, generateDocx } from "../src/lib/server/docx";
 import { ALL_TEMPLATES, type CvData, type TemplateId } from "../src/lib/types";

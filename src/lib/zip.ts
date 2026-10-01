@@ -1,14 +1,15 @@
 import { inflateRawSync } from "node:zlib";
 
 /**
- * Minimal ZIP reader for .docx assertions.
+ * Minimal ZIP reader.
  *
  * A .docx is a ZIP of OOXML parts and Node ships no zip reader, so this walks the
- * central directory rather than adding a dependency just for tests.
+ * central directory rather than pulling in a dependency for it. Shared by the
+ * .docx importer and the export tests.
  *
  * Note on the local header: when the data-descriptor flag is set its compressed
- * size is written as 0, so sizes are always taken from the central directory and
- * only the name/extra lengths are re-read from the local header.
+ * size is written as 0, so sizes always come from the central directory and only
+ * the name/extra lengths are re-read from the local header.
  */
 
 type Entry = { name: string; method: number; compressedSize: number; offset: number };
@@ -57,4 +58,9 @@ export function readZipEntry(zip: Buffer, want: string): string | null {
   const start = found.offset + 30 + lNameLen + lExtraLen;
   const data = zip.subarray(start, start + found.compressedSize);
   return (found.method === 0 ? data : inflateRawSync(data)).toString("utf8");
+}
+
+/** Is this buffer a ZIP container (i.e. an OOXML file)? */
+export function isZip(buf: Buffer): boolean {
+  return buf.length > 3 && buf.readUInt32LE(0) === 0x04034b50;
 }

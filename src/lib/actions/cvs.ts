@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
-import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV } from "@/lib/cv-data";
+import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV, normalizeCvData } from "@/lib/cv-data";
 import { effectivePlan } from "@/lib/plan-access";
 import { normalizeApplicationKit } from "@/lib/apply/kit";
 import { isTemplateId, type ApplicationKit, type CvData, type Plan, type TemplateId } from "@/lib/types";
@@ -69,6 +69,8 @@ export async function createCv(opts?: {
   title?: string;
   sample?: boolean;
   template?: TemplateId;
+  /** Pre-filled content, e.g. the result of importing an existing CV. */
+  data?: CvData;
 }) {
   const { supabase, user } = await requireUser();
   const { plan, expiresAt } = await getProfilePlan(user.id);
@@ -98,7 +100,10 @@ export async function createCv(opts?: {
       user_id: user.id,
       title: opts?.title || "Untitled CV",
       template,
-      data: opts?.sample ? SAMPLE_CV : EMPTY_CV,
+      // Imported content is normalised on the way in for the same reason the
+      // renderer normalises on the way out: a shape the editor cannot walk
+      // becomes a 500 with no message.
+      data: opts?.data ? normalizeCvData(opts.data) : opts?.sample ? SAMPLE_CV : EMPTY_CV,
     })
     .select("id")
     .single();

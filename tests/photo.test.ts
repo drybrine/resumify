@@ -5,7 +5,7 @@ import { PHOTO_MAX_CHARS, safePhoto } from "../src/lib/photo";
 import { renderResumeHtml } from "../src/lib/templates/render";
 import { generateDocx } from "../src/lib/server/docx";
 import { ALL_TEMPLATES, type CvData, type TemplateId } from "../src/lib/types";
-import { listZipEntries } from "./helpers/zip";
+import { listZipEntries } from "../src/lib/zip";
 
 // A real 1×1 PNG, so the bytes are genuinely a decodable image.
 const PNG =

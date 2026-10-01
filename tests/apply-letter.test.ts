@@ -6,7 +6,7 @@ import { EMPTY_KIT, normalizeApplicationKit } from "../src/lib/apply/kit";
 import { renderLetterBody, wrapLetterDocument } from "../src/lib/apply/letter-document";
 import { buildLetterDocument } from "../src/lib/server/letter-docx";
 import type { CvData } from "../src/lib/types";
-import { readZipEntry } from "./helpers/zip";
+import { readZipEntry } from "../src/lib/zip";
 
 const kit = (over: Partial<typeof EMPTY_KIT> = {}) => ({ ...EMPTY_KIT, ...over });
 
