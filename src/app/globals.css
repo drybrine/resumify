@@ -441,6 +441,10 @@ a {
      are pinned together by tests/paper-size.test.ts. */
   width: 210mm;
   min-height: 297mm;
+  /* The paper's vertical print margin, so the on-screen sheet matches the PDF:
+     there the same 0.35in comes from the printer's page margin and therefore
+     repeats on every page. */
+  padding: 0.35in 0;
   background: #fff;
   color: #000;
   box-shadow: 0 1px 2px rgba(25, 23, 18, 0.16), 0 18px 40px -18px rgba(25, 23, 18, 0.4);
@@ -514,7 +518,7 @@ a {
 /* ===== Jake ===== */
 .resume-preview.template-jake {
   font-family: "Times New Roman", Times, Georgia, serif;
-  font-size: 10.5pt; line-height: 1.25; padding: 0.45in 0.55in;
+  font-size: 10.5pt; line-height: 1.25; padding: 0.1in 0.55in;
 }
 .resume-preview.template-jake header { text-align: center; margin-bottom: 8pt; }
 .resume-preview.template-jake header h1 {
@@ -564,7 +568,7 @@ a {
 /* ===== Compact ===== */
 .resume-preview.template-compact {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 9.5pt; line-height: 1.22; padding: 0.35in 0.45in;
+  font-size: 9.5pt; line-height: 1.22; padding: 0 0.45in;
 }
 .resume-preview.template-compact .compact-header {
   border-bottom: 1.5pt solid #111; padding-bottom: 4pt; margin-bottom: 6pt;
@@ -582,7 +586,7 @@ a {
 /* ===== Elegant ===== */
 .resume-preview.template-elegant {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 10.5pt; line-height: 1.35; color: #1c1917; padding: 0.5in 0.6in;
+  font-size: 10.5pt; line-height: 1.35; color: #1c1917; padding: 0.15in 0.6in;
 }
 .resume-preview.template-elegant .elegant-header { text-align: center; margin-bottom: 14pt; }
 .resume-preview.template-elegant .elegant-header h1 {
@@ -606,7 +610,7 @@ a {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 9.5pt; line-height: 1.35; padding: 0; color: #1e293b;
 }
-.resume-preview.template-sidebar .sidebar-layout { display: flex; min-height: 297mm; }
+.resume-preview.template-sidebar .sidebar-layout { display: flex; min-height: 279.22mm; }
 .resume-preview.template-sidebar .side {
   width: 2.45in; background: #1e293b; color: #e2e8f0;
   padding: 0.4in 0.3in; flex-shrink: 0;
@@ -642,7 +646,7 @@ a {
 /* ===== Corporate ===== */
 .resume-preview.template-corporate {
   font-family: Calibri, "Segoe UI", Arial, sans-serif;
-  font-size: 10.5pt; line-height: 1.3; color: #0f172a; padding: 0.4in 0.55in;
+  font-size: 10.5pt; line-height: 1.3; color: #0f172a; padding: 0.05in 0.55in;
 }
 .resume-preview.template-corporate .corp-header { margin-bottom: 12pt; }
 .resume-preview.template-corporate .corp-bar {
@@ -664,7 +668,7 @@ a {
 /* ===== Tech ===== */
 .resume-preview.template-tech {
   font-family: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
-  font-size: 9.5pt; line-height: 1.4; color: #0f172a; padding: 0.4in 0.5in;
+  font-size: 9.5pt; line-height: 1.4; color: #0f172a; padding: 0.05in 0.5in;
   border-top: 4pt solid #10b981;
 }
 .resume-preview.template-tech .tech-prompt {
@@ -690,7 +694,7 @@ a {
 /* ===== Minimal ===== */
 .resume-preview.template-minimal {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 10pt; line-height: 1.45; color: #292524; padding: 0.6in 0.7in;
+  font-size: 10pt; line-height: 1.45; color: #292524; padding: 0.25in 0.7in;
 }
 .resume-preview.template-minimal .min-header { margin-bottom: 20pt; }
 .resume-preview.template-minimal .min-header h1 {
@@ -716,7 +720,7 @@ a {
 /* ===== Harvard ===== */
 .resume-preview.template-harvard {
   font-family: Garamond, "Times New Roman", Georgia, serif;
-  font-size: 10.5pt; line-height: 1.3; color: #111; padding: 0.5in 0.6in;
+  font-size: 10.5pt; line-height: 1.3; color: #111; padding: 0.15in 0.6in;
 }
 .resume-preview.template-harvard header { text-align: center; border-bottom: 2.5pt double #800000; padding-bottom: 6pt; margin-bottom: 10pt; }
 .resume-preview.template-harvard header h1 { font-size: 22pt; font-weight: 700; color: #800000; letter-spacing: 1pt; margin-bottom: 3pt; text-transform: uppercase; }
@@ -725,7 +729,7 @@ a {
 
 /* ===== Executive ===== */
 .resume-preview.template-executive {
-  font-family: Georgia, serif; font-size: 10pt; line-height: 1.35; color: #1e293b; padding: 0.45in 0.55in;
+  font-family: Georgia, serif; font-size: 10pt; line-height: 1.35; color: #1e293b; padding: 0.1in 0.55in;
 }
 .resume-preview.template-executive .exec-header { display: flex; justify-content: space-between; border-bottom: 2pt solid #0f172a; padding-bottom: 8pt; margin-bottom: 12pt; }
 .resume-preview.template-executive .exec-header h1 { font-size: 24pt; font-weight: 700; color: #0f172a; margin-bottom: 2pt; }
@@ -735,7 +739,7 @@ a {
 .resume-preview.template-creative {
   font-family: "Inter", system-ui, sans-serif; font-size: 9.5pt; line-height: 1.35; padding: 0; color: #0f172a;
 }
-.resume-preview.template-creative .creative-layout { display: flex; min-height: 297mm; }
+.resume-preview.template-creative .creative-layout { display: flex; min-height: 279.22mm; }
 .resume-preview.template-creative .side { width: 2.6in; background: #6366f1; color: #fff; padding: 0.45in 0.35in; flex-shrink: 0; }
 .resume-preview.template-creative .side h1 { font-size: 18pt; font-weight: 800; line-height: 1.15; margin-bottom: 12pt; }
 .resume-preview.template-creative .side h3 { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1pt; opacity: 0.8; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 3pt; margin-bottom: 6pt; }
@@ -745,7 +749,7 @@ a {
 
 /* ===== Terminal ===== */
 .resume-preview.template-terminal {
-  font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.35; color: #00ff66; background: #0c1017; padding: 0.4in 0.5in;
+  font-family: "Courier New", Courier, monospace; font-size: 9pt; line-height: 1.35; color: #00ff66; background: #0c1017; padding: 0.05in 0.5in;
 }
 .resume-preview.template-terminal header { border-bottom: 1px dashed #00ff66; padding-bottom: 6pt; margin-bottom: 10pt; }
 .resume-preview.template-terminal header h1 { font-size: 18pt; font-weight: 700; color: #00ff66; margin-bottom: 4pt; }
@@ -755,7 +759,7 @@ a {
 /* ===== Swiss ===== */
 .resume-preview.template-swiss {
   font-family: Arial, sans-serif;
-  font-size: 9.6pt; line-height: 1.34; color: #17202b; padding: 0.55in 0.58in;
+  font-size: 9.6pt; line-height: 1.34; color: #17202b; padding: 0.2in 0.58in;
 }
 .resume-preview.template-swiss .swiss-header { border-bottom: 2pt solid #cf312b; padding-bottom: 12pt; }
 .resume-preview.template-swiss .swiss-kicker { font-size: 7.5pt; letter-spacing: 1.7pt; color: #cf312b; margin-bottom: 8pt; }
@@ -777,7 +781,7 @@ a {
 /* ===== Scholar ===== */
 .resume-preview.template-scholar {
   font-family: Garamond, Georgia, serif;
-  font-size: 10.3pt; line-height: 1.35; color: #25201c; padding: 0.55in 0.68in;
+  font-size: 10.3pt; line-height: 1.35; color: #25201c; padding: 0.2in 0.68in;
 }
 .resume-preview.template-scholar .scholar-header { text-align: center; border-bottom: 3pt double #762f38; padding-bottom: 9pt; margin-bottom: 12pt; }
 .resume-preview.template-scholar .scholar-kicker { font-family: Arial, sans-serif; font-weight: 700; font-size: 7.5pt; letter-spacing: 1.8pt; color: #762f38; }
@@ -803,7 +807,7 @@ a {
 /* ===== Timeline ===== */
 .resume-preview.template-timeline {
   font-family: Arial, sans-serif;
-  font-size: 9.5pt; line-height: 1.35; color: #1b2935; padding: 0.5in 0.58in;
+  font-size: 9.5pt; line-height: 1.35; color: #1b2935; padding: 0.15in 0.58in;
 }
 .resume-preview.template-timeline .timeline-header { border-left: 4pt solid #126b67; padding: 4pt 0 8pt 12pt; margin-bottom: 13pt; }
 .resume-preview.template-timeline .timeline-kicker { color: #126b67; font-size: 7.5pt; letter-spacing: 1.3pt; }
@@ -825,7 +829,7 @@ a {
 /* ===== Mono ===== */
 .resume-preview.template-mono {
   font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
-  font-size: 9pt; line-height: 1.42; color: #1a1a1a; padding: 0.5in 0.6in;
+  font-size: 9pt; line-height: 1.42; color: #1a1a1a; padding: 0.15in 0.6in;
   border-top: 5pt solid #1a1a1a;
 }
 .resume-preview.template-mono .mono-header { display: flex; justify-content: space-between; align-items: end; gap: 16pt; border-bottom: 1pt solid #333; padding-bottom: 7pt; margin-bottom: 4pt; }
@@ -849,7 +853,7 @@ a {
 /* ===== Atlas ===== */
 .resume-preview.template-atlas {
   font-family: Arial, sans-serif;
-  font-size: 9.5pt; line-height: 1.32; color: #202b38; padding: 0.48in 0.56in;
+  font-size: 9.5pt; line-height: 1.32; color: #202b38; padding: 0.13in 0.56in;
 }
 .resume-preview.template-atlas .atlas-header { background: #153a5b; color: #fff; padding: 15pt 17pt 12pt; margin: -0.48in -0.56in 12pt; }
 .resume-preview.template-atlas .atlas-place { font-size: 7.5pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #a8c7dc; }
@@ -871,7 +875,7 @@ a {
 /* ===== Editorial ===== */
 .resume-preview.template-editorial {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 10pt; line-height: 1.38; color: #26231f; padding: 0.58in 0.68in;
+  font-size: 10pt; line-height: 1.38; color: #26231f; padding: 0.23in 0.68in;
 }
 .resume-preview.template-editorial .editorial-header { border-block: 1pt solid #27231f; padding: 9pt 0 10pt; margin-bottom: 14pt; }
 .resume-preview.template-editorial .editorial-index { font-family: Arial, sans-serif; font-weight: bold; font-size: 7.5pt; letter-spacing: 1.5pt; color: #a14b36; margin-bottom: 8pt; }
@@ -889,7 +893,7 @@ a {
 /* ===== Orbit ===== */
 .resume-preview.template-orbit {
   font-family: Arial, sans-serif;
-  font-size: 9.7pt; line-height: 1.35; color: #232a3a; padding: 0.5in 0.6in;
+  font-size: 9.7pt; line-height: 1.35; color: #232a3a; padding: 0.15in 0.6in;
 }
 .resume-preview.template-orbit .orbit-header { position: relative; text-align: center; padding: 6pt 0 12pt; margin-bottom: 6pt; }
 .resume-preview.template-orbit .orbit-orbit { position: absolute; left: 50%; top: -0.62in; width: 1.6in; height: 1.6in; margin-left: -0.8in; border: 12pt solid #eee9f8; border-radius: 50%; }
@@ -909,7 +913,7 @@ a {
 /* ===== Mono Grid ===== */
 .resume-preview.template-mono-grid {
   font-family: "SFMono-Regular", Consolas, monospace;
-  font-size: 8.5pt; line-height: 1.4; color: #191919; padding: 0.52in 0.58in;
+  font-size: 8.5pt; line-height: 1.4; color: #191919; padding: 0.17in 0.58in;
 }
 .resume-preview.template-mono-grid .monogrid-header { border-bottom: 2pt solid #111; padding-bottom: 8pt; margin-bottom: 12pt; }
 .resume-preview.template-mono-grid .monogrid-header h1 { font-size: 20pt; }

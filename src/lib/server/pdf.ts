@@ -235,9 +235,14 @@ async function applyFit(page: Page, scale: number, width: string, height: string
   );
 }
 
-/** Shrink the sheet until it fits one page, or give up (leaving it at 100%). */
+/**
+ * Shrink the sheet until it fits one page, or give up (leaving it at 100%).
+ *
+ * Measured against the page's *content* height — the page box minus the print
+ * margins — because that is the space a page actually has to offer.
+ */
 async function fitToPage(page: Page): Promise<number> {
-  const pageHeightPx = PAPER.heightPx;
+  const pageHeightPx = PAPER.contentHeightPx;
   let scale = 1;
 
   for (let step = 0; step < FIT_STEPS; step++) {
@@ -246,7 +251,9 @@ async function fitToPage(page: Page): Promise<number> {
     const next = fitScale(scale, height, pageHeightPx);
     if (next === scale) return scale;
     scale = next;
-    await applyFit(page, scale, PAPER.widthCss, PAPER.heightCss);
+    // The content height, not the full sheet: the vertical space is a page margin
+    // now, so the sheet inside it is only PAGE.contentHeight tall.
+    await applyFit(page, scale, PAPER.widthCss, PAPER.contentHeightCss);
   }
   return scale;
 }
@@ -301,7 +308,15 @@ export async function generatePdf(html: string): Promise<Buffer> {
       const pdf = await page.pdf({
         format: PAPER.printFormat,
         printBackground: true,
-        margin: { top: "0", right: "0", bottom: "0", left: "0" },
+        // Vertical space is a page margin, not sheet padding: it has to repeat on
+        // every page. Left/right stay 0 so the full-bleed side columns still reach
+        // the paper edge; the templates supply their own horizontal padding.
+        margin: {
+          top: PAPER.printMarginCss,
+          bottom: PAPER.printMarginCss,
+          left: "0",
+          right: "0",
+        },
       });
       return Buffer.from(pdf);
     } finally {

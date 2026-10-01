@@ -40,6 +40,28 @@ export const PAPER = {
    */
   widthTwip: Math.round((210 / MM_PER_IN) * 1440),
   heightTwip: Math.round((297 / MM_PER_IN) * 1440),
+  /**
+   * Vertical print margin, applied by the printer to **every** page.
+   *
+   * The sheet's own padding only ever applies at the top of page 1 and the end of
+   * the last page: at a page break the text simply carried on to the paper edge —
+   * measured at 4.2mm from the bottom of page 1 and 3.5mm from the top of page 2,
+   * which is inside most printers' non-printable area and reads as "cut off".
+   * A page margin is the only mechanism that repeats on every page.
+   *
+   * 0.35in is chosen to be the smallest vertical padding any template declared, so
+   * each template's padding is reduced by exactly this much and the printed result
+   * is unchanged for the 17 that had room to give. The three full-bleed templates
+   * (modern, sidebar, creative) declared none, so they gain this margin and lose
+   * the same amount of height — a deliberate trade: a bleeding band cannot be
+   * printed to the edge anyway.
+   */
+  printMarginIn: 0.35,
+  printMarginCss: "0.35in",
+  /** Height inside the margins: what one page can actually hold. */
+  contentHeightCss: "279.22mm",
+  contentHeightMm: 297 - 0.35 * 2 * MM_PER_IN,
+  contentHeightPx: (297 - 0.35 * 2 * MM_PER_IN) * (PX_PER_IN / MM_PER_IN),
   /** The value Chrome's `page.pdf()` expects for `format`. */
   printFormat: "A4",
 } as const;
