@@ -211,7 +211,7 @@ function parseHeader(block: CvLine[]): { personal: CvData["personal"]; contact: 
   return { personal, contact };
 }
 
-/** "SURYA ALAMSYAH PUTERA PRATAMA" → "Surya Alamsyah Putera Pratama". */
+/** "JOHN DOE" → "John Doe". */
 function titleCase(name: string): string {
   if (name !== name.toUpperCase()) return name;
   return name

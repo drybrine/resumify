@@ -123,7 +123,7 @@ test("a null or junk data column still yields a valid document", async () => {
 });
 
 test("docxFilename is a safe .docx attachment header", () => {
-  const good = docxFilename("CV Surya");
+  const good = docxFilename("CV John Doe");
   assert.match(good, /^attachment; filename="[^"]+\.docx"/);
   assert.match(good, /filename\*=UTF-8''/);
 
