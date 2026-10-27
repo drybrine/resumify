@@ -19,11 +19,12 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export function AuthMenu() {
-  // null = "not known yet". Without credentials there is nothing to resolve, so
-  // start at the signed-out markup instead of waiting for an effect.
-  const [signedIn, setSignedIn] = useState<boolean | null>(
-    SUPABASE_URL && SUPABASE_KEY ? null : false,
-  );
+  // Start signed-out, not blank: this renders the primary call to action in the
+  // server HTML (so it is there for crawlers and for the first paint), and the
+  // browser only ever swaps *towards* the signed-in state. The alternative — a
+  // placeholder until the session resolves — left a hole where "Daftar gratis"
+  // belongs on the one page that has to convert.
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     if (!SUPABASE_URL || !SUPABASE_KEY) return;
@@ -49,11 +50,6 @@ export function AuthMenu() {
       listener.subscription.unsubscribe();
     };
   }, []);
-
-  // Reserve the exact height so resolving the session does not shift the layout.
-  if (signedIn === null) {
-    return <div className="h-8 w-[150px]" aria-hidden />;
-  }
 
   if (signedIn) {
     return (
