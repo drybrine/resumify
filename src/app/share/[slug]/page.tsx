@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPublicCv } from "@/lib/server/public-share";
@@ -6,15 +7,28 @@ import type { CvData, TemplateId } from "@/lib/types";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
+/**
+ * One lookup per request, shared by the metadata and the page.
+ *
+ * `notFound()` has to run in `generateMetadata`: a dynamic route starts
+ * streaming the shell before the page body renders, so by the time the body
+ * calls `notFound()` the 200 status is already on the wire and an unknown slug
+ * answered 200 with the not-found UI inside. Metadata resolves first, so the
+ * status is still changeable here.
+ */
+const loadPublicCv = cache(async (slug: string) => getPublicCv(slug));
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cv = await getPublicCv(slug);
+  const cv = await loadPublicCv(slug);
+  if (!cv) notFound();
+
   return {
-    title: cv?.title || "CV yang dibagikan",
+    title: cv.title || "CV yang dibagikan",
     description: "CV yang dibagikan lewat Resumify",
     robots: { index: false, follow: false },
   };
@@ -26,7 +40,7 @@ export default async function SharePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cv = await getPublicCv(slug);
+  const cv = await loadPublicCv(slug);
   if (!cv) notFound();
 
   const html = renderResumeHtml(

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/reveal";
 import { HeroShowcase, TemplateGallery } from "@/components/template-showcase";
 import { formatIdr, type ProPricing } from "@/lib/plans";
-import { getProPricing } from "@/lib/plan-pricing";
+import { getProPricingCached } from "@/lib/plan-pricing";
 
 const SPECS = [
   { k: "Template", v: "20 layout, 2 bisa dipakai di paket gratis" },
@@ -68,7 +68,7 @@ export default async function HomePage() {
   // The Pro price and period are admin-editable (plan_settings), so read them
   // instead of hardcoding: a stale literal here contradicts what the checkout
   // actually charges.
-  const proPricing = await getProPricing();
+  const proPricing = await getProPricingCached();
   const faqs = faqsFor(proPricing);
 
   return (

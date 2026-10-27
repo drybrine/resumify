@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { DEFAULT_PRO, type ProPricing } from "@/lib/plans";
 
@@ -44,3 +46,19 @@ export async function getProPricingService(): Promise<ProPricing> {
     return DEFAULT_PRO;
   }
 }
+
+/**
+ * Cached pricing for the root layout's metadata.
+ *
+ * `getProPricing()` uses the cookie-bound client, and calling it from
+ * `generateMetadata` in the root layout made every route dynamic — the marketing
+ * pages included, which is why they shipped `cache-control: private, no-store`
+ * and never hit the CDN. This variant reads with the service client (no
+ * cookies) and caches for five minutes, so an admin price change still lands
+ * quickly while `/` can be prerendered.
+ */
+export const getProPricingCached = unstable_cache(
+  async () => getProPricingService(),
+  ["pro-pricing"],
+  { revalidate: 300, tags: ["pro-pricing"] },
+);

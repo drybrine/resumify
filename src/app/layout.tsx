@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Newsreader, Instrument_Sans } from "next/font/google";
 import { formatIdr } from "@/lib/plans";
-import { getProPricing } from "@/lib/plan-pricing";
+import { getProPricingCached } from "@/lib/plan-pricing";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const display = Newsreader({
@@ -24,7 +26,7 @@ const sans = Instrument_Sans({
  * cards show has to come from the same place as the checkout amount.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const { priceIdr } = await getProPricing();
+  const { priceIdr } = await getProPricingCached();
 
   return {
     title: {
@@ -68,6 +70,8 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <script dangerouslySetInnerHTML={{ __html: MOTION_FLAG }} />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
