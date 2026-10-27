@@ -63,3 +63,30 @@ This was a source review plus public home/auth-gate probes, not a full penetrati
 [3] https://www.postgresql.org/docs/current/sql-createfunction.html
 [4] https://nextjs.org/blog/nextjs-security-update-september-22-2026
 
+
+---
+
+## Remediation status (2026-10-27)
+
+Applied against the live project `szgqsqnvwwpmovwizltl` (migrations
+`harden_rls_and_payment_rpcs`, `pin_search_path_and_trigger_grants`,
+`rate_limits`), verified by re-querying the database and re-probing the public
+endpoints:
+
+- The hardened `schema.sql` is now actually deployed: `protect_profile_fields`
+  and `enforce_cv_share_entitlement` plus their triggers exist, the shared-CV
+  SELECT policy is `using (false)`, and both payment RPCs are `service_role`
+  only. An anonymous call now answers `401 permission denied` instead of
+  executing.
+- Every `SECURITY DEFINER` function pins `search_path`.
+- Fixed-window rate limits on PDF/Word export, CV import, invoice creation and
+  the payment webhook (`public.consume_rate_limit`).
+- Dependency advisories cleared: `next` 16.4.3, `zod` 4.6.7, `puppeteer-core`
+  25.16.0. `npm audit --omit=dev` reports one dev-only advisory
+  (`source-map-js` via `@tailwindcss/postcss`).
+- CI, CSP, `/api/health`, env validation, CV payload size caps, `vercel.json`
+  region (`sin1`) and a static landing page are in place.
+
+Still open, and deliberately not claimed as fixed: live QRIS settlement
+verification, leaked-password protection (an Auth dashboard setting), a custom
+domain, and a real RLS integration test suite.
