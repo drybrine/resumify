@@ -12,6 +12,12 @@ permissions:
   contents: read
   deployments: read
 
+env:
+  # Vercel's environment_url points at the immutable deployment URL, which sits
+  # behind Vercel Authentication. The public production alias is the thing users
+  # actually hit, so that is what gets probed.
+  PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://resumify-weld.vercel.app' }}
+
 jobs:
   smoke:
     # Production only: preview URLs sit behind Vercel Authentication (302), so a
@@ -24,13 +30,9 @@ jobs:
       - name: Resolve target URL
         id: target
         run: |
-          url="${{ github.event.deployment_status.environment_url }}"
-          if [ -z "$url" ]; then
-            echo "::error::Deployment has no environment_url"
-            exit 1
-          fi
+          url="$PRODUCTION_URL"
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "environment=${{ github.event.deployment_status.environment }}" >> "$GITHUB_OUTPUT"
+          echo "deployed commit: ${{ github.event.deployment.sha }}"
 
       - name: Health endpoint
         run: |
