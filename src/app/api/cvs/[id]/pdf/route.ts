@@ -7,6 +7,7 @@ import {
   PdfBrowserUnavailableError,
 } from "@/lib/server/pdf";
 import { loadCvForExport } from "@/lib/server/export-cv";
+import { consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 import type { CvData, TemplateId } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -24,6 +25,10 @@ export async function POST(
   const loaded = await loadCvForExport(id);
   if (!loaded.ok) return loaded.response;
   const cv = loaded.cv;
+
+  // Launching Chromium is the most expensive thing this app does; cap it per user.
+  const limit = await consumeRateLimit(`pdf:${loaded.userId}`, LIMITS.pdfExport);
+  if (!limit.ok) return rateLimited(limit, "Terlalu banyak ekspor PDF. Coba lagi nanti.");
 
   const template = (cv.template as TemplateId) || "jake";
   const body = renderResumeHtml(cv.data as CvData, template);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateDocx, docxFilename } from "@/lib/server/docx";
 import { loadCvForExport } from "@/lib/server/export-cv";
+import { consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 import type { CvData, TemplateId } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -17,6 +18,9 @@ export async function POST(
   const loaded = await loadCvForExport(id);
   if (!loaded.ok) return loaded.response;
   const cv = loaded.cv;
+
+  const limit = await consumeRateLimit(`docx:${loaded.userId}`, LIMITS.docxExport);
+  if (!limit.ok) return rateLimited(limit);
 
   const template = (cv.template as TemplateId) || "jake";
 

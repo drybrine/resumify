@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
-import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV, normalizeCvData } from "@/lib/cv-data";
+import { EMPTY_CV, PLAN_LIMITS, SAMPLE_CV } from "@/lib/cv-data";
+import { boundCvData, boundTitle } from "@/lib/cv-guard";
 import { effectivePlan } from "@/lib/plan-access";
 import { normalizeApplicationKit } from "@/lib/apply/kit";
 import { isTemplateId, type ApplicationKit, type CvData, type Plan, type TemplateId } from "@/lib/types";
@@ -65,6 +66,13 @@ export async function getCv(id: string) {
   return row;
 }
 
+/** createCv cannot return an error object, so a rejected payload throws. */
+function guardCvData(input: unknown): CvData {
+  const guarded = boundCvData(input);
+  if (!guarded.ok) throw new Error(guarded.error);
+  return guarded.data;
+}
+
 export async function createCv(opts?: {
   title?: string;
   sample?: boolean;
@@ -98,12 +106,12 @@ export async function createCv(opts?: {
     .from("cvs")
     .insert({
       user_id: user.id,
-      title: opts?.title || "Untitled CV",
+      title: boundTitle(opts?.title, "Untitled CV"),
       template,
-      // Imported content is normalised on the way in for the same reason the
-      // renderer normalises on the way out: a shape the editor cannot walk
-      // becomes a 500 with no message.
-      data: opts?.data ? normalizeCvData(opts.data) : opts?.sample ? SAMPLE_CV : EMPTY_CV,
+      // Imported content is normalised *and bounded* on the way in: the shape
+      // keeps the renderer safe, the size cap keeps one row from carrying
+      // megabytes into every PDF render.
+      data: opts?.data ? guardCvData(opts.data) : opts?.sample ? SAMPLE_CV : EMPTY_CV,
     })
     .select("id")
     .single();
@@ -136,12 +144,19 @@ export async function updateCv(
     return { error: "Template requires Pro plan." };
   }
 
+  let bounded: CvData | undefined;
+  if (payload.data !== undefined) {
+    const guarded = boundCvData(payload.data);
+    if (!guarded.ok) return { error: guarded.error };
+    bounded = guarded.data;
+  }
+
   const { error } = await supabase
     .from("cvs")
     .update({
-      ...(payload.title !== undefined ? { title: payload.title } : {}),
+      ...(payload.title !== undefined ? { title: boundTitle(payload.title, "Untitled CV") } : {}),
       ...(payload.template !== undefined ? { template: payload.template } : {}),
-      ...(payload.data !== undefined ? { data: payload.data } : {}),
+      ...(bounded !== undefined ? { data: bounded } : {}),
     })
     .eq("id", id)
     .eq("user_id", user.id);

@@ -3,6 +3,7 @@ import { normalizeApplicationKit } from "@/lib/apply/kit";
 import { generateLetterDocx } from "@/lib/server/letter-docx";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
 import { loadCvForExport } from "@/lib/server/export-cv";
+import { consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -16,6 +17,9 @@ export async function POST(
   const loaded = await loadCvForExport(id);
   if (!loaded.ok) return loaded.response;
   const cv = loaded.cv;
+
+  const limit = await consumeRateLimit(`letter-docx:${loaded.userId}`, LIMITS.docxExport);
+  if (!limit.ok) return rateLimited(limit);
 
   const kit = normalizeApplicationKit((cv.data as { apply?: unknown } | null)?.apply);
   if (!kit.letter.trim()) {

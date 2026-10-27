@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getProPricing } from "@/lib/plan-pricing";
+import { consumeRateLimit, LIMITS } from "@/lib/rate-limit";
 
 import {
   buildDynamicQris,
@@ -48,6 +49,13 @@ async function expireStalePayments() {
  */
 export async function createProPayment() {
   const { supabase, user } = await requireUser();
+
+  // Every invoice writes a row and builds a QRIS payload; a loop here is abuse.
+  const limit = await consumeRateLimit(`payment-create:${user.id}`, LIMITS.paymentCreate);
+  if (!limit.ok) {
+    return { error: "Terlalu banyak permintaan pembayaran. Coba lagi nanti." };
+  }
+
   const paymentAdmin = await createServiceClient();
   await expireStalePayments();
 

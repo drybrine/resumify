@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The pre-Next prototype, kept only for reference. Linting it produces
+    // warnings nobody will fix and hides real ones in src/.
+    "legacy/**",
   ]),
 ]);
 

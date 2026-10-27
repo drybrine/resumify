@@ -11,7 +11,7 @@ export type ExportCvRow = {
 };
 
 export type LoadCvResult =
-  | { ok: true; cv: ExportCvRow }
+  | { ok: true; cv: ExportCvRow; userId: string }
   | { ok: false; response: NextResponse };
 
 /**
@@ -24,6 +24,7 @@ export type LoadCvResult =
  */
 export async function loadCvForExport(id: string): Promise<LoadCvResult> {
   let row: ExportCvRow;
+  let userId: string;
   try {
     const supabase = await createClient();
     const {
@@ -36,6 +37,7 @@ export async function loadCvForExport(id: string): Promise<LoadCvResult> {
         response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       };
     }
+    userId = user.id;
 
     const { data, error } = await supabase
       .from("cvs")
@@ -67,5 +69,5 @@ export async function loadCvForExport(id: string): Promise<LoadCvResult> {
     };
   }
 
-  return { ok: true, cv: row };
+  return { ok: true, cv: row, userId };
 }

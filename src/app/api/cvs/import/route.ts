@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractCvLines, MAX_IMPORT_BYTES } from "@/lib/import/extract";
 import { parseCvLines } from "@/lib/import/parse";
+import { consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 
 /**
  * Parse an uploaded CV into structured data.
@@ -27,6 +28,10 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   // Parsing is CPU work on someone else's file; keep it behind a session.
   if (!user) return NextResponse.json({ error: "Masuk dulu ya." }, { status: 401 });
+
+  // Parsing is CPU work on an uploaded file; keep it bounded per account.
+  const limit = await consumeRateLimit(`cv-import:${user.id}`, LIMITS.cvImport);
+  if (!limit.ok) return rateLimited(limit, "Terlalu banyak impor. Coba lagi nanti.");
 
   const declared = Number(request.headers.get("content-length") ?? 0);
   if (Number.isFinite(declared) && declared > MAX_UPLOAD_BYTES + 512 * 1024) {

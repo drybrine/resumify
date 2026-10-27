@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { autoConfirmByAmount } from "@/lib/server/payment-confirmation";
+import { clientIp, consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 
 /**
  * Auto-confirm webhook — match credit by unique amount_idr.
@@ -17,6 +18,10 @@ import { autoConfirmByAmount } from "@/lib/server/payment-confirmation";
  * Optional: ?source=bca|flip|manual for audit notes.
  */
 export async function POST(req: Request) {
+  // Cheap gate before the secret comparison: a replayed feed cannot burn CPU.
+  const limit = await consumeRateLimit(`webhook:${clientIp(req)}`, LIMITS.paymentWebhook);
+  if (!limit.ok) return rateLimited(limit, "Too many requests.");
+
   const secret = process.env.PAYMENT_WEBHOOK_SECRET?.trim();
   if (!secret) {
     return NextResponse.json(

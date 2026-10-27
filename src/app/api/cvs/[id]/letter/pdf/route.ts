@@ -4,6 +4,7 @@ import { normalizeApplicationKit } from "@/lib/apply/kit";
 import { generatePdf, PdfBrowserUnavailableError } from "@/lib/server/pdf";
 import { attachmentFilename } from "@/lib/server/attachment-filename";
 import { loadCvForExport } from "@/lib/server/export-cv";
+import { consumeRateLimit, rateLimited, LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,6 +18,9 @@ export async function POST(
   const loaded = await loadCvForExport(id);
   if (!loaded.ok) return loaded.response;
   const cv = loaded.cv;
+
+  const limit = await consumeRateLimit(`letter-pdf:${loaded.userId}`, LIMITS.pdfExport);
+  if (!limit.ok) return rateLimited(limit, "Terlalu banyak ekspor PDF. Coba lagi nanti.");
 
   // Rendered from what is saved, like the CV exports, so the file always matches
   // what the editor showed when the button was pressed.
