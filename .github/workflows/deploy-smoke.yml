@@ -14,7 +14,11 @@ permissions:
 
 jobs:
   smoke:
-    if: github.event.deployment_status.state == 'success'
+    # Production only: preview URLs sit behind Vercel Authentication (302), so a
+    # smoke test against them would only ever measure the login wall.
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'Production'
     runs-on: ubuntu-latest
     steps:
       - name: Resolve target URL
