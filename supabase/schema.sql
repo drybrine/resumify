@@ -148,6 +148,7 @@ create policy "Users update own profile"
   using (auth.uid() = id);
 
 -- CVs policies
+drop policy if exists "Users manage own cvs" on public.cvs;
 create policy "Users manage own cvs"
   on public.cvs for all
   using (auth.uid() = user_id)
@@ -434,10 +435,12 @@ create policy "Admins insert plan settings"
 
 alter table public.payments enable row level security;
 
+drop policy if exists "Users read own payments" on public.payments;
 create policy "Users read own payments"
   on public.payments for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users insert own payments" on public.payments;
 create policy "Users insert own payments"
   on public.payments for insert
   with check (auth.uid() = user_id);
