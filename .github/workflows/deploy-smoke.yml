@@ -1,0 +1,73 @@
+name: Deploy smoke test
+
+# Runs after Vercel reports a finished deployment, against that exact URL.
+# CI proves the build compiles; this proves the thing that actually got served
+# still answers correctly — a build can be green while a deploy 500s because an
+# env var is missing or a migration never ran.
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  deployments: read
+
+jobs:
+  smoke:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve target URL
+        id: target
+        run: |
+          url="${{ github.event.deployment_status.environment_url }}"
+          if [ -z "$url" ]; then
+            echo "::error::Deployment has no environment_url"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "environment=${{ github.event.deployment_status.environment }}" >> "$GITHUB_OUTPUT"
+
+      - name: Health endpoint
+        run: |
+          url="${{ steps.target.outputs.url }}/api/health"
+          body=$(curl -sS --max-time 20 -w '\n%{http_code}' "$url")
+          code=$(printf '%s' "$body" | tail -n1)
+          payload=$(printf '%s' "$body" | sed '$d')
+          echo "GET $url -> $code"
+          echo "$payload"
+          [ "$code" = "200" ] || { echo "::error::Health check returned $code"; exit 1; }
+          printf '%s' "$payload" | grep -q '"ok":true' || { echo "::error::Health payload not ok"; exit 1; }
+
+      - name: Public routes
+        run: |
+          base="${{ steps.target.outputs.url }}"
+          fail=0
+          for path in / /pricing /signup; do
+            code=$(curl -sS -o /dev/null --max-time 20 -w '%{http_code}' "$base$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          for path in /dashboard /admin; do
+            code=$(curl -sS -o /dev/null --max-time 20 -w '%{http_code}' "$base$path")
+            echo "$path -> $code (expect 307)"
+            [ "$code" = "307" ] || fail=1
+          done
+          exit $fail
+
+      - name: Unknown share slug must 404
+        run: |
+          # Guards the streaming bug where notFound() ran after the shell flushed
+          # and the page answered 200 with the not-found UI inside.
+          url="${{ steps.target.outputs.url }}/share/smoke-$RANDOM$RANDOM"
+          code=$(curl -sS -o /dev/null --max-time 20 -w '%{http_code}' "$url")
+          echo "$url -> $code"
+          [ "$code" = "404" ] || { echo "::error::Unknown slug answered $code, expected 404"; exit 1; }
+
+      - name: Security headers
+        run: |
+          base="${{ steps.target.outputs.url }}"
+          headers=$(curl -sSI --max-time 20 "$base/")
+          echo "$headers" | grep -qi 'content-security-policy' || { echo "::error::CSP missing"; exit 1; }
+          echo "$headers" | grep -qi 'x-frame-options: DENY' || { echo "::error::X-Frame-Options missing"; exit 1; }
+          echo "$headers" | grep -qi 'strict-transport-security' || { echo "::error::HSTS missing"; exit 1; }

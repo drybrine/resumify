@@ -1,5 +1,9 @@
 # CV Builder SaaS
 
+[![CI](https://github.com/drybrine/resumify/actions/workflows/ci.yml/badge.svg)](https://github.com/drybrine/resumify/actions/workflows/ci.yml)
+[![Deploy smoke test](https://github.com/drybrine/resumify/actions/workflows/deploy-smoke.yml/badge.svg)](https://github.com/drybrine/resumify/actions/workflows/deploy-smoke.yml)
+[![Production health](https://github.com/drybrine/resumify/actions/workflows/uptime.yml/badge.svg)](https://github.com/drybrine/resumify/actions/workflows/uptime.yml)
+
 Next.js 16 + Supabase + **QRIS (Indonesia)**. ATS resume builder with multi-CV cloud save, templates, PDF export, share links, billing, admin.
 
 ## Stack
@@ -94,6 +98,30 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Original vanilla HTML/JS version lives in `legacy/`.
 
+## CI / CD
+
+| Workflow | Trigger | What it proves |
+|---|---|---|
+| `ci.yml` | push to `main`, every PR | lint, 118 tests, production build, `npm audit` |
+| `deploy-smoke.yml` | every Vercel deployment | the deployed URL answers: `/api/health` 200, public routes 200, `/dashboard` + `/admin` 307, unknown share slug **404**, CSP/HSTS/X-Frame-Options present |
+| `uptime.yml` | every 15 min | `/api/health` still 200; opens an issue when it stops, closes it on recovery |
+
+Deployment is Vercel's git integration: a push to `main` goes to Production, a
+pull request gets a Preview URL. There is no deploy step in Actions — CI must be
+green before the merge, and the smoke test runs against whatever Vercel actually
+served, which is the part a green build cannot prove.
+
+`main` is protected: the `verify` check has to pass, and force-pushes are
+rejected.
+
+### Database changes
+
+Schema changes go through `supabase/migrations/`, never a SQL-editor paste —
+that is how the production database drifted from `supabase/schema.sql` in the
+first place. Apply with the Supabase MCP `apply_migration` tool or
+`supabase db push`, then re-run the drift check (functions, triggers, policies,
+grants) before calling it done.
+
 ## License
 
-Private / your product.
+MIT — see `LICENSE`.

@@ -1,0 +1,79 @@
+name: Production health
+
+# The cheapest uptime monitor that needs no extra service: GitHub's scheduler
+# probes /api/health every 15 minutes and opens an issue when it stops
+# answering, so a broken deploy leaves a record instead of silence.
+#
+# Scheduled runs can be delayed under load; treat a single failure as a hint and
+# two consecutive ones as real. For paging-grade alerting, point an external
+# monitor (Better Stack, UptimeRobot) at the same endpoint.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-health
+  cancel-in-progress: false
+
+env:
+  TARGET: https://resumify-weld.vercel.app/api/health
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe /api/health
+        id: probe
+        run: |
+          set +e
+          code=$(curl -sS -o /tmp/health.json --max-time 25 -w '%{http_code}' "$TARGET")
+          status=$?
+          [ $status -ne 0 ] && code="000"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "GET $TARGET -> $code"
+          cat /tmp/health.json 2>/dev/null || true
+
+      - name: Report failure
+        if: steps.probe.outputs.code != '200'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODE: ${{ steps.probe.outputs.code }}
+        run: |
+          set -e
+          body=$(cat /tmp/health.json 2>/dev/null || echo "(no body)")
+          title="Production health check failing"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "$title in:title" --json number --jq '.[0].number // empty')
+          note="Probe returned HTTP ${CODE} at $(date -u +%FT%TZ).
+
+          Response: \`${body}\`
+
+          Check the Vercel deployment log and the Supabase project status."
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$note"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$note"
+          fi
+          echo "::error::Health check returned ${CODE}"
+          exit 1
+
+      - name: Close the alert on recovery
+        if: steps.probe.outputs.code == '200'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          title="Production health check failing"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "$title in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" \
+              --body "Recovered: /api/health answers 200 again ($(date -u +%FT%TZ))."
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY"
+          fi
